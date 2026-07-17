@@ -24,7 +24,8 @@
 
 <style>
 /* ФАРМАСТОР v2 — ШЕЛЛ b3 · токени §6 · прес: A67 pointer-driven */
-*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+input,textarea,[contenteditable]{-webkit-user-select:text;user-select:text;-webkit-touch-callout:default}
 
 :root{
   --font:'Manrope',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
@@ -69,7 +70,7 @@
   }
 }
 
-html{height:100%;background:var(--bg)}
+html{height:100%;min-height:calc(100% + env(safe-area-inset-top));background:var(--bg)}
 body{font-family:var(--font);background:var(--bg);color:var(--text);
   min-height:100dvh;height:100dvh;overflow:hidden;display:flex;flex-direction:column;-webkit-font-smoothing:antialiased}
 .wrap{flex:1 1 auto;min-height:0;overflow:hidden;display:flex;flex-direction:column;background:var(--bg)}
@@ -84,11 +85,10 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);
 .hdr{position:sticky;top:0;z-index:20;background:var(--bg);
   padding:calc(env(safe-area-inset-top) + 10px) 14px 10px;border-bottom:1px solid var(--border-subtle)}
 .hdr-row{display:flex;align-items:center;gap:10px;min-height:34px}
-.icon-btn{flex:0 0 auto;width:34px;height:34px;border-radius:10px;border:1px solid var(--border-subtle);
-  background:var(--surface-2);color:var(--text-2);display:flex;align-items:center;justify-content:center;
-  font-size:17px;line-height:1;cursor:pointer;transition:transform .22s var(--spring),background .12s ease}
-[data-theme="dark"] .icon-btn{background:var(--surface-3);border-color:var(--border)}
-.icon-btn.ghost{background:transparent;border-color:transparent}
+.icon-btn{flex:0 0 auto;width:34px;height:34px;border-radius:10px;border:1px solid rgba(20,50,42,.12);
+  background:color-mix(in srgb,#fff 55%,var(--bg));color:var(--text-2);display:flex;align-items:center;justify-content:center;
+  font-size:17px;line-height:1;cursor:pointer;box-shadow:0 1.4px 3.6px rgba(20,50,42,.081);transition:transform .22s var(--spring),background .12s ease}
+[data-theme="dark"] .icon-btn{background:color-mix(in srgb,#fff 6%,var(--surface-3));border-color:rgba(255,255,255,.045);box-shadow:inset 0 1px 0 rgba(255,255,255,.096)}
 .icon-btn svg{width:19px;height:19px;display:block}
 .hdr-title{flex:1;min-width:0}
 .hdr-title .t{font-size:19px;font-weight:800;letter-spacing:-.3px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -124,21 +124,22 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);
 .sheet-scrim.on{opacity:1;pointer-events:auto}
 .sheet{position:fixed;left:0;right:0;bottom:0;z-index:41;background:var(--card);border-radius:20px 20px 0 0;
   padding:8px 0 calc(10px + env(safe-area-inset-bottom));transform:translateY(100%);
-  transition:transform .26s cubic-bezier(.32,.72,0,1);box-shadow:0 -8px 30px rgba(0,0,0,.18)}
-[data-theme="dark"] .sheet{background:var(--surface-2);box-shadow:0 -8px 30px rgba(0,0,0,.5)}
-.sheet.on{transform:translateY(0)}
+  transition:transform .26s cubic-bezier(.32,.72,0,1)}
+[data-theme="dark"] .sheet{background:var(--surface-2)}
+.sheet.on{transform:translateY(0);box-shadow:0 -8px 30px rgba(0,0,0,.18)}
+[data-theme="dark"] .sheet.on{box-shadow:0 -8px 30px rgba(0,0,0,.5)}
 .grip{width:38px;height:4px;border-radius:4px;background:var(--border);margin:6px auto 8px}
 /* A58 grouped-card menu (b11) */
 .eb{font:800 10.5px/1 var(--font);text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin:14px 16px 7px}
 .gcard{margin:0 12px;background:var(--surface-3);border:1px solid var(--border-subtle);border-radius:14px;overflow:hidden}
 [data-theme="dark"] .gcard{border-color:var(--border)}
-.mi{display:flex;align-items:center;gap:12px;padding:12px 13px;border-bottom:1px solid var(--border-subtle);cursor:pointer;transition:background .12s ease}
+.mi{display:flex;align-items:center;gap:12px;padding:12px 13px;border-bottom:1px solid var(--border-subtle);cursor:pointer;transition:background .12s ease,transform .12s ease}
 [data-theme="dark"] .mi{border-bottom-color:var(--border)}
 .mi:last-child{border-bottom:none}
 a.mi{text-decoration:none;color:inherit}
-.mi.is-pressed{background:color-mix(in srgb,var(--surface-3),var(--text) 5%)}
-.mi-ic{width:30px;height:30px;flex-shrink:0;display:flex;align-items:center;justify-content:center;border-radius:9px;background:var(--surface-2);color:var(--text-2)}
-[data-theme="dark"] .mi-ic{background:color-mix(in srgb,var(--surface-3),#fff 4%)}
+.mi.is-pressed{background:color-mix(in srgb,var(--surface-3),var(--text) 5%);transform:scale(.98)}
+.mi-ic{width:30px;height:30px;flex-shrink:0;display:flex;align-items:center;justify-content:center;border-radius:9px;background:color-mix(in srgb,#fff 55%,var(--surface-3));border:1px solid rgba(20,50,42,.12);box-shadow:0 1.4px 3.6px rgba(20,50,42,.081);color:var(--text-2)}
+[data-theme="dark"] .mi-ic{background:color-mix(in srgb,#fff 6%,var(--surface-3));border-color:rgba(255,255,255,.045);box-shadow:inset 0 1px 0 rgba(255,255,255,.096)}
 .mi-ic svg{width:16px;height:16px}
 .mi-tx{flex:1;min-width:0}
 .mi-tx b{display:block;font:700 13.5px/1.15 var(--font);color:var(--text)}
@@ -436,17 +437,18 @@ a.mi{text-decoration:none;color:inherit}
 
 /* ===== auto-dark parity (A69) — mirror EVERY [data-theme="dark"] component (shell + added) ===== */
 @media(prefers-color-scheme:dark){
-  :root:not([data-theme="light"]) .icon-btn{background:var(--surface-3);border-color:var(--border)}
+  :root:not([data-theme="light"]) .icon-btn{background:color-mix(in srgb,#fff 6%,var(--surface-3));border-color:rgba(255,255,255,.045);box-shadow:inset 0 1px 0 rgba(255,255,255,.096)}
   :root:not([data-theme="light"]) .tchip{background:var(--surface-3);border-color:var(--border)}
   :root:not([data-theme="light"]) .progress{background:color-mix(in srgb,var(--bg),#fff 16%);border:none;box-shadow:inset 0 1px 0 rgba(255,255,255,.16)}
   :root:not([data-theme="light"]) .progress > i{background:hsl(163 52% 46%)}
   :root:not([data-theme="light"]) .demo-btn.secondary{background:var(--surface-3);border-color:var(--border)}
-  :root:not([data-theme="light"]) .sheet{background:var(--surface-2);box-shadow:0 -8px 30px rgba(0,0,0,.5)}
+  :root:not([data-theme="light"]) .sheet{background:var(--surface-2)}
+  :root:not([data-theme="light"]) .sheet.on{box-shadow:0 -8px 30px rgba(0,0,0,.5)}
   :root:not([data-theme="light"]) .btn-copy{background:linear-gradient(180deg,hsl(163 55% 34%),hsl(163 55% 30%));box-shadow:inset 0 1px 0 rgba(255,255,255,.10)}
   :root:not([data-theme="light"]) .btn-form{background:color-mix(in srgb,var(--accent) 18%,var(--surface-3));border:1px solid color-mix(in srgb,var(--accent) 26%,var(--border));color:color-mix(in srgb,var(--accent-ink) 58%,var(--accent));box-shadow:inset 0 1px 0 rgba(255,255,255,.08)}
   :root:not([data-theme="light"]) .gcard{border-color:var(--border)}
   :root:not([data-theme="light"]) .mi{border-bottom-color:var(--border)}
-  :root:not([data-theme="light"]) .mi-ic{background:color-mix(in srgb,var(--surface-3),#fff 4%)}
+  :root:not([data-theme="light"]) .mi-ic{background:color-mix(in srgb,#fff 6%,var(--surface-3));border-color:rgba(255,255,255,.045);box-shadow:inset 0 1px 0 rgba(255,255,255,.096)}
   :root:not([data-theme="light"]) .doact{color:var(--accent);background:color-mix(in srgb,var(--accent) 16%,transparent)}
   :root:not([data-theme="light"]) .thseg{background:color-mix(in srgb,var(--bg),#000 15%);border-color:var(--border)}
   :root:not([data-theme="light"]) .seg-thumb{background:linear-gradient(180deg,hsl(163 55% 34%),hsl(163 55% 30%))}
@@ -494,7 +496,7 @@ a.mi{text-decoration:none;color:inherit}
     <section class="screen" id="s-fill">
       <header class="hdr">
         <div class="hdr-row">
-          <button class="icon-btn ghost pressable" aria-label="Назад" onclick="show('s-home')">‹</button>
+          <button class="icon-btn pressable" aria-label="Назад" onclick="show('s-home')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 6 9 12 15 18"/></svg></button>
           <div class="hdr-title">
             <div class="t" id="fillAddr">Аптека</div>
             <div class="s" id="fillSub">—</div>
@@ -541,7 +543,7 @@ a.mi{text-decoration:none;color:inherit}
 
   <div class="eb">Дії</div>
   <div class="gcard">
-    <a class="mi js-order-link" target="_blank" rel="noopener">
+    <a class="mi pressable js-order-link" target="_blank" rel="noopener">
       <span class="mi-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></span>
       <span class="mi-tx"><b>Excel онлайн</b><span>Форма замовлення для вставки</span></span>
       <span class="doact">Відкрити</span>
@@ -778,7 +780,7 @@ const LAYOUT={
 const OTC_BRANDS=['strep','nuro','gavis'];
 const IW_BRANDS=['durex','contex','evi'];
 
-const APP_BUILD = { ver:'v2.4.0', build:'menu.b11', date:'17.07.2026' }; // wsd 10.6 — єдина константа версії
+const APP_BUILD = { ver:'v2.4.0', build:'polish.b12_3', date:'17.07.2026' }; // wsd 10.6 — єдина константа версії
 const NETWORK = { name:'Фармастор', tagline:'інструмент залишків', tg:'t.me/Konst_Andre' };
 const ORDER_FORM_URL = 'https://rbcom-my.sharepoint.com/:x:/r/personal/yuliia_syniuhina_reckitt_com/_layouts/15/Doc.aspx?sourcedoc=%7B361AB6BF-2AE9-410C-A81F-2AA3502C4EAD%7D&file=%25u0424%25u0430%25u0440%25u043c%25u0430%25u0441%25u0442%25u043e%25u0440%20%25u0437%25u0430%25u043c%25u043e%25u0432%25u043b%25u0435%25u043d%25u043d%25u044f%20%25u0442%25u0442.xlsx&wdLOR=c06833412-A6C7-4B15-AE95-76BCF4AB9FD6&openShare=true&fromShare=true&action=default&mobileredirect=true';
 const MSL_BY_K={}; MSL.forEach(function(s){MSL_BY_K[s.k]=s;});
