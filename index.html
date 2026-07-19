@@ -469,6 +469,204 @@ a.mi{text-decoration:none;color:inherit}
     box-shadow:inset 0 2px 5px rgba(0,0,0,.55),inset 0 -1px 0 rgba(255,255,255,.12)}
 }
 
+
+/* =============================================================== */
+/* ===== ДИНАМІКА (§5.1 · порт b13) — усе скоуплено під #s-cmp ==== */
+/* ===== (уникає колізії з FILL: .row/.dyn/.dchip/.well/.brand) === */
+/* =============================================================== */
+#s-cmp{
+  /* геом + col-треки (—cmp* префікс: --chRad зайнятий FILL δ-chip) */
+  --cmpColW:38px; --cmpColD:50px; --cmpColG:6px;
+  --cmpChH:25px; --cmpChRad:6px;
+  /* ДІМ · LIGHT (Lbg20/Lbord70/Ldrop7 baked · device-lock 19.07) */
+  --domeBg:color-mix(in srgb,var(--bg-soft) 20%,var(--card));
+  --domeBd:color-mix(in srgb,var(--border) 70%,transparent);
+  --domeSh:0 1px 7px rgba(20,50,42,.10);
+  /* плитки-tally · LIGHT (A66 drop≥14) */
+  --tileBg:linear-gradient(180deg,color-mix(in srgb,var(--card) 92%,#fff),color-mix(in srgb,var(--card) 93%,#000));
+  --tileBd:var(--border-subtle);
+  --tileSh:0 1px 2px rgba(20,50,42,.045),0 6px 16px rgba(20,50,42,.06);
+  /* well (від/до) · LIGHT inset */
+  --wellBg:color-mix(in srgb,var(--bg-soft) 68%,var(--card));
+  --wellBd:var(--border-subtle);
+  --wellSh:inset 0 1px 2px rgba(20,50,42,.10);
+  /* dbox (Δ-гніздо T2) · LIGHT глянець */
+  --dboxBase:var(--card); --dboxFillMix:14; --dboxBdMix:44;
+  --dboxSh:inset 0 1px 0 rgba(255,255,255,.55),0 1.5px 3px color-mix(in srgb,var(--sig) 20%,transparent);
+  /* st-ico база */
+  --stBase:var(--card);
+}
+[data-theme="dark"] #s-cmp,
+:root:not([data-theme="light"]) #s-cmp{
+  --domeBg:color-mix(in srgb,var(--surface-3),#fff 12%);          /* Dbg12 */
+  --domeBd:color-mix(in srgb,var(--border),#fff 10%);             /* DbordC10 */
+  --domeSh:inset 0 1px 0 rgba(255,255,255,.14),inset 0 -1px 0 rgba(0,0,0,.28); /* DridgeC14/Ddip28 · drop=0 */
+  --tileBg:color-mix(in srgb,#fff 10%,var(--surface-3));          /* Dlift10 */
+  --tileBd:color-mix(in srgb,var(--border),#fff 7%);             /* Dbord7 */
+  --tileSh:inset 0 1.3px 0 rgba(255,255,255,.16),inset 0 -1px 0 rgba(0,0,0,.12); /* Dridge16/Dgrane12 */
+  --wellBg:color-mix(in srgb,var(--card),#000 22%);
+  --wellBd:color-mix(in srgb,var(--border),#000 18%);
+  --wellSh:inset 0 1.5px 3px rgba(0,0,0,.5),inset 0 -1px 0 rgba(255,255,255,.07);
+  --dboxBase:var(--surface-3); --dboxFillMix:24; --dboxBdMix:50;
+  --dboxSh:inset 0 1.2px 0 rgba(255,255,255,.20),inset 0 -1px 0 rgba(0,0,0,.22),0 2px 6px rgba(0,0,0,.22);
+  --stBase:var(--surface-3);
+}
+
+/* ---- хедер Динаміки (sticky, як FILL) ---- */
+#cmp-hdr{position:sticky;top:0;z-index:20;background:var(--bg)}
+
+/* ---- SUMCARD: 1 полотно, 3 зони (§5.1) ---- */
+#s-cmp .sumcard{margin:4px 12px 14px;background:var(--card);border-radius:18px;border:1px solid var(--border-subtle);
+  box-shadow:0 1px 3px rgba(20,50,42,.05),0 7px 20px rgba(20,50,42,.055);overflow:hidden}
+[data-theme="dark"] #s-cmp .sumcard,
+:root:not([data-theme="light"]) #s-cmp .sumcard{background:color-mix(in srgb,#fff 4%,var(--surface-2));border-color:var(--border);box-shadow:inset 0 1px 0 rgba(255,255,255,.05)}
+#s-cmp .sum-div{height:1px;background:var(--border-subtle);margin:0 14px}
+[data-theme="dark"] #s-cmp .sum-div,
+:root:not([data-theme="light"]) #s-cmp .sum-div{background:var(--border)}
+
+/* зона 1: статус + tally + дата (композиція A: st-line зверху, tally 3 на ширину) */
+#s-cmp .sum-top{padding:14px 14px 13px}
+#s-cmp .st-line{display:flex;align-items:center;justify-content:space-between;gap:12px}
+#s-cmp .st-line .st-head{flex:1 1 auto;min-width:0}
+#s-cmp .st-line .dpill{flex:0 0 auto}
+#s-cmp .st-head{display:flex;align-items:center;gap:9px;min-width:0}
+#s-cmp .st-ico{width:34px;height:34px;border-radius:11px;display:flex;align-items:center;justify-content:center;flex:0 0 34px;
+  background:color-mix(in srgb,var(--stC) calc(var(--stMix)*1%),var(--stBase));color:var(--stC)}
+#s-cmp .st-ico svg{width:19px;height:19px}
+#s-cmp .st-txt{display:flex;flex-direction:column;justify-content:center;gap:1px;min-width:0}
+#s-cmp .st-word{font-size:19px;font-weight:800;letter-spacing:-.4px;white-space:nowrap;color:var(--stWord)}
+#s-cmp .st-cap{font:600 10.5px/1.05 var(--font);color:var(--muted);letter-spacing:.1px;white-space:nowrap;margin-top:2px}
+#s-cmp .st-head.up{--stC:var(--accent);--stWord:var(--accent);--stMix:13}
+#s-cmp .st-head.down{--stC:var(--warn);--stWord:var(--warn);--stMix:15}
+#s-cmp .st-head.flat{--stC:var(--muted);--stWord:var(--text-2);--stMix:15}
+[data-theme="dark"] #s-cmp .st-head.up,:root:not([data-theme="light"]) #s-cmp .st-head.up{--stMix:22}
+[data-theme="dark"] #s-cmp .st-head.down,:root:not([data-theme="light"]) #s-cmp .st-head.down{--stMix:22}
+[data-theme="dark"] #s-cmp .st-head.flat,:root:not([data-theme="light"]) #s-cmp .st-head.flat{--stMix:20}
+
+/* дата-пігулка (композиція A) */
+#s-cmp .dpill{display:inline-flex;align-items:center;gap:7px;padding:7px 11px;border-radius:11px;font:700 12.5px/1 var(--font);
+  color:var(--text-2);background:var(--surface-2);border:1px solid var(--border-subtle);font-variant-numeric:tabular-nums;white-space:nowrap}
+[data-theme="dark"] #s-cmp .dpill,:root:not([data-theme="light"]) #s-cmp .dpill{background:var(--surface-3);border-color:var(--border)}
+#s-cmp .dpill .dp-ic{width:14px;height:14px;color:var(--muted);flex:0 0 14px}
+#s-cmp .dpill .dp-ic svg{width:14px;height:14px;display:block}
+#s-cmp .dpill .dp-c{width:12px;height:12px;color:var(--muted);flex:0 0 12px}
+#s-cmp .dpill .dp-c svg{width:12px;height:12px;display:block}
+
+/* 3 плитки-tally (ПІДНЯТІ · A66/A45) */
+#s-cmp .tally{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:13px}
+#s-cmp .tile{border-radius:13px;padding:9px 6px 8px;display:flex;flex-direction:column;align-items:center;gap:2px;min-width:0;
+  background:var(--tileBg);border:1px solid var(--tileBd);box-shadow:var(--tileSh)}
+#s-cmp .tile .ti-top{display:flex;align-items:center;gap:5px;min-width:0}
+#s-cmp .tile .ti-ic{width:15px;height:15px;flex:0 0 15px}
+#s-cmp .tile .ti-ic svg{width:15px;height:15px;display:block}
+#s-cmp .tile .ti-n{font-size:19px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.5px;line-height:1}
+#s-cmp .tile .ti-l{font-size:10.5px;font-weight:600;color:var(--muted);white-space:nowrap}
+#s-cmp .tile.better .ti-ic,#s-cmp .tile.better .ti-n{color:var(--accent)}
+#s-cmp .tile.worse .ti-ic,#s-cmp .tile.worse .ti-n{color:var(--warn)}
+#s-cmp .tile.same .ti-ic{color:var(--muted)}
+#s-cmp .tile.same .ti-n{color:var(--text-2)}
+
+/* зона 3: фільтр-тунель (SKU-рівень: Усі/Проблемні/Змінилось · A54 thumb) */
+#s-cmp .sum-fil{padding:11px 14px 13px}
+#s-cmp .sfilter{display:flex;gap:0;padding:3px;border-radius:12px;position:relative;overflow:hidden;
+  background:color-mix(in srgb,var(--bg-soft) 60%,var(--card));border:1px solid var(--border-subtle)}
+[data-theme="dark"] #s-cmp .sfilter,:root:not([data-theme="light"]) #s-cmp .sfilter{background:color-mix(in srgb,var(--card),#000 20%);border-color:color-mix(in srgb,var(--border),#000 16%)}
+#s-cmp .sfilter button{flex:1;border:none;background:transparent;font-family:var(--font);font-size:13px;font-weight:700;color:var(--text-2);
+  padding:7px 4px;border-radius:9px;position:relative;z-index:1;cursor:pointer;white-space:nowrap}
+#s-cmp .sfilter button.on{color:#fff}
+#s-cmp .sf-thumb{position:absolute;top:3px;bottom:3px;left:0;width:0;border-radius:9px;z-index:0;opacity:0;pointer-events:none;
+  background:linear-gradient(180deg,hsl(162 82% 31%),hsl(162 82% 26%));transition:transform var(--seg-dur) var(--seg-ease),width var(--seg-dur) var(--seg-ease),opacity .2s}
+[data-theme="dark"] #s-cmp .sf-thumb,:root:not([data-theme="light"]) #s-cmp .sf-thumb{background:linear-gradient(180deg,hsl(163 55% 34%),hsl(163 55% 30%))}
+#s-cmp .sf-thumb.no-anim{transition:none}
+@media(prefers-reduced-motion:reduce){#s-cmp .sf-thumb{transition:none}}
+
+/* ---- G-ДІМ (глобальний, sticky під хедером · R2 offset=--cmpHdrH) ---- */
+#s-cmp .gdome{display:flex;align-items:center;margin:4px 12px 2px;padding:0 14px;min-height:var(--cmpChH);border-radius:var(--cmpChRad);
+  position:sticky;top:var(--cmpHdrH,52px);z-index:20;background:var(--domeBg);border:1px solid var(--domeBd);box-shadow:var(--domeSh)}
+#s-cmp .gdome .spacer{flex:1;min-width:0;display:flex;align-items:center}
+#s-cmp .gdome .ch-lbl{display:block;font:700 11px/1 var(--font);text-transform:uppercase;letter-spacing:.5px;color:var(--muted);padding:0 0 0 4px}
+#s-cmp .gdome .hcols{display:grid;grid-template-columns:var(--cmpColW) var(--cmpColW) var(--cmpColD);gap:var(--cmpColG);align-items:center;flex:0 0 auto}
+#s-cmp .gdome .hc{font:800 11px/1 var(--font);text-align:center;color:var(--muted);font-variant-numeric:tabular-nums;letter-spacing:.2px}
+#s-cmp .gdome .hc.hd{color:var(--accent-ink);text-transform:uppercase;letter-spacing:.4px;font-size:9.5px}
+
+/* ---- АКОРДЕОН (реюз FILL-структури, скоуплено) ---- */
+#s-cmp .cat-div{font:800 12px/1 var(--font);text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin:16px 18px 8px;display:flex;align-items:center;gap:7px}
+#s-cmp .cat-div .cat-tier{font-weight:700;color:var(--accent-ink);letter-spacing:.3px}
+#s-cmp .brand{margin:8px 12px 0;background:var(--card);border-radius:16px;position:relative;border:1px solid var(--border-subtle);box-shadow:0 1px 3px rgba(20,50,42,.05)}
+[data-theme="dark"] #s-cmp .brand,:root:not([data-theme="light"]) #s-cmp .brand{background:var(--surface-2);border-color:var(--border);box-shadow:none}
+#s-cmp .bhdr{display:flex;align-items:center;gap:9px;padding:12px 14px;cursor:pointer}
+#s-cmp .bhdr .arr{font-size:12px;color:var(--muted);width:14px;flex:0 0 14px;transition:transform .2s}
+#s-cmp .brand.collapsed .bhdr .arr{transform:rotate(-90deg)}
+#s-cmp .bhdr .bnm{flex:1;min-width:0;font-size:14.5px;font-weight:800;letter-spacing:-.2px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#s-cmp .bhdr .bcnt{display:inline-flex;align-items:center;justify-content:center;min-width:34px;padding:3px 9px;border-radius:9px;font:700 12px/1 var(--font);font-variant-numeric:tabular-nums;color:var(--text-2);background:color-mix(in srgb,var(--surface-2) 55%,var(--card));border:1px solid var(--border-subtle)}
+[data-theme="dark"] #s-cmp .bhdr .bcnt,:root:not([data-theme="light"]) #s-cmp .bhdr .bcnt{background:color-mix(in srgb,var(--surface-3) 55%,var(--card));border-color:var(--border)}
+#s-cmp .bwrap{overflow:hidden}
+#s-cmp .brand.collapsed .bwrap{display:none}
+#s-cmp .bbody{overflow:hidden;min-height:0}
+#s-cmp .ebrow{display:flex;align-items:center;justify-content:space-between;padding:8px 14px 6px;border-top:2px solid var(--border-subtle);margin:0 7px}
+[data-theme="dark"] #s-cmp .ebrow,:root:not([data-theme="light"]) #s-cmp .ebrow{border-top-color:var(--border)}
+#s-cmp .bbody>.ebrow:first-child{border-top:none;padding-top:9px}
+#s-cmp .ebrow .eb{position:relative;text-transform:uppercase;font-size:11px;font-weight:700;letter-spacing:1.2px;color:color-mix(in srgb,var(--accent) 10%,var(--text-2));padding-left:11px}
+#s-cmp .ebrow .eb::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:3px;height:16px;border-radius:3px;background:var(--accent)}
+#s-cmp .ebrow .cnt{display:inline-flex;align-items:center;justify-content:center;min-width:42px;padding:3px 8px;border-radius:9px;font:700 11px/1 var(--font);font-variant-numeric:tabular-nums;color:var(--text-2);background:color-mix(in srgb,var(--surface-2) 55%,var(--card));border:1px solid var(--border-subtle)}
+[data-theme="dark"] #s-cmp .ebrow .cnt,:root:not([data-theme="light"]) #s-cmp .ebrow .cnt{background:color-mix(in srgb,var(--surface-3) 55%,var(--card));border-color:var(--border)}
+
+/* ---- РЯДКИ (анатомія: info + .cmp-dyn[well·well·dbox]) ---- */
+#s-cmp .rows{padding:0 6px 6px}
+#s-cmp .row{display:flex;align-items:center;gap:10px;padding:11px 8px;position:relative;margin-bottom:6px}
+#s-cmp .row+.row::before{content:'';position:absolute;top:-3.5px;left:8px;right:8px;height:1px;background:var(--border-subtle)}
+[data-theme="dark"] #s-cmp .row+.row::before,:root:not([data-theme="light"]) #s-cmp .row+.row::before{background:var(--border)}
+#s-cmp .row .info{flex:1;min-width:0}
+#s-cmp .row .rn{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;line-height:1.2;min-width:0}
+#s-cmp .row .rv{font-size:14px;font-weight:700;letter-spacing:-.1px;overflow-wrap:break-word;min-width:0;color:var(--text)}
+#s-cmp .rn-tag{display:inline-flex;align-items:baseline;gap:6px;white-space:nowrap;flex:0 0 auto}
+#s-cmp .row .rpk{font-size:12.5px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.2px;flex:0 0 auto;padding:1.5px 7px;border-radius:7px;color:var(--text);background:var(--surface-2);border:1px solid var(--border-subtle)}
+[data-theme="dark"] #s-cmp .row .rpk,:root:not([data-theme="light"]) #s-cmp .row .rpk{background:var(--surface-3);border-color:var(--border)}
+#s-cmp .row .rfd{font-size:11px;font-weight:600;color:var(--muted);flex:0 0 auto;white-space:nowrap}
+#s-cmp .row .rm{font-size:11.5px;margin-top:3px;font-weight:500;color:var(--text-2)}
+#s-cmp .row .rm .nm{color:var(--text-2);font-weight:700}
+#s-cmp .row .rm .normchg{color:var(--warn);font-weight:700}
+#s-cmp .row.lv-crit{--sig:var(--crit)}
+#s-cmp .row.lv-low{--sig:var(--warn)}
+#s-cmp .row.lv-ok{--sig:var(--accent)}
+#s-cmp .row.lv-none{--sig:var(--muted)}
+
+#s-cmp .cmp-dyn{display:grid;grid-template-columns:var(--cmpColW) var(--cmpColW) var(--cmpColD);gap:var(--cmpColG);align-items:center;flex:0 0 auto}
+#s-cmp .well{height:36px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-variant-numeric:tabular-nums;
+  background:var(--wellBg);border:1px solid var(--wellBd);box-shadow:var(--wellSh)}
+#s-cmp .well.was{font-size:14px;font-weight:700;color:var(--muted)}
+#s-cmp .well.now{font-size:16px;font-weight:800;color:var(--text)}
+#s-cmp .well.na{color:var(--muted);font-weight:600}
+#s-cmp .dbox{height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-variant-numeric:tabular-nums;white-space:nowrap;font-size:17px;font-weight:800;color:var(--sig);
+  background:color-mix(in srgb,var(--sig) calc(var(--dboxFillMix)*1%),var(--dboxBase));
+  border:1px solid color-mix(in srgb,var(--sig) calc(var(--dboxBdMix)*1%),transparent);box-shadow:var(--dboxSh)}
+#s-cmp .row.lv-none .dbox{color:var(--muted);background:var(--surface-2);border-color:var(--border-subtle);box-shadow:inset 0 1px 0 rgba(255,255,255,.4)}
+[data-theme="dark"] #s-cmp .row.lv-none .dbox,:root:not([data-theme="light"]) #s-cmp .row.lv-none .dbox{background:var(--surface-3);border-color:var(--border);box-shadow:inset 0 1px 0 rgba(255,255,255,.05)}
+#s-cmp .newbadge{font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.3px;padding:3px 6px;border-radius:7px;white-space:nowrap;color:var(--accent-ink);background:color-mix(in srgb,var(--accent) 16%,var(--card));border:1px solid color-mix(in srgb,var(--accent) 40%,transparent)}
+[data-theme="dark"] #s-cmp .newbadge,:root:not([data-theme="light"]) #s-cmp .newbadge{background:color-mix(in srgb,var(--accent) 26%,var(--surface-3));border-color:color-mix(in srgb,var(--accent) 45%,transparent)}
+
+/* список-контейнер low-pad */
+#s-cmp #cmp-list{padding-bottom:calc(30px + env(safe-area-inset-bottom))}
+#s-cmp .cmp-empty{text-align:center;color:var(--muted);font-size:13px;font-weight:600;padding:40px 20px}
+
+
+/* ===== §5.4 STATUS-ФІЛЬТР (комбо-чіп band-swap · порт b13) ===== */
+.bc.is-pressed{transform:scale(.93);transition-duration:.06s}
+.bc.area-bc{min-width:0;overflow:hidden}
+.bc.area-bc .lbl{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bc.filt{flex:0 0 auto;gap:7px}
+.bc.filt .g{width:9px;height:9px;flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center}
+.bc.filt .g.all{border:1.6px solid var(--muted);border-radius:50%}
+.bc.filt .g.active{background:var(--accent);border-radius:50%;box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 16%,transparent)}
+.bc.filt .g.transferred{width:auto;color:var(--accent-ink);font-weight:800;font-size:11px}
+[data-theme="dark"] .bc.filt .g.transferred,:root:not([data-theme="light"]) .bc.filt .g.transferred{color:var(--accent)}
+.bc.filt .cnt{color:var(--muted);font-weight:700;font-variant-numeric:tabular-nums}
+.chip .fg{width:8px;height:8px;flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;margin-right:5px}
+.chip .fg.all{border:1.5px solid currentColor;border-radius:50%;opacity:.55}
+.chip .fg.active{background:currentColor;border-radius:50%}
+.chip .fg.transferred::before{content:'✓'}
+.chip .cn{opacity:.7;font-weight:700;font-variant-numeric:tabular-nums;margin-left:5px}
+
 </style>
 </head>
 
@@ -518,6 +716,21 @@ a.mi{text-decoration:none;color:inherit}
           <span>Excel</span>
         </a>
       </div>
+    </section>
+
+    <section class="screen" id="s-cmp">
+      <header class="hdr" id="cmp-hdr">
+        <div class="hdr-row">
+          <button class="icon-btn pressable" aria-label="Назад" onclick="show('s-home')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 6 9 12 15 18"/></svg></button>
+          <div class="hdr-title">
+            <div class="t" id="cmpAddr">Динаміка</div>
+            <div class="s" id="cmpSub">—</div>
+          </div>
+          <button class="icon-btn pressable" aria-label="Меню" onclick="openSheet()"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.95"/><circle cx="12" cy="12" r="1.95"/><circle cx="19" cy="12" r="1.95"/></svg></button>
+        </div>
+      </header>
+      <div id="cmp-sum"></div>
+      <div id="cmp-list"></div>
     </section>
 
   </div>
@@ -750,7 +963,8 @@ const PH=[
   {"px": "3919583", "area": "Дніпропетровська", "city": "Дніпро", "addr": "Дніпропетровська обл., м.Дніпро, просп.Науки, 171. прим. 23", "net": "Фармастор", "oTC": "C", "iW": "D"},
   {"px": "3988188", "area": "Полтавська", "city": "Полтава", "addr": "Україна, м.Полтава, вул.Героїв ОУН, 26", "net": "Фармастор", "oTC": "B", "iW": "B"},
   {"px": "4387433", "area": "Дніпропетровська", "city": "Дніпро", "addr": "Україна, м.Дніпро, вул.Панікахи, 15", "net": "Фармастор", "oTC": "A", "iW": "B"},
-  {"px": "20052701", "area": "Кіровоградська", "city": "Кропивницький", "addr": "Україна, м.Кропивницький, вул.Коваленка Юрія, 2А", "net": "Фармастор", "oTC": "A", "iW": "B"}
+  {"px": "20052701", "area": "Кіровоградська", "city": "Кропивницький", "addr": "Україна, м.Кропивницький, вул.Коваленка Юрія, 2А", "net": "Фармастор", "oTC": "A", "iW": "B"},
+  {"px": "999001", "area": "Дніпропетровська", "city": "Дніпро", "addr": "◆ ТЕСТ Динаміки, вул.Мокова 1", "net": "Фармастор", "oTC": "B", "iW": "A"}
 ];
 
 const LAYOUT={
@@ -780,7 +994,7 @@ const LAYOUT={
 const OTC_BRANDS=['strep','nuro','gavis'];
 const IW_BRANDS=['durex','contex','evi'];
 
-const APP_BUILD = { ver:'v2.4.0', build:'polish.b12_3', date:'17.07.2026' }; // wsd 10.6 — єдина константа версії
+const APP_BUILD = { ver:'v2.5.0', build:'dynamika.b13-SEED', date:'19.07.2026' }; // wsd 10.6 — єдина константа версії
 const NETWORK = { name:'Фармастор', tagline:'інструмент залишків', tg:'t.me/Konst_Andre' };
 const ORDER_FORM_URL = 'https://rbcom-my.sharepoint.com/:x:/r/personal/yuliia_syniuhina_reckitt_com/_layouts/15/Doc.aspx?sourcedoc=%7B361AB6BF-2AE9-410C-A81F-2AA3502C4EAD%7D&file=%25u0424%25u0430%25u0440%25u043c%25u0430%25u0441%25u0442%25u043e%25u0440%20%25u0437%25u0430%25u043c%25u043e%25u0432%25u043b%25u0435%25u043d%25u043d%25u044f%20%25u0442%25u0442.xlsx&wdLOR=c06833412-A6C7-4B15-AE95-76BCF4AB9FD6&openShare=true&fromShare=true&action=default&mobileredirect=true';
 const MSL_BY_K={}; MSL.forEach(function(s){MSL_BY_K[s.k]=s;});
@@ -915,7 +1129,7 @@ function esc(s){return(''+s).replace(/&/g,'&amp;').replace(/</g,'&lt;');}
 const AREAS=[]; PH.forEach(function(p){if(AREAS.indexOf(p.area)<0)AREAS.push(p.area);});
 function citiesOf(a){var s=[];PH.forEach(function(p){if(p.area===a&&s.indexOf(p.city)<0)s.push(p.city);});
   return s.sort(function(x,y){return x.localeCompare(y,'uk');});}
-var S={area:AREAS[0]||'',city:'',q:'',picking:'city'};
+var S={area:AREAS[0]||'',city:'',q:'',picking:'city',mode:'all'};   /* mode = §5.4 status-фільтр */
 const AK='farmstore_area';
 function loadArea(){try{var r=JSON.parse(localStorage.getItem(AK));if(r&&AREAS.indexOf(r.a)>=0)S.area=r.a;}catch(e){}} /* B57 name-guard: область ∈ AREAS */
 function saveArea(){try{localStorage.setItem(AK,JSON.stringify({a:S.area}));}catch(e){}}
@@ -936,13 +1150,42 @@ function areaChips(){return AREAS.map(function(a){
 function cityChips(){var cs=citiesOf(S.area);
   var all='<button class="chip'+(!S.city?' on':'')+'" data-city="">Всі</button>';
   return all+cs.map(function(c){return '<button class="chip'+(c===S.city?' on':'')+'" data-city="'+esc(c)+'">'+esc(c)+'</button>';}).join('');}
-function bandChips(){return S.picking==='area'?areaChips():cityChips();}
+function bandChips(){if(S.picking==='area')return areaChips();if(S.picking==='filter')return filterChips();return cityChips();}
 
 function breadcrumb(){
-  return '<div class="bcrow"><button class="bc" id="bc">'+esc(S.area)+' <span class="bc-c">▾</span></button>'+
+  return '<div class="bcrow"><button class="bc area-bc pressable'+(S.picking==='area'?' open':'')+'" id="bc"><span class="lbl">'+esc(S.area)+'</span> <span class="bc-c">▾</span></button>'+
+    filtChip()+
     '<span class="bc-count" id="bcCount"></span></div>';}
 function searchField(){return '<div class="srch"><span class="si">'+SVG_SEARCH+'</span>'+
   '<input id="q" placeholder="Пошук вулиці / Proxima…" value="'+esc(S.q)+'"></div>';}
+
+
+/* ===== §5.4 STATUS-ФІЛЬТР — хелпери (порт b13) ===== */
+var FILTERS=[{k:'all',label:'Усі'},{k:'active',label:'Активні'},{k:'transferred',label:'Перенесені'}];
+function phState(px){var e=ST.phs[px];if(!e||!e.visits||!e.visits.length)return'new';
+  var v=e.visits[e.visits.length-1];
+  return v.transferred?'transferred':(Object.keys(v.vals||{}).length?'ready':'new');}
+function counts(){var a=0,t=0;PH.forEach(function(p){if(p.area!==S.area)return;
+  (phState(p.px)==='transferred')?t++:a++;});return{a:a,t:t,all:a+t};}
+function filtGlyph(){
+  if(S.mode==='active')return'<span class="g active"></span>';
+  if(S.mode==='transferred')return'<span class="g transferred">✓</span>';
+  return'<span class="g all"></span>';}
+function filtChip(){var c=counts(),lbl,cnt='';
+  if(S.mode==='active'){lbl='Активні';cnt='<span class="cnt">'+c.a+'</span>';}
+  else if(S.mode==='transferred'){lbl='Перенесені';cnt='<span class="cnt">'+c.t+'</span>';}
+  else lbl='Усі';
+  return'<button class="bc filt pressable'+(S.picking==='filter'?' open':'')+'" id="filtBc">'+filtGlyph()+
+    '<span class="lbl">'+lbl+'</span>'+cnt+'<span class="bc-c">▾</span></button>';}
+function filterChips(){var c=counts();
+  return FILTERS.map(function(f){
+    var n=f.k==='all'?c.all:(f.k==='active'?c.a:c.t);
+    return'<button class="chip'+(f.k===S.mode?' on':'')+'" data-filt="'+f.k+'"><span class="fg '+f.k+'"></span>'+f.label+'<span class="cn">'+n+'</span></button>';
+  }).join('');}
+function renderCrumbState(){
+  var bc=document.getElementById('bc'),fb=document.getElementById('filtBc');
+  if(bc)bc.classList.toggle('open',S.picking==='area');
+  if(fb)fb.classList.toggle('open',S.picking==='filter');}
 
 function renderTop(){
   document.getElementById('toparea').innerHTML=
@@ -953,14 +1196,20 @@ function bindTop(){
   var cr=document.getElementById('cityrow');
   if(cr)cr.addEventListener('click',function(e){var b=e.target.closest('.chip');if(!b)return;
     if(b.hasAttribute('data-area')){        /* область-mode → вибір області */
-      S.area=b.getAttribute('data-area');S.city='';S.picking='city';saveArea();renderTop();renderHome();
-    }else{                                  /* місто → in-place .on (scroll зберігається) */
-      [].forEach.call(cr.querySelectorAll('.chip'),function(c){c.classList.remove('on');});
-      b.classList.add('on');S.city=b.getAttribute('data-city');renderHome();edgeRecalc();
-    }});
+      S.area=b.getAttribute('data-area');S.city='';S.picking='city';saveArea();renderTop();renderHome();return;
+    }
+    if(b.hasAttribute('data-filt')){        /* §5.4 фільтр-mode → вибір статусу */
+      S.mode=b.getAttribute('data-filt');S.picking='city';renderTop();renderHome();return;
+    }
+    /* місто → in-place .on (scroll зберігається) */
+    [].forEach.call(cr.querySelectorAll('.chip'),function(c){c.classList.remove('on');});
+    b.classList.add('on');S.city=b.getAttribute('data-city');renderHome();edgeRecalc();});
   var bc=document.getElementById('bc');
   if(bc)bc.addEventListener('click',function(){
-    S.picking=S.picking==='area'?'city':'area';bc.classList.toggle('open',S.picking==='area');renderBand();});
+    S.picking=S.picking==='area'?'city':'area';renderCrumbState();renderBand();});
+  var fb=document.getElementById('filtBc');
+  if(fb)fb.addEventListener('click',function(){
+    S.picking=S.picking==='filter'?'city':'filter';renderCrumbState();renderBand();});
   var q=document.getElementById('q');
   if(q)q.addEventListener('input',function(){S.q=q.value;renderHome();});
 }
@@ -1035,7 +1284,7 @@ function heroHTML(p){
 }
 function footHTML(p){
   var anchor='<span class="anchor">M'+p.m+' · Proxima '+esc(p.px)+'</span>';
-  var dyn=p.visits>=2?'<span class="dyn">Динаміка ›</span>':(p.visits>=1?'<span class="dyn">показники ›</span>':'');
+  var dyn=p.visits>=2?'<span class="dyn cmp-go" data-px="'+esc(p.px)+'">Динаміка ›</span>':(p.visits>=1?'<span class="dyn">показники ›</span>':'');
   var date='';
   if(p.state==='ready'||p.state==='transferred')date='<span class="date">'+fmtDate(p.date)+'</span>';
   else if(p.lastTr)date='<span class="date">ост. '+fmtDate(p.lastTr)+'</span>';
@@ -1053,19 +1302,21 @@ function hSort(a,b){return a.city.localeCompare(b.city,'uk')||a.addr.localeCompa
 function renderHome(){
   var full=homeModel();
   var M=full.filter(topMatch);
-  var h;
-  if(!M.length){
+  var act=M.filter(function(p){return p.state!=='transferred';}).sort(hSort);
+  var tr=M.filter(function(p){return p.state==='transferred';}).sort(hSort);
+  var h,shown;
+  if(S.mode==='active'){shown=act;h=act.map(hCard).join('');}
+  else if(S.mode==='transferred'){shown=tr;h=tr.map(hCard).join('');}
+  else{shown=M;h=act.map(hCard).join('');
+    if(tr.length)h+='<div class="sec">Перенесені ('+tr.length+')<span class="ln"></span></div>'+tr.map(hCard).join('');}
+  if(!shown.length){
+    var mlbl=S.mode==='active'?' · активні':(S.mode==='transferred'?' · перенесені':'');
     h='<div class="empty">Нічого не знайдено у «'+esc(S.area)+(S.city?' · '+esc(S.city):'')+
-      (S.q.trim()?' · «'+esc(S.q.trim())+'»':'')+'»</div>';
-  }else{
-    var act=M.filter(function(p){return p.state!=='transferred';}).sort(hSort);
-    var tr=M.filter(function(p){return p.state==='transferred';}).sort(hSort);
-    h=act.map(hCard).join('');
-    if(tr.length)h+='<div class="sec">Перенесені ('+tr.length+')<span class="ln"></span></div>'+tr.map(hCard).join('');
+      (S.q.trim()?' · «'+esc(S.q.trim())+'»':'')+mlbl+'»</div>';
   }
   var list=document.getElementById('homeList');
   list.innerHTML=h;
-  var c=document.getElementById('bcCount');if(c)c.textContent=M.length+' апт.';
+  var c=document.getElementById('bcCount');if(c)c.textContent=counts().all+' апт.';
   // arc-fill: грає ЛИШЕ на щойно-змінене видиме кільце (snapshot-diff); НЕ на першому mount, НЕ на фільтр/band-swap
   if(_homeSnap){
     M.forEach(function(p){
@@ -1289,18 +1540,242 @@ document.addEventListener('pointercancel',clearPressed,{passive:true});
 
 /* ---- home card tap → drill FILL (delegated) ---- */
 document.getElementById('homeList').addEventListener('click',function(e){
+  var g=e.target.closest('.cmp-go');
+  if(g){var gp=g.getAttribute('data-px');if(gp){e.stopPropagation();openCmp(gp);}return;}   // §5.1 вхід у Динаміку
   var c=e.target.closest('.card');if(!c)return;
   var px=c.getAttribute('data-px');if(px)openFill(px);
 });
 
 /* ---- init ---- */
 loadST();
+/* ============================================================
+   МОК-СІД Динаміки — ЛИШЕ у _SEED-копії (НЕ в b13-базі!).
+   One-shot (прапорець farmstore_seed_dynamika). НЕ чіпає реальні аптеки —
+   додає окрему тестову «◆ ТЕСТ Динаміки» (px 999001).
+   2 transferred-знімки покривають усі кольор-стани + cross-norm.
+   Прибрати: ••• → «Очистити всі дані» (стирає фейк-візити).
+   ============================================================ */
+function seedMockDynamika(){
+  try{
+    if(localStorage.getItem('farmstore_seed_dynamika'))return;   // one-shot guard
+    if(!ST.phs)ST.phs={};
+    ST.phs['999001']={visits:[
+      /* ЗНІМОК «ВІД» · 18.06 · tier OTC=C / IW=A */
+      {date:'2026-06-18',transferred:true,tier:{oTC:'C',iW:'A'},vals:{
+        /* IW pure (A→A): */ '3114241':1,'3287241':3,'3333219':1,'3114239':2,'3114250':2,'3221420':3,
+        /* OTC cross (C→B): */ '3020906':4,'3278321':1,'8053858':2,'3020904':2 }},
+      /* ЗНІМОК «ДО» · 02.07 · tier OTC=B / IW=A */
+      {date:'2026-07-02',transferred:true,tier:{oTC:'B',iW:'A'},vals:{
+        /* IW pure: improve/degrade/stuck/stable/crit — 3221420 ВІДСУТНІЙ = na */
+        '3114241':4,'3287241':1,'3333219':1,'3114239':2,'3114250':0,
+        /* OTC cross: degrade/improve/stuck/crit */ '3020906':4,'3278321':5,'8053858':3,'3020904':0 }}
+    ]};
+    saveST();
+    localStorage.setItem('farmstore_seed_dynamika','1');
+    if(console&&console.log)console.log('[SEED] Динаміка-мок додано: ◆ ТЕСТ · px 999001 (2 знімки).');
+  }catch(e){}
+}
+seedMockDynamika();
 loadArea();
 renderTop();
 renderHome();
 applyThemeSeg(true);
 if(document.fonts&&document.fonts.ready){document.fonts.ready.then(function(){placeThemeThumb(true);});}
 window.addEventListener('resize',function(){requestAnimationFrame(function(){placeThemeThumb(true);});});
+
+
+/* ======================================================================= */
+/* ===== ДИНАМІКА (§5.1 · порт b13) — екран порівняння visits[] ========== */
+/* ======================================================================= */
+/* SVG-іконки (моно, без емодзі — §7/дизайн-лок) */
+var CMP_UP='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>';
+var CMP_DN='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg>';
+var CMP_EQ='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9h14M5 15h14"/></svg>';
+var CMP_TREND='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M17 7h4v4"/></svg>';
+var CMP_TRENDDN='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7l6 6 4-4 8 8"/><path d="M17 17h4v-4"/></svg>';
+var CMP_CAL='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="16.5" rx="2.5"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg>';
+var CMP_CRT='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>';
+
+var CMP={px:null,sfilter:'all',data:null};
+
+/* ---- вибір двох знімків: дефолт = останні два transferred (§5.1) ---- */
+function cmpPickVisits(px){
+  var e=ST.phs[px]; if(!e||!e.visits)return null;
+  var withVals=function(v){return v&&v.vals&&Object.keys(v.vals).length;};
+  var tr=e.visits.filter(function(v){return v.transferred&&withVals(v);});
+  var pool=tr.length>=2?tr:e.visits.filter(withVals);
+  if(pool.length<2)return null;
+  return {from:pool[pool.length-2],to:pool[pool.length-1]};
+}
+/* ---- адаптер visits[].vals → model (cat→brand→sub→items) ---- */
+function cmpBuild(px){
+  var pk=cmpPickVisits(px); if(!pk)return null;
+  var fromV=pk.from,toV=pk.to,ph=getPh(px);
+  var cats=[{c:'OTC',brands:OTC_BRANDS},{c:'IW',brands:IW_BRANDS}];
+  var model=cats.map(function(cat){
+    var isOtc=cat.c==='OTC';
+    var tF=(fromV.tier&&(isOtc?fromV.tier.oTC:fromV.tier.iW))||(isOtc?ph.oTC:ph.iW);
+    var tT=(toV.tier&&(isOtc?toV.tier.oTC:toV.tier.iW))||(isOtc?ph.oTC:ph.iW);
+    var brands=cat.brands.map(function(bk){
+      var L=LAYOUT[bk];
+      var subgroups=L.subs.map(function(sub){
+        var items=sub.rows.map(function(r){
+          var f=(r.k in fromV.vals)?fromV.vals[r.k]:null;
+          var t=(r.k in toV.vals)?toV.vals[r.k]:null;
+          return {f:f,t:t,nF:normFor(r.k,tF),nT:normFor(r.k,tT),n:r.v,fd:r.fd,pk:r.pk};
+        });
+        return {sub:sub.eb,items:items};
+      });
+      return {b:L.brand,subgroups:subgroups};
+    });
+    return {c:cat.c,tier:tT,brands:brands};
+  });
+  return {model:model,fromV:fromV,toV:toV};
+}
+
+/* ---- Δ-КОЛІР = МОДЕЛЬ B (недобір s=max(0,MSL−V) · critK=0 · A8/§5.1) ---- */
+function cmpLevel(f,t,nF,nT){
+  if(f===null||t===null)return'na';
+  if(t===0)return'crit';                        // порожня полиця
+  var sF=Math.max(0,nF-f),sT=Math.max(0,nT-t);
+  if(sF===0&&sT===0)return'stable';             // обидва ≥ норми → muted
+  if(sT<sF)return'improve';                     // недобір скоротився → accent (навіть якщо ще нижче)
+  if(sT>sF)return'degrade';                     // недобір виріс → warn
+  return'stuck';                                // застряг нижче → warn
+}
+function cmpLvClass(lv){
+  if(lv==='improve')return'lv-ok';
+  if(lv==='degrade'||lv==='stuck')return'lv-low';
+  if(lv==='crit')return'lv-crit';
+  return'lv-none';                              // stable · na
+}
+/* tally-бакет = ТРАЄКТОРІЯ (stuck→«без змін», хоч рядок warn=СТАН) */
+function cmpTraj(lv){
+  if(lv==='improve')return'b';
+  if(lv==='degrade'||lv==='crit')return'w';
+  if(lv==='na')return'';
+  return's';                                    // stable · stuck
+}
+function cmpSign(d){return d>0?'+'+d:''+d;}
+function cmpFmt(v){return v===null?'—':(''+v);}
+/* фільтр zone-3: Проблемні = СТАН нижче норми ЗАРАЗ (sT>0, §5.4-aligned) */
+function cmpPassFilter(it){
+  if(CMP.sfilter==='all')return true;
+  if(CMP.sfilter==='moved')return it.f!==it.t;
+  if(it.t===null)return false;
+  return it.t===0||Math.max(0,it.nT-it.t)>0;
+}
+
+/* ---- ВЕРХІВКА (sumcard, композиція A) ---- */
+function cmpTally(model){
+  var b=0,w=0,s=0;
+  model.forEach(function(cat){cat.brands.forEach(function(br){br.subgroups.forEach(function(sg){sg.items.forEach(function(it){
+    var bk=cmpTraj(cmpLevel(it.f,it.t,it.nF,it.nT));
+    if(bk==='b')b++;else if(bk==='w')w++;else if(bk==='s')s++;
+  });});});});
+  return {b:b,w:w,s:s};
+}
+function cmpTileHTML(cls,svg,n,label){return '<div class="tile '+cls+'"><div class="ti-top"><span class="ti-ic">'+svg+'</span><span class="ti-n">'+n+'</span></div><span class="ti-l">'+label+'</span></div>';}
+function cmpTallyHTML(v){return '<div class="tally">'+cmpTileHTML('better',CMP_UP,v.b,'до норми')+cmpTileHTML('worse',CMP_DN,v.w,'від норми')+cmpTileHTML('same',CMP_EQ,v.s,'без змін')+'</div>';}
+function cmpStHeadHTML(wcls,word){
+  var ico=wcls==='up'?CMP_TREND:wcls==='down'?CMP_TRENDDN:CMP_EQ;
+  return '<div class="st-head '+wcls+'"><span class="st-ico">'+ico+'</span><div class="st-txt"><span class="st-word">'+word+'</span><span class="st-cap">відносно MSL</span></div></div>';
+}
+function cmpDpillHTML(fromV,toV){return '<button class="dpill" aria-label="Період"><span class="dp-ic">'+CMP_CAL+'</span><span>'+fmtDate(fromV.date)+'–'+fmtDate(toV.date)+'</span><span class="dp-c">'+CMP_CRT+'</span></button>';}
+function renderCmpTop(){
+  var built=CMP.data,v=cmpTally(built.model);
+  var wcls=v.b>v.w?'up':(v.w>v.b?'down':'flat');
+  var word=wcls==='up'?'Покращилось':wcls==='down'?'Погіршилось':'Без змін';
+  var top='<div class="sum-top mode-a"><div class="st-line">'+cmpStHeadHTML(wcls,word)+cmpDpillHTML(built.fromV,built.toV)+'</div>'+cmpTallyHTML(v)+'</div>';
+  function fb(f,l){return '<button data-f="'+f+'"'+(CMP.sfilter===f?' class="on"':'')+' onclick="cmpSetFilter(\''+f+'\')">'+l+'</button>';}
+  var fil='<div class="sum-fil"><div class="sfilter"><span class="sf-thumb" aria-hidden="true"></span>'+fb('all','Усі')+fb('problem','Проблемні')+fb('moved','Змінилось')+'</div></div>';
+  document.getElementById('cmp-sum').innerHTML='<div class="sumcard">'+top+'<div class="sum-div"></div>'+fil+'</div>';
+}
+function cmpSetFilter(f){
+  CMP.sfilter=f;
+  [].forEach.call(document.querySelectorAll('#s-cmp .sfilter button'),function(b){b.classList.toggle('on',b.getAttribute('data-f')===f);});
+  cmpPlaceThumb(false);
+  renderCmpList();
+}
+function cmpPlaceThumb(snap){
+  var seg=document.querySelector('#s-cmp .sfilter');if(!seg)return;
+  var t=seg.querySelector('.sf-thumb'),act=seg.querySelector('button.on');
+  if(!t||!act){if(t)t.style.opacity='0';return;}
+  var sr=seg.getBoundingClientRect(),r=act.getBoundingClientRect();
+  if(r.width===0){t.style.opacity='0';return;}
+  var apply=function(){t.style.width=r.width+'px';t.style.transform='translateX('+(r.left-sr.left-3)+'px)';t.style.opacity='1';};
+  if(snap){t.classList.add('no-anim');apply();requestAnimationFrame(function(){requestAnimationFrame(function(){t.classList.remove('no-anim');});});}
+  else apply();
+}
+
+/* ---- СПИСОК (G-дім + акордеон + рядки) ---- */
+function cmpGdomeHTML(fromV,toV){return '<div class="gdome"><div class="spacer"><span class="ch-lbl">SKU</span></div><div class="hcols"><div class="hc">'+fmtDate(fromV.date)+'</div><div class="hc">'+fmtDate(toV.date)+'</div><div class="hc hd">ЗМІНА</div></div></div>';}
+function cmpDynHTML(it,lv){
+  var absF=(it.f===null),absT=(it.t===null);
+  var was='<div class="well was'+(absF?' na':'')+'">'+cmpFmt(it.f)+'</div>';
+  var now='<div class="well now'+(absT?' na':'')+'">'+cmpFmt(it.t)+'</div>';
+  var dcell;
+  if(absF&&!absT)dcell='<span class="newbadge">новий</span>';
+  else if(absT)dcell='<div class="dbox"></div>';
+  else{var d=it.t-it.f;dcell='<div class="dbox">'+(d===0?'0':cmpSign(d))+'</div>';}
+  return '<div class="cmp-dyn">'+was+now+dcell+'</div>';
+}
+function cmpRowHTML(it){
+  var lv=cmpLevel(it.f,it.t,it.nF,it.nT);
+  var normNote=(it.nF!==it.nT)?'<span class="normchg">MSL '+it.nF+'→'+it.nT+'</span>':'MSL <span class="nm">'+it.nT+'</span>';
+  var nameMain=it.n||it.fd||'';
+  var fdSuf=(it.n&&it.fd)?'<span class="rfd">'+esc(it.fd)+'</span>':'';
+  var pkChip=it.pk?'<span class="rpk">'+esc(it.pk)+'</span>':'';
+  var tag=(fdSuf||pkChip)?'<span class="rn-tag">'+fdSuf+pkChip+'</span>':'';
+  return '<div class="row '+cmpLvClass(lv)+'"><div class="info"><div class="rn"><span class="rv">'+esc(nameMain)+'</span>'+tag+'</div><div class="rm">'+normNote+'</div></div>'+cmpDynHTML(it,lv)+'</div>';
+}
+function renderCmpList(){
+  var built=CMP.data,model=built.model;
+  var html=cmpGdomeHTML(built.fromV,built.toV),any=false;
+  model.forEach(function(cat){
+    var visBrands=cat.brands.map(function(br){
+      var visSubs=br.subgroups.map(function(sg){return {sub:sg.sub,items:sg.items.filter(cmpPassFilter)};})
+        .filter(function(sg){return sg.items.length;});
+      var total=visSubs.reduce(function(a,sg){return a+sg.items.length;},0);
+      return {b:br.b,subs:visSubs,total:total};
+    }).filter(function(br){return br.total;});
+    if(!visBrands.length)return;
+    any=true;
+    html+='<div class="cat-div">'+cat.c+' <span class="cat-tier">· кат. '+esc(cat.tier)+'</span></div>';
+    visBrands.forEach(function(br){
+      html+='<div class="brand"><div class="bhdr"><span class="arr">▾</span><span class="bnm">'+esc(br.b)+'</span><span class="bcnt">'+br.total+'</span></div><div class="bwrap"><div class="bbody">';
+      br.subs.forEach(function(sg){
+        if(sg.sub)html+='<div class="ebrow"><span class="eb">'+esc(sg.sub)+'</span><span class="cnt">'+sg.items.length+'</span></div>';
+        html+='<div class="rows">';
+        sg.items.forEach(function(it){html+=cmpRowHTML(it);});
+        html+='</div>';
+      });
+      html+='</div></div></div>';
+    });
+  });
+  if(!any)html+='<div class="cmp-empty">Немає рядків під цим фільтром</div>';
+  var list=document.getElementById('cmp-list');
+  list.innerHTML=html;
+  [].forEach.call(list.querySelectorAll('.bhdr'),function(h){h.onclick=function(){h.parentElement.classList.toggle('collapsed');};});
+}
+
+/* ---- ВХІД ---- */
+function openCmp(px){
+  var ph=getPh(px); if(!ph)return;
+  var built=cmpBuild(px);
+  if(!built){try{toast('Недостатньо візитів для порівняння');}catch(e){}return;}
+  CMP={px:px,sfilter:'all',data:built};
+  document.getElementById('cmpAddr').textContent=displayAddr(ph.addr);
+  document.getElementById('cmpSub').textContent=ph.city+' · Proxima '+ph.px;
+  renderCmpTop();
+  renderCmpList();
+  show('s-cmp');
+  requestAnimationFrame(function(){
+    var hd=document.getElementById('cmp-hdr');
+    if(hd)document.getElementById('s-cmp').style.setProperty('--cmpHdrH',hd.offsetHeight+'px');  // R2: sticky-офсет G-дому
+    cmpPlaceThumb(true);
+  });
+}
 
 </script>
 </body>
