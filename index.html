@@ -544,9 +544,12 @@ a.mi{text-decoration:none;color:inherit}
 [data-theme="dark"] #s-cmp .st-head.flat,:root:not([data-theme="light"]) #s-cmp .st-head.flat{--stMix:20}
 
 /* дата-пігулка (композиція A) */
-#s-cmp .dpill{display:inline-flex;align-items:center;gap:7px;padding:7px 11px;border-radius:11px;font:700 12.5px/1 var(--font);
-  color:var(--text-2);background:var(--surface-2);border:1px solid var(--border-subtle);font-variant-numeric:tabular-nums;white-space:nowrap}
-[data-theme="dark"] #s-cmp .dpill,:root:not([data-theme="light"]) #s-cmp .dpill{background:var(--surface-3);border-color:var(--border)}
+#s-cmp .dpill{display:inline-flex;align-items:center;gap:7px;padding:7px 10px 7px 11px;border-radius:11px;cursor:pointer;
+  font:800 13px/1 var(--font);letter-spacing:-.2px;color:var(--text);font-variant-numeric:tabular-nums;white-space:nowrap;
+  background:color-mix(in srgb,var(--bg-soft) 82%,var(--card));border:1px solid var(--border-subtle);
+  box-shadow:inset 0 1px 2px rgba(20,50,42,.10)}
+[data-theme="dark"] #s-cmp .dpill,:root:not([data-theme="light"]) #s-cmp .dpill{background:color-mix(in srgb,var(--card),#000 18%);border-color:color-mix(in srgb,var(--border),#000 12%);
+  box-shadow:inset 0 1.5px 4px rgba(0,0,0,.45),inset 0 -1px 0 rgba(255,255,255,.07)}
 #s-cmp .dpill .dp-ic{width:14px;height:14px;color:var(--muted);flex:0 0 14px}
 #s-cmp .dpill .dp-ic svg{width:14px;height:14px;display:block}
 #s-cmp .dpill .dp-c{width:12px;height:12px;color:var(--muted);flex:0 0 12px}
@@ -569,8 +572,10 @@ a.mi{text-decoration:none;color:inherit}
 /* зона 3: фільтр-тунель (SKU-рівень: Усі/Проблемні/Змінилось · A54 thumb) */
 #s-cmp .sum-fil{padding:11px 14px 13px}
 #s-cmp .sfilter{display:flex;gap:0;padding:3px;border-radius:12px;position:relative;overflow:hidden;
-  background:color-mix(in srgb,var(--bg-soft) 60%,var(--card));border:1px solid var(--border-subtle)}
-[data-theme="dark"] #s-cmp .sfilter,:root:not([data-theme="light"]) #s-cmp .sfilter{background:color-mix(in srgb,var(--card),#000 20%);border-color:color-mix(in srgb,var(--border),#000 16%)}
+  background:color-mix(in srgb,var(--bg-soft) 82%,var(--card));border:1px solid var(--border-subtle);
+  box-shadow:inset 0 1px 2px rgba(20,50,42,.15)}
+[data-theme="dark"] #s-cmp .sfilter,:root:not([data-theme="light"]) #s-cmp .sfilter{background:color-mix(in srgb,var(--card),#000 20%);border-color:color-mix(in srgb,var(--border),#000 16%);
+  box-shadow:inset 0 2px 5px rgba(0,0,0,.5),inset 0 -1px 0 rgba(255,255,255,.08)}
 #s-cmp .sfilter button{flex:1;border:none;background:transparent;font-family:var(--font);font-size:13px;font-weight:700;color:var(--text-2);
   padding:7px 4px;border-radius:9px;position:relative;z-index:1;cursor:pointer;white-space:nowrap}
 #s-cmp .sfilter button.on{color:#fff}
@@ -963,8 +968,7 @@ const PH=[
   {"px": "3919583", "area": "Дніпропетровська", "city": "Дніпро", "addr": "Дніпропетровська обл., м.Дніпро, просп.Науки, 171. прим. 23", "net": "Фармастор", "oTC": "C", "iW": "D"},
   {"px": "3988188", "area": "Полтавська", "city": "Полтава", "addr": "Україна, м.Полтава, вул.Героїв ОУН, 26", "net": "Фармастор", "oTC": "B", "iW": "B"},
   {"px": "4387433", "area": "Дніпропетровська", "city": "Дніпро", "addr": "Україна, м.Дніпро, вул.Панікахи, 15", "net": "Фармастор", "oTC": "A", "iW": "B"},
-  {"px": "20052701", "area": "Кіровоградська", "city": "Кропивницький", "addr": "Україна, м.Кропивницький, вул.Коваленка Юрія, 2А", "net": "Фармастор", "oTC": "A", "iW": "B"},
-  {"px": "999001", "area": "Дніпропетровська", "city": "Дніпро", "addr": "◆ ТЕСТ Динаміки, вул.Мокова 1", "net": "Фармастор", "oTC": "B", "iW": "A"}
+  {"px": "20052701", "area": "Кіровоградська", "city": "Кропивницький", "addr": "Україна, м.Кропивницький, вул.Коваленка Юрія, 2А", "net": "Фармастор", "oTC": "A", "iW": "B"}
 ];
 
 const LAYOUT={
@@ -994,7 +998,7 @@ const LAYOUT={
 const OTC_BRANDS=['strep','nuro','gavis'];
 const IW_BRANDS=['durex','contex','evi'];
 
-const APP_BUILD = { ver:'v2.5.0', build:'dynamika.b13-SEED', date:'19.07.2026' }; // wsd 10.6 — єдина константа версії
+const APP_BUILD = { ver:'v2.5.0', build:'dynamika.b13_2', date:'19.07.2026' }; // wsd 10.6 — єдина константа версії
 const NETWORK = { name:'Фармастор', tagline:'інструмент залишків', tg:'t.me/Konst_Andre' };
 const ORDER_FORM_URL = 'https://rbcom-my.sharepoint.com/:x:/r/personal/yuliia_syniuhina_reckitt_com/_layouts/15/Doc.aspx?sourcedoc=%7B361AB6BF-2AE9-410C-A81F-2AA3502C4EAD%7D&file=%25u0424%25u0430%25u0440%25u043c%25u0430%25u0441%25u0442%25u043e%25u0440%20%25u0437%25u0430%25u043c%25u043e%25u0432%25u043b%25u0435%25u043d%25u043d%25u044f%20%25u0442%25u0442.xlsx&wdLOR=c06833412-A6C7-4B15-AE95-76BCF4AB9FD6&openShare=true&fromShare=true&action=default&mobileredirect=true';
 const MSL_BY_K={}; MSL.forEach(function(s){MSL_BY_K[s.k]=s;});
@@ -1548,34 +1552,6 @@ document.getElementById('homeList').addEventListener('click',function(e){
 
 /* ---- init ---- */
 loadST();
-/* ============================================================
-   МОК-СІД Динаміки — ЛИШЕ у _SEED-копії (НЕ в b13-базі!).
-   One-shot (прапорець farmstore_seed_dynamika). НЕ чіпає реальні аптеки —
-   додає окрему тестову «◆ ТЕСТ Динаміки» (px 999001).
-   2 transferred-знімки покривають усі кольор-стани + cross-norm.
-   Прибрати: ••• → «Очистити всі дані» (стирає фейк-візити).
-   ============================================================ */
-function seedMockDynamika(){
-  try{
-    if(localStorage.getItem('farmstore_seed_dynamika'))return;   // one-shot guard
-    if(!ST.phs)ST.phs={};
-    ST.phs['999001']={visits:[
-      /* ЗНІМОК «ВІД» · 18.06 · tier OTC=C / IW=A */
-      {date:'2026-06-18',transferred:true,tier:{oTC:'C',iW:'A'},vals:{
-        /* IW pure (A→A): */ '3114241':1,'3287241':3,'3333219':1,'3114239':2,'3114250':2,'3221420':3,
-        /* OTC cross (C→B): */ '3020906':4,'3278321':1,'8053858':2,'3020904':2 }},
-      /* ЗНІМОК «ДО» · 02.07 · tier OTC=B / IW=A */
-      {date:'2026-07-02',transferred:true,tier:{oTC:'B',iW:'A'},vals:{
-        /* IW pure: improve/degrade/stuck/stable/crit — 3221420 ВІДСУТНІЙ = na */
-        '3114241':4,'3287241':1,'3333219':1,'3114239':2,'3114250':0,
-        /* OTC cross: degrade/improve/stuck/crit */ '3020906':4,'3278321':5,'8053858':3,'3020904':0 }}
-    ]};
-    saveST();
-    localStorage.setItem('farmstore_seed_dynamika','1');
-    if(console&&console.log)console.log('[SEED] Динаміка-мок додано: ◆ ТЕСТ · px 999001 (2 знімки).');
-  }catch(e){}
-}
-seedMockDynamika();
 loadArea();
 renderTop();
 renderHome();
