@@ -152,8 +152,11 @@ a.mi{text-decoration:none;color:inherit}
 .mi.danger b{color:var(--crit)}
 .throw{display:flex;align-items:center;gap:12px;padding:11px 13px 3px}
 .thlbl{flex:1;font:700 13.5px/1 var(--font);color:var(--text)}
-.thseg{display:flex;gap:0;margin:0 13px;padding:3px;background:var(--surface-2);border-radius:11px;border:1px solid var(--border-subtle);position:relative;overflow:hidden}
-[data-theme="dark"] .thseg{background:color-mix(in srgb,var(--bg),#000 15%);border-color:var(--border)}
+.thseg{display:flex;gap:0;margin:0 13px;padding:3px;border-radius:11px;position:relative;overflow:hidden;
+  background:color-mix(in srgb,var(--bg-soft) 82%,var(--card));border:1px solid var(--border-subtle);
+  box-shadow:inset 0 1px 2px rgba(20,50,42,.15)}
+[data-theme="dark"] .thseg{background:color-mix(in srgb,var(--card),#000 20%);border-color:color-mix(in srgb,var(--border),#000 16%);
+  box-shadow:inset 0 2px 5px rgba(0,0,0,.5),inset 0 -1px 0 rgba(255,255,255,.08)}
 .thseg button{flex:1;border:none;background:transparent;padding:8px 4px;border-radius:9px;cursor:pointer;font:700 12px/1 var(--font);color:var(--muted);transition:color .15s;position:relative;z-index:1}
 .thseg button.on{color:#fff}
 .seg-thumb{position:absolute;top:3px;bottom:3px;left:0;width:0;border-radius:9px;z-index:0;opacity:0;pointer-events:none;background:var(--accent);box-shadow:0 1px 3px -1px color-mix(in srgb,var(--accent) 40%,transparent);transition:transform var(--seg-dur) var(--seg-ease),width var(--seg-dur) var(--seg-ease)}
@@ -450,7 +453,7 @@ a.mi{text-decoration:none;color:inherit}
   :root:not([data-theme="light"]) .mi{border-bottom-color:var(--border)}
   :root:not([data-theme="light"]) .mi-ic{background:color-mix(in srgb,#fff 6%,var(--surface-3));border-color:rgba(255,255,255,.045);box-shadow:inset 0 1px 0 rgba(255,255,255,.096)}
   :root:not([data-theme="light"]) .doact{color:var(--accent);background:color-mix(in srgb,var(--accent) 16%,transparent)}
-  :root:not([data-theme="light"]) .thseg{background:color-mix(in srgb,var(--bg),#000 15%);border-color:var(--border)}
+  :root:not([data-theme="light"]) .thseg{background:color-mix(in srgb,var(--card),#000 20%);border-color:color-mix(in srgb,var(--border),#000 16%);box-shadow:inset 0 2px 5px rgba(0,0,0,.5),inset 0 -1px 0 rgba(255,255,255,.08)}
   :root:not([data-theme="light"]) .seg-thumb{background:linear-gradient(180deg,hsl(163 55% 34%),hsl(163 55% 30%))}
   :root:not([data-theme="light"]) .cf-cancel{background:color-mix(in srgb,var(--surface-3),#fff 3%)}
   :root:not([data-theme="light"]) .fld{background:color-mix(in srgb,var(--card),#000 calc(var(--dWellDip)*1%));
@@ -968,7 +971,8 @@ const PH=[
   {"px": "3919583", "area": "Дніпропетровська", "city": "Дніпро", "addr": "Дніпропетровська обл., м.Дніпро, просп.Науки, 171. прим. 23", "net": "Фармастор", "oTC": "C", "iW": "D"},
   {"px": "3988188", "area": "Полтавська", "city": "Полтава", "addr": "Україна, м.Полтава, вул.Героїв ОУН, 26", "net": "Фармастор", "oTC": "B", "iW": "B"},
   {"px": "4387433", "area": "Дніпропетровська", "city": "Дніпро", "addr": "Україна, м.Дніпро, вул.Панікахи, 15", "net": "Фармастор", "oTC": "A", "iW": "B"},
-  {"px": "20052701", "area": "Кіровоградська", "city": "Кропивницький", "addr": "Україна, м.Кропивницький, вул.Коваленка Юрія, 2А", "net": "Фармастор", "oTC": "A", "iW": "B"}
+  {"px": "20052701", "area": "Кіровоградська", "city": "Кропивницький", "addr": "Україна, м.Кропивницький, вул.Коваленка Юрія, 2А", "net": "Фармастор", "oTC": "A", "iW": "B"},
+  {"px": "999001", "area": "Дніпропетровська", "city": "Дніпро", "addr": "◆ ТЕСТ Динаміки, вул.Мокова 1", "net": "Фармастор", "oTC": "B", "iW": "A"}
 ];
 
 const LAYOUT={
@@ -998,7 +1002,7 @@ const LAYOUT={
 const OTC_BRANDS=['strep','nuro','gavis'];
 const IW_BRANDS=['durex','contex','evi'];
 
-const APP_BUILD = { ver:'v2.5.0', build:'dynamika.b13_2', date:'19.07.2026' }; // wsd 10.6 — єдина константа версії
+const APP_BUILD = { ver:'v2.5.0', build:'dynamika.b13_2-SEED', date:'19.07.2026' }; // wsd 10.6 — єдина константа версії
 const NETWORK = { name:'Фармастор', tagline:'інструмент залишків', tg:'t.me/Konst_Andre' };
 const ORDER_FORM_URL = 'https://rbcom-my.sharepoint.com/:x:/r/personal/yuliia_syniuhina_reckitt_com/_layouts/15/Doc.aspx?sourcedoc=%7B361AB6BF-2AE9-410C-A81F-2AA3502C4EAD%7D&file=%25u0424%25u0430%25u0440%25u043c%25u0430%25u0441%25u0442%25u043e%25u0440%20%25u0437%25u0430%25u043c%25u043e%25u0432%25u043b%25u0435%25u043d%25u043d%25u044f%20%25u0442%25u0442.xlsx&wdLOR=c06833412-A6C7-4B15-AE95-76BCF4AB9FD6&openShare=true&fromShare=true&action=default&mobileredirect=true';
 const MSL_BY_K={}; MSL.forEach(function(s){MSL_BY_K[s.k]=s;});
@@ -1552,6 +1556,30 @@ document.getElementById('homeList').addEventListener('click',function(e){
 
 /* ---- init ---- */
 loadST();
+/* ============================================================
+   МОК-СІД Динаміки — ЛИШЕ у _SEED-копії (НЕ в b13_2-базі!).
+   One-shot (прапорець farmstore_seed_dyn2). Додає окрему тестову
+   «◆ ТЕСТ Динаміки» (px 999001) — не чіпає реальні аптеки.
+   Прибрати: ••• → «Очистити всі дані».
+   ============================================================ */
+function seedMockDynamika(){
+  try{
+    if(localStorage.getItem('farmstore_seed_dyn2'))return;   // one-shot
+    if(!ST.phs)ST.phs={};
+    ST.phs['999001']={visits:[
+      {date:'2026-06-18',transferred:true,tier:{oTC:'C',iW:'A'},vals:{
+        '3114241':1,'3287241':3,'3333219':1,'3114239':2,'3114250':2,'3221420':3,
+        '3020906':4,'3278321':1,'8053858':2,'3020904':2 }},
+      {date:'2026-07-02',transferred:true,tier:{oTC:'B',iW:'A'},vals:{
+        '3114241':4,'3287241':1,'3333219':1,'3114239':2,'3114250':0,
+        '3020906':4,'3278321':5,'8053858':3,'3020904':0 }}
+    ]};
+    saveST();
+    localStorage.setItem('farmstore_seed_dyn2','1');
+    if(console&&console.log)console.log('[SEED] ◆ ТЕСТ · px 999001 (2 знімки).');
+  }catch(e){}
+}
+seedMockDynamika();
 loadArea();
 renderTop();
 renderHome();
