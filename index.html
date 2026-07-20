@@ -260,7 +260,45 @@ a.mi{text-decoration:none;color:inherit}
 .foot{grid-area:foot;display:flex;align-items:center;justify-content:space-between;gap:8px;
   border-top:1px solid var(--border-subtle);padding-top:9px}
 .anchor,.date{font-size:11.5px;color:var(--muted);font-variant-numeric:tabular-nums}
-.dyn{font-size:11.5px;color:var(--accent);font-weight:600}
+/* ===== BADGE «Історія · N» (§5.2 порт · valuesLOCK device✓ b14) — тихий soft-fill chip, L/D split ===== */
+:root{
+  --bH:30px; --bPadX:10px; --bRad:10px; --bGap:5px; --bIcon:14px; --bChev:13px; --bFont:12px;
+  --Lfill:37; --Lbord:20; --Lshadow:18; --Lgrad:14; --LvalL:70;
+  --Dfill:44; --Dridge:18; --Dbord:55; --DvalL:70;
+  --LaccAmt:0; --DaccAmt:10; --accS:20; --accL:42;
+  --bDisOp:46; --bPress:.88;}
+.hist{display:inline-flex;align-items:center;gap:var(--bGap);height:var(--bH);padding:0 var(--bPadX);
+  border-radius:var(--bRad);font:800 var(--bFont)/1 var(--font);border:1px solid;background:transparent;
+  cursor:pointer;flex:0 0 auto;-webkit-appearance:none;white-space:nowrap;transition:transform 280ms var(--spring)}
+/* ☀ LIGHT (default) — нейтр-fill + lift(повний) + sheen + border + txt-L (+accent overlay=0) */
+.hist{
+  --Lbase:color-mix(in srgb, var(--bg-soft) calc(var(--Lfill)*1%), var(--card));
+  background:
+    linear-gradient(180deg, rgba(255,255,255, calc(var(--Lgrad)*.01)), rgba(255,255,255,0)),
+    color-mix(in srgb, hsl(162 calc(var(--accS)*1%) calc(var(--accL)*1%)) calc(var(--LaccAmt)*1%), var(--Lbase));
+  border-color:color-mix(in srgb, hsl(162 calc(var(--accS)*1%) calc(var(--accL)*1%)) calc(var(--LaccAmt)*1%),
+     color-mix(in srgb, var(--muted) calc(var(--Lbord)*1%), var(--border)));
+  color:color-mix(in srgb, var(--accent-ink) calc(var(--LaccAmt)*1%),
+     color-mix(in srgb, var(--text) calc(var(--LvalL)*1%), var(--muted)));
+  box-shadow:0 calc(var(--Lshadow)*0.04px) calc(var(--Lshadow)*0.2px) rgba(20,50,42, calc(var(--Lshadow)*0.004));}
+/* ☾ DARK — tone-lift + ridge + border + txt-L (+accent overlay=шепіт teal) */
+[data-theme="dark"] .hist, :root:not([data-theme="light"]) .hist{
+  --Dbase:color-mix(in srgb, var(--surface-3) calc(var(--Dfill)*1%), var(--card));
+  background:color-mix(in srgb, hsl(163 calc(var(--accS)*1%) calc(var(--accL)*1%)) calc(var(--DaccAmt)*1%), var(--Dbase));
+  border-color:color-mix(in srgb, hsl(163 calc(var(--accS)*1%) calc(var(--accL)*1%)) calc(var(--DaccAmt)*1%),
+     color-mix(in srgb, var(--border) calc(var(--Dbord)*1%), var(--border-subtle)));
+  color:color-mix(in srgb, var(--accent-ink) calc(var(--DaccAmt)*1%),
+     color-mix(in srgb, var(--text) calc(var(--DvalL)*1%), var(--muted)));
+  box-shadow:inset 0 1px 0 rgba(255,255,255, calc(var(--Dridge)*.01));}
+.hist .h-ico{display:inline-flex;width:var(--bIcon);height:var(--bIcon);flex:0 0 auto}
+.hist .h-ico svg{width:100%;height:100%;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.hist .h-sep{margin:0 3px;opacity:.5;font-weight:600}
+.hist .h-n{font-weight:800;font-variant-numeric:tabular-nums}
+.hist .h-chev{display:inline-flex;width:var(--bChev);height:var(--bChev);opacity:.55;margin-left:1px;flex:0 0 auto}
+.hist .h-chev svg{width:100%;height:100%;stroke:currentColor;stroke-width:2.2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.hist.dis{opacity:calc(var(--bDisOp)*.01);pointer-events:none;cursor:default}
+.hist.pressing{transform:scale(var(--bPress));transition-duration:80ms}
+@media (prefers-reduced-motion:reduce){.hist{transition-duration:.01ms!important}}
 .sec{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);
   margin:14px 16px 8px;display:flex;align-items:center;gap:9px}
 .sec .ln{flex:1;height:1px;background:var(--border-subtle)}
@@ -971,8 +1009,7 @@ const PH=[
   {"px": "3919583", "area": "Дніпропетровська", "city": "Дніпро", "addr": "Дніпропетровська обл., м.Дніпро, просп.Науки, 171. прим. 23", "net": "Фармастор", "oTC": "C", "iW": "D"},
   {"px": "3988188", "area": "Полтавська", "city": "Полтава", "addr": "Україна, м.Полтава, вул.Героїв ОУН, 26", "net": "Фармастор", "oTC": "B", "iW": "B"},
   {"px": "4387433", "area": "Дніпропетровська", "city": "Дніпро", "addr": "Україна, м.Дніпро, вул.Панікахи, 15", "net": "Фармастор", "oTC": "A", "iW": "B"},
-  {"px": "20052701", "area": "Кіровоградська", "city": "Кропивницький", "addr": "Україна, м.Кропивницький, вул.Коваленка Юрія, 2А", "net": "Фармастор", "oTC": "A", "iW": "B"},
-  {"px": "999001", "area": "Дніпропетровська", "city": "Дніпро", "addr": "◆ ТЕСТ Динаміки, вул.Мокова 1", "net": "Фармастор", "oTC": "B", "iW": "A"}
+  {"px": "20052701", "area": "Кіровоградська", "city": "Кропивницький", "addr": "Україна, м.Кропивницький, вул.Коваленка Юрія, 2А", "net": "Фармастор", "oTC": "A", "iW": "B"}
 ];
 
 const LAYOUT={
@@ -1002,7 +1039,7 @@ const LAYOUT={
 const OTC_BRANDS=['strep','nuro','gavis'];
 const IW_BRANDS=['durex','contex','evi'];
 
-const APP_BUILD = { ver:'v2.5.0', build:'dynamika.b13_2-SEED', date:'19.07.2026' }; // wsd 10.6 — єдина константа версії
+const APP_BUILD = { ver:'v2.5.0', build:'history-badge.b14', date:'20.07.2026' }; // wsd 10.6 — єдина константа версії
 const NETWORK = { name:'Фармастор', tagline:'інструмент залишків', tg:'t.me/Konst_Andre' };
 const ORDER_FORM_URL = 'https://rbcom-my.sharepoint.com/:x:/r/personal/yuliia_syniuhina_reckitt_com/_layouts/15/Doc.aspx?sourcedoc=%7B361AB6BF-2AE9-410C-A81F-2AA3502C4EAD%7D&file=%25u0424%25u0430%25u0440%25u043c%25u0430%25u0441%25u0442%25u043e%25u0440%20%25u0437%25u0430%25u043c%25u043e%25u0432%25u043b%25u0435%25u043d%25u043d%25u044f%20%25u0442%25u0442.xlsx&wdLOR=c06833412-A6C7-4B15-AE95-76BCF4AB9FD6&openShare=true&fromShare=true&action=default&mobileredirect=true';
 const MSL_BY_K={}; MSL.forEach(function(s){MSL_BY_K[s.k]=s;});
@@ -1290,13 +1327,21 @@ function heroHTML(p){
     '<div class="amid"><span class="fig">'+p.filled+'</span><span class="den">/'+TOTAL+'</span></div>'+
     '<span class="arcword">'+hPct(p.filled)+'%</span></div></div>';
 }
+/* ---- Бейдж «Історія · N» (§5.2) : icon=clock · cap 7 · disabled N≤1 · вхід §5.1 ---- */
+var HIST_CAP=7;
+var HIST_CLOCK='<span class="h-ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 1.8"/></svg></span>';
+var HIST_CHEV='<span class="h-chev"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></span>';
+function histBadge(p){
+  var dis=p.visits<=1;                                   // N≤1 → disabled (1:1 з гейтом visits>=2)
+  var N=p.visits>HIST_CAP?(HIST_CAP+'+'):(''+p.visits);  // cap 7: N>7 → «7+»
+  return '<button class="hist'+(dis?' dis':'')+'" data-px="'+esc(p.px)+'"'+(dis?' disabled':'')+'>'
+    +HIST_CLOCK+'<span class="h-lbl">Історія</span><span class="h-sep">·</span><span class="h-n">'+N+'</span>'
+    +HIST_CHEV+'</button>';
+}
 function footHTML(p){
+  // 2-слот: anchor ліворуч · бейдж праворуч. .date прибрано з Home (→ живе в §5.1 dpill).
   var anchor='<span class="anchor">M'+p.m+' · Proxima '+esc(p.px)+'</span>';
-  var dyn=p.visits>=2?'<span class="dyn cmp-go" data-px="'+esc(p.px)+'">Динаміка ›</span>':(p.visits>=1?'<span class="dyn">показники ›</span>':'');
-  var date='';
-  if(p.state==='ready'||p.state==='transferred')date='<span class="date">'+fmtDate(p.date)+'</span>';
-  else if(p.lastTr)date='<span class="date">ост. '+fmtDate(p.lastTr)+'</span>';
-  return '<div class="foot">'+anchor+dyn+date+'</div>';
+  return '<div class="foot">'+anchor+histBadge(p)+'</div>';
 }
 function hCard(p){
   var cls='card pressable'+(p.state==='transferred'?' tr':'');
@@ -1541,45 +1586,26 @@ function deliverCSV(name,csv){
 }
 
 /* ---- A67 pointer-driven press ---- */
-function clearPressed(){document.querySelectorAll('.is-pressed').forEach(function(el){el.classList.remove('is-pressed')});}
-document.addEventListener('pointerdown',function(e){var el=e.target.closest('.pressable')||e.target.closest('.chip');if(el)el.classList.add('is-pressed');},{passive:true});
+function clearPressed(){document.querySelectorAll('.is-pressed,.pressing').forEach(function(el){el.classList.remove('is-pressed');el.classList.remove('pressing');});}
+document.addEventListener('pointerdown',function(e){
+  // §5.2 ІЗОЛЯЦІЯ: бейдж-перевірка ПЕРШОЮ → прес лише на бейдж (scale .88), картка лишається статичною
+  var b=e.target.closest('.hist');
+  if(b){if(!b.classList.contains('dis'))b.classList.add('pressing');return;}
+  var el=e.target.closest('.pressable')||e.target.closest('.chip');if(el)el.classList.add('is-pressed');
+},{passive:true});
 document.addEventListener('pointerup',clearPressed,{passive:true});
 document.addEventListener('pointercancel',clearPressed,{passive:true});
 
-/* ---- home card tap → drill FILL (delegated) ---- */
+/* ---- home card tap → drill FILL (delegated); бейдж → §5.1 (ізольовано) ---- */
 document.getElementById('homeList').addEventListener('click',function(e){
-  var g=e.target.closest('.cmp-go');
-  if(g){var gp=g.getAttribute('data-px');if(gp){e.stopPropagation();openCmp(gp);}return;}   // §5.1 вхід у Динаміку
+  var g=e.target.closest('.hist');
+  if(g){if(!g.classList.contains('dis')){var gp=g.getAttribute('data-px');if(gp){e.stopPropagation();openCmp(gp);}}return;}  // §5.1 вхід (лише активний бейдж)
   var c=e.target.closest('.card');if(!c)return;
   var px=c.getAttribute('data-px');if(px)openFill(px);
 });
 
 /* ---- init ---- */
 loadST();
-/* ============================================================
-   МОК-СІД Динаміки — ЛИШЕ у _SEED-копії (НЕ в b13_2-базі!).
-   One-shot (прапорець farmstore_seed_dyn2). Додає окрему тестову
-   «◆ ТЕСТ Динаміки» (px 999001) — не чіпає реальні аптеки.
-   Прибрати: ••• → «Очистити всі дані».
-   ============================================================ */
-function seedMockDynamika(){
-  try{
-    if(localStorage.getItem('farmstore_seed_dyn2'))return;   // one-shot
-    if(!ST.phs)ST.phs={};
-    ST.phs['999001']={visits:[
-      {date:'2026-06-18',transferred:true,tier:{oTC:'C',iW:'A'},vals:{
-        '3114241':1,'3287241':3,'3333219':1,'3114239':2,'3114250':2,'3221420':3,
-        '3020906':4,'3278321':1,'8053858':2,'3020904':2 }},
-      {date:'2026-07-02',transferred:true,tier:{oTC:'B',iW:'A'},vals:{
-        '3114241':4,'3287241':1,'3333219':1,'3114239':2,'3114250':0,
-        '3020906':4,'3278321':5,'8053858':3,'3020904':0 }}
-    ]};
-    saveST();
-    localStorage.setItem('farmstore_seed_dyn2','1');
-    if(console&&console.log)console.log('[SEED] ◆ ТЕСТ · px 999001 (2 знімки).');
-  }catch(e){}
-}
-seedMockDynamika();
 loadArea();
 renderTop();
 renderHome();
