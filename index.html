@@ -41,6 +41,10 @@ input,textarea,[contenteditable]{-webkit-user-select:text;user-select:text;-webk
   --comet-a:hsl(162 72% 30%); --comet-b:hsl(162 55% 66%);
   /* ===== MOTION reward LOCK v2 (bake ×1) — dark=glow · light=wash+ring. glowSpread/ringW UNITLESS (CSS *1px) ===== */
   --collapseDur:700ms; --collapseEase:ease-in-out;
+  /* ===== §5-B ISLAND COLLAPSE (b17) — ІМЕНА ОКРЕМІ: --collapseDur вище належить картці бренду ===== */
+  --islCollDur:240ms; --islCollEase:cubic-bezier(.32,.72,0,1); --islFadeDur:140ms;
+  --devTrayRad:22px;          /* §6b ретест у колапсі — дефолт = залочені 22 */
+  --devCollPadT:10px;         /* padding-top ярусу в колапсі; дефолт = поточна геометрія (дельта 0) */
   --popDur:800ms; --popEase:ease-in-out; --popOver:4.5;
   --glowSpread:16; --glowOp:.9; --glowDur:900ms;
   --washOp:.7; --washDur:900ms; --ringW:5; --ringOp:.9;
@@ -374,6 +378,7 @@ a.mi{text-decoration:none;color:inherit}
 /* ===== StockCheck ISLAND (Frosted-Liquid · FINDINGS §4-preset · device-locked, in-product verify pending) ===== */
 .isl-spacer{flex:none;height:200px} /* JS refines to island height (ResizeObserver, shell plumbing) */
 .isl{position:absolute;top:0;left:12px;right:12px;z-index:20;border-radius:24px;overflow:hidden;
+  padding-top:calc(env(safe-area-inset-top) + 10px);   /* b17: перенесено з .isl-brand — інакше колапс з'їдає safe-area */
   background:rgba(245,249,247,.82);
   -webkit-backdrop-filter:blur(12px) saturate(170%);backdrop-filter:blur(12px) saturate(170%);
   border:1px solid rgba(20,50,42,.137);
@@ -388,7 +393,22 @@ a.mi{text-decoration:none;color:inherit}
   :root:not([data-theme="light"]) .isl::before{content:"";position:absolute;inset:0 0 auto 0;height:1px;
     background:rgba(255,255,255,.06);z-index:2;pointer-events:none}}
 /* brand row — carry-over #2: OWN header-row gap (NOT brand-internal 4px) */
-.isl-brand{display:flex;align-items:center;gap:9px;padding:calc(env(safe-area-inset-top) + 10px) 12px 10px}
+.isl-brand{display:flex;align-items:center;gap:9px;padding:0 12px 10px;overflow:hidden;min-height:0} /* рецепт .bbody (р.~500) 1:1 */
+/* ===== §5-B COLLAPSE-ON-SCROLL (b17) =====
+   Важіль один на обидві механіки: grid-template-rows 1fr→0fr (той самий патерн, що .bwrap р.~500).
+   A (snap)   = клас .shrunk + CSS-transition.
+   B (linked) = .linked гасить transition, JS пише (1-p)fr щокадру.
+   NAME-GUARD: .collapsed/.bwrap зайняті карткою бренду-препарату → тут .isl-head/.shrunk (греп: 0 входжень у b16). */
+.isl-head{display:grid;grid-template-rows:1fr;overflow:hidden;
+  transition:grid-template-rows var(--islCollDur) var(--islCollEase)}
+.isl-head>.isl-brand{transition:opacity var(--islFadeDur) linear,visibility 0s}  /* повернення — миттєве */
+.isl.shrunk .isl-head{grid-template-rows:0fr}
+.isl.shrunk .isl-head>.isl-brand{opacity:0;visibility:hidden;pointer-events:none;
+  transition:opacity var(--islFadeDur) linear,visibility 0s linear var(--islCollDur)} /* ховаємо лише в кінці згортання */
+.isl.linked .isl-head,.isl.linked .isl-head>.isl-brand{transition:none}
+.isl.no-anim,.isl.no-anim .isl-head,.isl.no-anim .isl-head>.isl-brand{transition:none}
+#s-home .isl.shrunk .toparea{padding-top:var(--devCollPadT)}
+#s-home .isl.no-anim .toparea,#s-home .isl.linked .toparea{transition:none}
 /* ⚠️ NAME-GUARD (§3a, b15_2): НЕ перейменовувати назад у `.brand` — база вже має `.brand`
    (р.~430 картка бренду-препарату: cardBg + radius16 + margin + ::before/::after glow/wash).
    Специфічність однакова (0,1,0) → правила МЕРЖАТЬСЯ, не перебиваються → фантомна плита + зсув ряду. */
@@ -412,14 +432,15 @@ a.mi{text-decoration:none;color:inherit}
 .ntile svg{display:block}
 .ntile .bscale{display:grid;place-items:center;transform:scale(1.28)} /* badgeScale */
 /* filter-tier inside island: toparea relocated here → transparent so glass shows through */
-#s-home .isl .toparea{background:transparent;border-bottom:none;padding:10px 0 12px} /* tierPadT/B (valuesLOCK §4) */
+#s-home .isl .toparea{background:transparent;border-bottom:none;padding:10px 0 12px; /* tierPadT/B (valuesLOCK §4) */
+  transition:padding-top var(--islCollDur) var(--islCollEase)}
 .toparea{--chipH:30px;--chipGap:6px;--chipPadX:14px;--chipRad:10px;--searchH:40px;
   padding:10px 0 12px;display:flex;flex-direction:column;gap:0;
   border-bottom:1px solid var(--border-subtle);background:var(--bg)}
 /* ТАЦЯ (γ′) — несе групу bcrow+chiprow+srch. gapBC=gapCH=10 → один flex-gap.
    Ряди зберігають власні 14px → лінія контенту фільтрів = 6+14 = 20px (порт 1:1 зі стендом). */
 .tray{display:flex;flex-direction:column;gap:10px;
-  margin:0 6px;padding:8px 0;border-radius:22px;      /* trayPad 8 → margin 14−8=6 · trayRad 22 (§5.1) */
+  margin:0 6px;padding:8px 0;border-radius:var(--devTrayRad);  /* trayPad 8 → margin 14−8=6 · trayRad 22 (§5.1, ретест у колапсі) */
   background:var(--m-tray-bg);box-shadow:var(--m-tray-sh)}
 /* breadcrumb row: область ▾ ліворуч · лічильник праворуч (нуль додаткової висоти) */
 .bcrow{display:flex;align-items:center;gap:8px;padding:0 14px}
@@ -819,6 +840,7 @@ a.mi{text-decoration:none;color:inherit}
       </div>
       <!-- StockCheck island (Route 1 overlay · glass sits over scroll-content) -->
       <div class="isl" id="homeIsland">
+       <div class="isl-head" id="islHead">
         <div class="isl-brand">
           <div class="sc-brand">
             <span class="sc-ic"><svg class="sc-comet" width="34" height="34" viewBox="0 0 48 48" aria-hidden="true"><defs><linearGradient id="scComet" gradientUnits="userSpaceOnUse" x1="39.91" y1="25.67" x2="32.95" y2="10.74"><stop offset="0" stop-color="var(--comet-a)"/><stop offset="1" stop-color="var(--comet-b)"/></linearGradient></defs><path d="M43.00 26.00L41.70 30.76L39.24 34.99L35.80 38.42L31.63 40.83L27.02 42.07L22.29 42.09L17.75 40.90L13.70 38.59L10.42 35.36L8.09 31.42L6.87 27.05L6.82 22.56L7.91 18.24L10.06 14.39L13.11 11.24L16.82 9.01L20.94 7.82L25.19 7.73L29.29 8.73L32.95 10.74L32.95 10.74L29.18 9.03L25.15 8.35L21.12 8.74L17.35 10.13L14.11 12.42L11.60 15.44L9.96 18.97L9.29 22.76L9.62 26.56L10.90 30.11L13.03 33.17L15.85 35.55L19.15 37.12L22.70 37.77L26.26 37.49L29.59 36.31L32.47 34.34L34.71 31.73L36.20 28.66L36.83 25.35Z" fill="url(#scComet)"/><path d="M17.5 25l4.7 4.7L32 18.5" fill="none" stroke="var(--text)" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
@@ -831,6 +853,7 @@ a.mi{text-decoration:none;color:inherit}
             <button class="isl-menu pressable" aria-label="Меню" onclick="openSheet()"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.95"/><circle cx="12" cy="12" r="1.95"/><circle cx="19" cy="12" r="1.95"/></svg></button>
           </div>
         </div>
+       </div>
         <!-- Node 5 · TopArea (§5.3) — relocated INSIDE island as collapsing filter-tier -->
         <div class="toparea" id="toparea"></div>
       </div>
@@ -1138,7 +1161,7 @@ const LAYOUT={
 const OTC_BRANDS=['strep','nuro','gavis'];
 const IW_BRANDS=['durex','contex','evi'];
 
-const APP_BUILD = { ver:'v2.7.0', build:'stockcheck-island.b16', date:'24.07.2026' }; // wsd 10.6 — MATERIALITY γ′ port (tray + per-family material, valuesLOCK)
+const APP_BUILD = { ver:'v2.8.0', build:'stockcheck-collapse.b17', date:'24.07.2026' }; // wsd 10.6 — §5-B collapse-on-scroll + dev-panel (A/B арбітраж)
 const NETWORK = { name:'Фармастор', tagline:'інструмент залишків', tg:'t.me/Konst_Andre' };
 const ORDER_FORM_URL = 'https://rbcom-my.sharepoint.com/:x:/r/personal/yuliia_syniuhina_reckitt_com/_layouts/15/Doc.aspx?sourcedoc=%7B361AB6BF-2AE9-410C-A81F-2AA3502C4EAD%7D&file=%25u0424%25u0430%25u0440%25u043c%25u0430%25u0441%25u0442%25u043e%25u0440%20%25u0437%25u0430%25u043c%25u043e%25u0432%25u043b%25u0435%25u043d%25u043d%25u044f%20%25u0442%25u0442.xlsx&wdLOR=c06833412-A6C7-4B15-AE95-76BCF4AB9FD6&openShare=true&fromShare=true&action=default&mobileredirect=true';
 const MSL_BY_K={}; MSL.forEach(function(s){MSL_BY_K[s.k]=s;});
@@ -1910,13 +1933,205 @@ function openCmp(px){
   });
 }
 
-/* ===== StockCheck island · spacer plumbing (Stage 1 shell; collapse = Stage 3) ===== */
+/* ═══════════════════════════════════════════════════════════════════════════
+   §5-B COLLAPSE-ON-SCROLL (b17) · FINDINGS §5-B (модель залочена device v2)
+
+   ⚠️ SPACER НЕ ЗАЛЕЖИТЬ ВІД ВИСОТИ ОСТРІВЦЯ (виправлено проти b16).
+   b16 робив sp.height = isl.offsetHeight+10 через ResizeObserver на самому
+   острівці. З колапсом це петля: острівець коротшає → RO смикає spacer →
+   reflow 14 карток щокадру = корінь 14.20 (30–40 ms).
+   b17: spacer рахується з ІНВАРІАНТІВ (padT + headH + tierH + border),
+   виміряних у РОЗГОРНУТОМУ стані → колапс на нього не впливає взагалі.
+
+   §4-port-1 · defense-in-depth (4 шари):
+   (a) clamp        — Math.max(0,…) на читанні + clamp p у [0,1]  ✓ нижче
+   (b) overscroll   — .home-scroll{overscroll-behavior:none}       ✓ CSS р.~127
+   (c) чистий rest  — механіка A не пише inline ВЗАГАЛІ; B чистить при p<=0 ✓
+   (d) frame-gap    — вимірювач у дев-панелі, рішення по ms на девайсі
+   ═══════════════════════════════════════════════════════════════════════════ */
+var ISLC=(function(){
+  var isl=document.getElementById('homeIsland'),
+      sp =document.getElementById('islSpacer'),
+      head=document.getElementById('islHead'),
+      SC =document.getElementById('homeScroll'),
+      ta =document.getElementById('toparea');
+  if(!isl||!sp||!head||!SC||!ta)return null;
+  var brand=head.querySelector('.isl-brand');
+  var SH='shrunk', LK='linked', NA='no-anim', GAP=10;
+
+  var D={mech:'A', thIn:56, thOut:10, range:56, dur:240, fade:140,
+         ease:'cubic-bezier(.32,.72,0,1)', padT:10, trayRad:22};
+  var C={padT:0, headH:0, tierH:0, bord:0, expH:0};
+  var shr=false, ticking=false;
+
+  function clearInline(){ head.style.gridTemplateRows=''; brand.style.opacity=''; brand.style.visibility=''; }
+  function setShr(v){ if(shr===v)return; shr=v; isl.classList.toggle(SH,v); }
+
+  /* --- вимір інваріантів: тимчасово знімаємо колапс БЕЗ анімації (патерн cap-no-anim, A56) --- */
+  function remeasure(){
+    var wasSh=isl.classList.contains(SH), inl=head.style.gridTemplateRows;
+    if(wasSh||inl){ isl.classList.add(NA); isl.classList.remove(SH); head.style.gridTemplateRows=''; }
+    var cs=getComputedStyle(isl);
+    C.padT =parseFloat(cs.paddingTop)||0;
+    C.bord =(parseFloat(cs.borderTopWidth)||0)+(parseFloat(cs.borderBottomWidth)||0);
+    C.headH=head.offsetHeight;
+    C.tierH=ta.offsetHeight;
+    C.expH =C.padT+C.headH+C.tierH+C.bord;
+    sp.style.height=(C.expH+GAP)+'px';
+    if(wasSh) isl.classList.add(SH);
+    if(inl)   head.style.gridTemplateRows=inl;
+    if(wasSh||inl){ void isl.offsetWidth; isl.classList.remove(NA); }
+  }
+
+  function apply(){
+    ticking=false;
+    var st=Math.max(0, SC.scrollTop);                     /* шар (a) — rubber-band не пускаємо в мінус */
+    if(D.mech==='A'){
+      if(!shr && st>D.thIn)       setShr(true);
+      else if(shr && st<D.thOut)  setShr(false);
+    }else{
+      var p=Math.max(0, Math.min(1, st/Math.max(1,D.range)));   /* шар (a) — clamp у [0,1] */
+      if(p<=0){ clearInline(); }                                /* шар (c) — чистий rest */
+      else{
+        head.style.gridTemplateRows=(1-p).toFixed(4)+'fr';
+        brand.style.opacity=Math.max(0,1-p*1.6).toFixed(3);
+        brand.style.visibility=(p>=1?'hidden':'visible');
+      }
+    }
+  }
+  function onScroll(){ if(ticking)return; ticking=true; requestAnimationFrame(apply); }
+
+  /* короткий список → колапс недосяжний і не має лишатись залипшим */
+  function guard(){ if(SC.scrollHeight-SC.clientHeight<24){ setShr(false); clearInline(); } }
+  function reset(){ SC.scrollTop=0; setShr(false); clearInline(); }
+
+  function setMech(m){
+    D.mech=m; isl.classList.toggle(LK, m==='B');
+    isl.classList.add(NA); setShr(false); clearInline();
+    void isl.offsetWidth; isl.classList.remove(NA);
+    apply();
+  }
+  function vars(){
+    var r=document.documentElement.style;
+    r.setProperty('--islCollDur', D.dur+'ms');
+    r.setProperty('--islFadeDur', D.fade+'ms');
+    r.setProperty('--islCollEase', D.ease);
+    r.setProperty('--devTrayRad', D.trayRad+'px');
+    r.setProperty('--devCollPadT', D.padT+'px');
+    remeasure();
+  }
+
+  SC.addEventListener('scroll', onScroll, {passive:true});
+  window.addEventListener('resize', function(){ remeasure(); apply(); });
+  window.addEventListener('orientationchange', function(){ setTimeout(function(){remeasure();apply();},250); });
+  window.addEventListener('load', function(){ remeasure(); guard(); });
+  if('ResizeObserver' in window){ new ResizeObserver(function(){ remeasure(); }).observe(ta); }
+  remeasure();
+
+  return {D:D, C:C, SC:SC, isl:isl, remeasure:remeasure, apply:apply,
+          guard:guard, reset:reset, setMech:setMech, vars:vars};
+})();
+
+/* ═══════════ DEV-PANEL START — знімається перед ship (шукати DEV-PANEL START/END) ═══════════ */
 (function(){
-  const isl=document.getElementById('homeIsland'), sp=document.getElementById('islSpacer');
-  if(!isl||!sp)return;
-  const sync=()=>{ sp.style.height=(isl.offsetHeight+10)+'px'; };
-  if('ResizeObserver' in window){ new ResizeObserver(sync).observe(isl); }
-  window.addEventListener('load',sync); window.addEventListener('resize',sync); sync();
+  if(!ISLC)return;
+  var D=ISLC.D, css=document.createElement('style');
+  css.textContent=
+  '#devH{position:fixed;left:10px;bottom:calc(env(safe-area-inset-bottom) + 10px);z-index:999;'+
+   'width:30px;height:30px;border-radius:9px;border:1px solid rgba(127,127,127,.5);'+
+   'background:rgba(20,30,26,.72);color:#cfe;font:700 14px/1 system-ui;display:grid;place-items:center;opacity:.55}'+
+  '#devP{position:fixed;left:12px;right:12px;bottom:calc(env(safe-area-inset-bottom) + 46px);z-index:998;'+
+   'display:none;max-height:46dvh;overflow:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;'+
+   'background:#101a16;color:#dfeee8;border:1px solid #2c3f38;border-radius:14px;padding:10px 12px 12px;'+
+   'font:600 11.5px/1.35 ui-monospace,Menlo,monospace;box-shadow:0 10px 30px rgba(0,0,0,.45)}'+
+  '#devP.on{display:block}'+
+  '#devP .rw{display:flex;align-items:center;gap:8px;margin:7px 0}'+
+  '#devP .rw label{flex:0 0 78px;color:#8fb3a8}'+
+  '#devP input[type=range]{flex:1;min-width:0;accent-color:#3ad9a8;height:22px}'+
+  '#devP .v{flex:0 0 46px;text-align:right;color:#7ff0c4}'+
+  '#devP .seg{display:flex;gap:6px;margin:2px 0 8px}'+
+  '#devP .seg button{flex:1;padding:7px 0;border-radius:8px;border:1px solid #2c3f38;background:#17251f;color:#9fc4b8;font:700 12px/1 inherit}'+
+  '#devP .seg button.on{background:#1f6b52;color:#fff;border-color:#2f9a77}'+
+  '#devP .act{display:flex;gap:6px;margin-top:9px}'+
+  '#devP .act button{flex:1;padding:9px 0;border-radius:9px;border:1px solid #2c3f38;background:#17251f;color:#cfe;font:700 12px/1 inherit}'+
+  '#devP .ro{display:flex;gap:10px;margin-top:8px;padding-top:8px;border-top:1px solid #22322c}'+
+  '#devP .ro div{flex:1}#devP .ro b{display:block;color:#7ff0c4;font-size:13px}'+
+  '#devP .ro .warn{color:#ffcf6b}#devP .ro .bad{color:#ff8b7a}'+
+  '#devP h5{margin:0 0 6px;color:#5f8478;font-weight:700;letter-spacing:.4px}';
+  document.head.appendChild(css);
+
+  var SL=[['thIn','поріг ↓',10,140,1],['thOut','поріг ↑',2,60,1],['range','range (B)',20,140,1],
+          ['dur','dur ms',100,600,10],['fade','fade ms',60,400,10],
+          ['trayRad','trayRad',10,28,1],['padT','collPadT',0,16,1]];
+  var EAS=[['iOS','cubic-bezier(.32,.72,0,1)'],['ease-out','cubic-bezier(.25,.8,.35,1)'],['spring','cubic-bezier(.34,1.28,.64,1)']];
+
+  var p=document.createElement('div'); p.id='devP';
+  var h='<h5>§5-B COLLAPSE · dev</h5><div class="seg" id="dvMech">'+
+        '<button data-m="A" class="on">A · snap</button><button data-m="B">B · linked</button></div>'+
+        '<div class="seg" id="dvEase">'+EAS.map(function(e,i){return '<button data-e="'+i+'"'+(i?'':' class="on"')+'>'+e[0]+'</button>';}).join('')+'</div>';
+  SL.forEach(function(s){ h+='<div class="rw"><label>'+s[1]+'</label><input type="range" id="dv_'+s[0]+
+      '" min="'+s[2]+'" max="'+s[3]+'" step="'+s[4]+'" value="'+D[s[0]]+'"><span class="v" id="dvv_'+s[0]+'">'+D[s[0]]+'</span></div>'; });
+  h+='<div class="act"><button id="dvFG">▶︎ frame-gap</button><button id="dvCopy">copy</button></div>'+
+     '<div class="ro"><div>max-gap<b id="roGap">—</b></div><div>dropped<b id="roDrop">—</b></div><div>Δ baseline<b id="roDelta">—</b></div></div>';
+  p.innerHTML=h; document.body.appendChild(p);
+  var hb=document.createElement('button'); hb.id='devH'; hb.textContent='⚙'; document.body.appendChild(hb);
+  hb.addEventListener('click',function(){ p.classList.toggle('on'); });
+
+  SL.forEach(function(s){
+    var el=document.getElementById('dv_'+s[0]), out=document.getElementById('dvv_'+s[0]);
+    el.addEventListener('input',function(){ D[s[0]]=+el.value; out.textContent=el.value; ISLC.vars(); ISLC.apply(); });
+  });
+  document.getElementById('dvMech').addEventListener('click',function(e){
+    var b=e.target.closest('button'); if(!b)return;
+    [].forEach.call(this.children,function(c){c.classList.toggle('on',c===b);});
+    ISLC.setMech(b.getAttribute('data-m'));});
+  document.getElementById('dvEase').addEventListener('click',function(e){
+    var b=e.target.closest('button'); if(!b)return;
+    [].forEach.call(this.children,function(c){c.classList.toggle('on',c===b);});
+    D.ease=EAS[+b.getAttribute('data-e')][1]; ISLC.vars();});
+
+  /* frame-gap трійка — порт 1:1 зі StockCheck_materiality_stagebench_v2 (wsd 2.4) */
+  var base=0;
+  function sampleFrames(ms,cb){ var g=[],last=performance.now(),t0=last,n=0;
+    function step(now){ var d=now-last; last=now; n++; if(n>20)g.push(d);
+      if(now-t0<ms)requestAnimationFrame(step); else cb(g);} requestAnimationFrame(step);}
+  document.getElementById('dvFG').addEventListener('click',function(){
+    var btn=this, sc=ISLC.SC; btn.textContent='… baseline';
+    sampleFrames(900,function(g0){
+      base=g0.length?Math.max.apply(null,g0):0; btn.textContent='… скролю';
+      var y=0,dir=1,top=Math.max(1,sc.scrollHeight-sc.clientHeight);
+      var iv=setInterval(function(){ y+=dir*14; if(y>=top){y=top;dir=-1;} if(y<=0){y=0;dir=1;} sc.scrollTop=y; },16);
+      sampleFrames(1800,function(g){
+        clearInterval(iv);
+        var mx=g.length?Math.max.apply(null,g):0, dr=g.filter(function(x){return x>33;}).length;
+        function cl(v,a,b){return v<=a?'':(v<=b?'warn':'bad');}
+        var e1=document.getElementById('roGap'),e2=document.getElementById('roDrop'),e3=document.getElementById('roDelta');
+        e1.textContent=mx.toFixed(1)+'ms'; e1.className=cl(mx,17,33);
+        e2.textContent=dr;                 e2.className=cl(dr,0,2);
+        var dl=mx-base; e3.textContent=(dl>=0?'+':'')+dl.toFixed(1); e3.className=cl(Math.abs(dl),6,16);
+        btn.textContent='▶︎ frame-gap';});});});
+
+  document.getElementById('dvCopy').addEventListener('click',function(){
+    var th=document.documentElement.getAttribute('data-theme')||'auto';
+    var s='StockCheck §5-B collapse · b17 · theme='+th+'\n'+
+      'mech='+D.mech+' thIn='+D.thIn+' thOut='+D.thOut+' range='+D.range+'\n'+
+      'dur='+D.dur+'ms fade='+D.fade+'ms ease='+D.ease+'\n'+
+      'trayRad='+D.trayRad+' collPadT='+D.padT+'\n'+
+      'headH='+ISLC.C.headH+' tierH='+ISLC.C.tierH+' expH='+ISLC.C.expH+'\n'+
+      'frame-gap: '+document.getElementById('roGap').textContent+
+      ' · dropped '+document.getElementById('roDrop').textContent+
+      ' · Δ '+document.getElementById('roDelta').textContent;
+    try{navigator.clipboard.writeText(s);}catch(e){}
+    this.textContent='copied ✓'; var b=this; setTimeout(function(){b.textContent='copy';},1200);});
+})();
+/* ═══════════ DEV-PANEL END ═══════════ */
+
+/* хуки в наявні функції — без правки їхніх тіл (10.7: інтерфейс, не переписування) */
+(function(){
+  if(!ISLC)return;
+  var _rh=renderHome; renderHome=function(){ _rh.apply(this,arguments); ISLC.guard(); };
+  var _rt=renderTop;  renderTop =function(){ _rt.apply(this,arguments);  ISLC.remeasure(); };
+  var _sh=show;       show      =function(id){ _sh.apply(this,arguments); if(id==='s-home')ISLC.reset(); };
 })();
 
 </script>
