@@ -405,8 +405,13 @@ a.mi{text-decoration:none;color:inherit}
 .isl.shrunk .isl-head{grid-template-rows:0fr}
 .isl.shrunk .isl-head>.isl-brand{opacity:0;visibility:hidden;pointer-events:none;
   transition:opacity var(--islFadeDur) linear,visibility 0s linear var(--islCollDur)} /* ховаємо лише в кінці згортання */
-.isl.linked .isl-head,.isl.linked .isl-head>.isl-brand,
-.isl.slide .isl-head,.isl.slide .isl-head>.isl-brand{transition:none} /* b17_3: у C opacity пишеться щокадру — транзиція на ній мусить бути мертва */
+.isl.linked .isl-head,.isl.linked .isl-head>.isl-brand{transition:none}
+.isl.slide .isl-head{transition:none}   /* у C головка не рухається — транзиція мертва в будь-якому режимі */
+/* b17_4: транзиція opacity бренду — ОДНОЧАСНО вартість і композиторний згладжувач
+   рваного scroll-потоку iOS. Гасимо її лише там, де згладжування не треба (none)
+   або де його робить JS (damp). У режимі css вона жива → слайдер fade знову живий. */
+.isl.slide.sm-none .isl-head>.isl-brand,
+.isl.slide.sm-damp .isl-head>.isl-brand{transition:none}
 .isl.no-anim,.isl.no-anim .isl-head,.isl.no-anim .isl-head>.isl-brand{transition:none}
 #s-home .isl.shrunk .toparea{padding-top:var(--devCollPadT)}
 #s-home .isl.no-anim .toparea,#s-home .isl.linked .toparea{transition:none}
@@ -1170,7 +1175,7 @@ const LAYOUT={
 const OTC_BRANDS=['strep','nuro','gavis'];
 const IW_BRANDS=['durex','contex','evi'];
 
-const APP_BUILD = { ver:'v2.8.2', build:'stockcheck-collapse.b17_3', date:'24.07.2026' }; // wsd 10.6 — §5-B collapse-on-scroll + dev-panel (A/B арбітраж)
+const APP_BUILD = { ver:'v2.8.3', build:'stockcheck-collapse.b17_4', date:'24.07.2026' }; // wsd 10.6 — §5-B collapse-on-scroll + dev-panel (A/B арбітраж)
 const NETWORK = { name:'Фармастор', tagline:'інструмент залишків', tg:'t.me/Konst_Andre' };
 const ORDER_FORM_URL = 'https://rbcom-my.sharepoint.com/:x:/r/personal/yuliia_syniuhina_reckitt_com/_layouts/15/Doc.aspx?sourcedoc=%7B361AB6BF-2AE9-410C-A81F-2AA3502C4EAD%7D&file=%25u0424%25u0430%25u0440%25u043c%25u0430%25u0441%25u0442%25u043e%25u0440%20%25u0437%25u0430%25u043c%25u043e%25u0432%25u043b%25u0435%25u043d%25u043d%25u044f%20%25u0442%25u0442.xlsx&wdLOR=c06833412-A6C7-4B15-AE95-76BCF4AB9FD6&openShare=true&fromShare=true&action=default&mobileredirect=true';
 const MSL_BY_K={}; MSL.forEach(function(s){MSL_BY_K[s.k]=s;});
@@ -1969,7 +1974,8 @@ var ISLC=(function(){
   var SH='shrunk', LK='linked', NA='no-anim', GAP=10;
 
   var D={mech:'A', thIn:56, thOut:10, range:56, dur:240, fade:140,
-         ease:'cubic-bezier(.32,.72,0,1)', padT:10, trayRad:22, msh:false};
+         ease:'cubic-bezier(.32,.72,0,1)', padT:10, trayRad:22, msh:false,
+         smooth:'css', kPct:28, fmulPct:160};   /* b17_4 · згладжування C */
   var C={padT:0, headH:0, tierH:0, bord:0, expH:0};
   var shr=false, ticking=false, moving=false;
 
@@ -1989,6 +1995,30 @@ var ISLC=(function(){
     isl.style.transform=''; setMotion(false);
   }
   function setShr(v){ if(shr===v)return; shr=v; isl.classList.toggle(SH,v); setMotion(true); }
+
+  /* ── b17_4 · SMOOTH (важіль, не дизайн) ────────────────────────────────────
+     none — сире значення щокадру (= b17_3): найдешевше, найрваніше
+     css  — транзиція opacity на композиторі (= b17_2): згладжує ЛИШЕ бренд
+     damp — rAF-демпфер у JS: curP += (tgtP−curP)*k — згладжує І зсув, І бренд
+     Підстава: прилад frame-gap крутить скрол ПРОГРАМНО → інерційної коалесенції
+     scroll-івентів iOS не відтворює. Плавність арбітрує око, ціну — прилад. */
+  var tgtP=0, curP=0, rafD=0;
+  function writeC(p){
+    if(p<=0){ clearInline(); return; }                       /* шар (c) — чистий rest */
+    var dC=C.headH||54;
+    setMotion(p<1);
+    isl.style.transform='translate3d(0,'+(-dC*p).toFixed(2)+'px,0)';
+    brand.style.opacity=Math.max(0,1-p*(D.fmulPct/100)).toFixed(3);
+    brand.style.visibility=(p>=.999?'hidden':'visible');
+  }
+  function dampStep(){
+    rafD=0;
+    var d=tgtP-curP;
+    if(Math.abs(d)<0.0015){ curP=tgtP; }
+    else{ curP+=d*(D.kPct/100); rafD=requestAnimationFrame(dampStep); }
+    writeC(curP);
+  }
+  function resetDamp(){ if(rafD){cancelAnimationFrame(rafD); rafD=0;} tgtP=0; curP=0; }
 
   /* --- вимір інваріантів: тимчасово знімаємо колапс БЕЗ анімації (патерн cap-no-anim, A56) --- */
   function remeasure(){
@@ -2014,14 +2044,9 @@ var ISLC=(function(){
       else if(shr && st<D.thOut)  setShr(false);
     }else if(D.mech==='C'){
       /* Δ = headH точно: після зсуву верх яруса лягає рівно на safe-area+10, зазор 10px зберігається */
-      var dC=C.headH||54, pC=Math.max(0, Math.min(1, st/dC));   /* шар (a) — clamp у [0,1] */
-      if(pC<=0){ clearInline(); }                               /* шар (c) — чистий rest */
-      else{
-        setMotion(pC<1);
-        isl.style.transform='translate3d(0,'+(-dC*pC).toFixed(2)+'px,0)';
-        brand.style.opacity=Math.max(0,1-pC*1.6).toFixed(3);
-        brand.style.visibility=(pC>=.999?'hidden':'visible');
-      }
+      tgtP=Math.max(0, Math.min(1, st/(C.headH||54)));           /* шар (a) — clamp у [0,1] */
+      if(D.smooth==='damp'){ if(!rafD) rafD=requestAnimationFrame(dampStep); }
+      else{ if(rafD){cancelAnimationFrame(rafD); rafD=0;} curP=tgtP; writeC(tgtP); }
     }else{
       var p=Math.max(0, Math.min(1, st/Math.max(1,D.range)));    /* шар (a) — clamp у [0,1] */
       if(p<=0){ clearInline(); }                                /* шар (c) — чистий rest */
@@ -2037,15 +2062,22 @@ var ISLC=(function(){
 
   /* короткий список → колапс недосяжний і не має лишатись залипшим */
   function guard(){ if(SC.scrollHeight-SC.clientHeight<24){ setShr(false); clearInline(); } }
-  function reset(){ SC.scrollTop=0; setShr(false); clearInline(); }
+  function reset(){ SC.scrollTop=0; setShr(false); resetDamp(); clearInline(); }
 
   function setMech(m){
     D.mech=m;
     isl.classList.toggle(LK, m==='B');
     isl.classList.toggle('slide', m==='C');
-    isl.classList.add(NA); setShr(false); clearInline();
+    isl.classList.add(NA); setShr(false); resetDamp(); clearInline();
     void isl.offsetWidth; isl.classList.remove(NA);
     apply();
+  }
+  function setSmooth(s){
+    D.smooth=s;
+    isl.classList.toggle('sm-none', s==='none');
+    isl.classList.toggle('sm-css',  s==='css');
+    isl.classList.toggle('sm-damp', s==='damp');
+    resetDamp(); clearInline(); apply();
   }
   /* A: вікно motion закривається, коли транзиція головки добігла */
   head.addEventListener('transitionend',function(e){
@@ -2067,9 +2099,10 @@ var ISLC=(function(){
   window.addEventListener('load', function(){ remeasure(); guard(); });
   if('ResizeObserver' in window){ new ResizeObserver(function(){ remeasure(); }).observe(ta); }
   remeasure();
+  setSmooth(D.smooth);
 
   return {D:D, C:C, SC:SC, isl:isl, remeasure:remeasure, apply:apply,
-          guard:guard, reset:reset, setMech:setMech, vars:vars};
+          guard:guard, reset:reset, setMech:setMech, setSmooth:setSmooth, vars:vars};
 })();
 
 /* ═══════════ DEV-PANEL START — знімається перед ship (шукати DEV-PANEL START/END) ═══════════ */
@@ -2102,6 +2135,7 @@ var ISLC=(function(){
 
   var SL=[['thIn','поріг ↓',10,140,1],['thOut','поріг ↑',2,60,1],['range','range (B)',20,140,1],
           ['dur','dur ms',100,600,10],['fade','fade ms',60,400,10],
+          ['kPct','damp k %',8,60,1],['fmulPct','fade mult %',100,220,5],
           ['trayRad','trayRad',10,28,1],['padT','collPadT',0,16,1]];
   var EAS=[['iOS','cubic-bezier(.32,.72,0,1)'],['ease-out','cubic-bezier(.25,.8,.35,1)'],['spring','cubic-bezier(.34,1.28,.64,1)']];
 
@@ -2109,6 +2143,8 @@ var ISLC=(function(){
   var h='<h5>§5-B COLLAPSE · dev</h5><div class="seg" id="dvMech">'+
         '<button data-m="A" class="on">A · snap</button><button data-m="B">B · linked</button>'+
         '<button data-m="C">C · slide</button></div>'+
+        '<div class="seg" id="dvSm"><button data-s="none">none</button>'+
+        '<button data-s="css" class="on">css</button><button data-s="damp">damp</button></div>'+
         '<div class="seg" id="dvEase">'+EAS.map(function(e,i){return '<button data-e="'+i+'"'+(i?'':' class="on"')+'>'+e[0]+'</button>';}).join('')+'</div>'+
         '<div class="seg" id="dvMsh"><button data-s="0" class="on">тіні в русі: ON</button>'+
         '<button data-s="1">OFF (діагностика)</button></div>';
@@ -2128,6 +2164,10 @@ var ISLC=(function(){
     var b=e.target.closest('button'); if(!b)return;
     [].forEach.call(this.children,function(c){c.classList.toggle('on',c===b);});
     ISLC.setMech(b.getAttribute('data-m'));});
+  document.getElementById('dvSm').addEventListener('click',function(e){
+    var b=e.target.closest('button'); if(!b)return;
+    [].forEach.call(this.children,function(c){c.classList.toggle('on',c===b);});
+    ISLC.setSmooth(b.getAttribute('data-s'));});
   document.getElementById('dvMsh').addEventListener('click',function(e){
     var b=e.target.closest('button'); if(!b)return;
     [].forEach.call(this.children,function(c){c.classList.toggle('on',c===b);});
@@ -2160,9 +2200,10 @@ var ISLC=(function(){
 
   document.getElementById('dvCopy').addEventListener('click',function(){
     var th=document.documentElement.getAttribute('data-theme')||'auto';
-    var s='StockCheck §5-B collapse · b17 · theme='+th+'\n'+
+    var s='StockCheck §5-B collapse · b17_4 · theme='+th+'\n'+
       'mech='+D.mech+' thIn='+D.thIn+' thOut='+D.thOut+' range='+D.range+'\n'+
       'dur='+D.dur+'ms fade='+D.fade+'ms ease='+D.ease+'\n'+
+      'smooth='+D.smooth+' k='+(D.kPct/100).toFixed(2)+' fmul='+(D.fmulPct/100).toFixed(2)+'\n'+
       'trayRad='+D.trayRad+' collPadT='+D.padT+' msh='+(D.msh?'OFF-shadows':'ON')+'\n'+
       'headH='+ISLC.C.headH+' tierH='+ISLC.C.tierH+' expH='+ISLC.C.expH+'\n'+
       'frame-gap: '+document.getElementById('roGap').textContent+
