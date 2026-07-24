@@ -405,7 +405,8 @@ a.mi{text-decoration:none;color:inherit}
 .isl.shrunk .isl-head{grid-template-rows:0fr}
 .isl.shrunk .isl-head>.isl-brand{opacity:0;visibility:hidden;pointer-events:none;
   transition:opacity var(--islFadeDur) linear,visibility 0s linear var(--islCollDur)} /* ховаємо лише в кінці згортання */
-.isl.linked .isl-head,.isl.linked .isl-head>.isl-brand{transition:none}
+.isl.linked .isl-head,.isl.linked .isl-head>.isl-brand,
+.isl.slide .isl-head,.isl.slide .isl-head>.isl-brand{transition:none} /* b17_3: у C opacity пишеться щокадру — транзиція на ній мусить бути мертва */
 .isl.no-anim,.isl.no-anim .isl-head,.isl.no-anim .isl-head>.isl-brand{transition:none}
 #s-home .isl.shrunk .toparea{padding-top:var(--devCollPadT)}
 #s-home .isl.no-anim .toparea,#s-home .isl.linked .toparea{transition:none}
@@ -1169,7 +1170,7 @@ const LAYOUT={
 const OTC_BRANDS=['strep','nuro','gavis'];
 const IW_BRANDS=['durex','contex','evi'];
 
-const APP_BUILD = { ver:'v2.8.1', build:'stockcheck-collapse.b17_2', date:'24.07.2026' }; // wsd 10.6 — §5-B collapse-on-scroll + dev-panel (A/B арбітраж)
+const APP_BUILD = { ver:'v2.8.2', build:'stockcheck-collapse.b17_3', date:'24.07.2026' }; // wsd 10.6 — §5-B collapse-on-scroll + dev-panel (A/B арбітраж)
 const NETWORK = { name:'Фармастор', tagline:'інструмент залишків', tg:'t.me/Konst_Andre' };
 const ORDER_FORM_URL = 'https://rbcom-my.sharepoint.com/:x:/r/personal/yuliia_syniuhina_reckitt_com/_layouts/15/Doc.aspx?sourcedoc=%7B361AB6BF-2AE9-410C-A81F-2AA3502C4EAD%7D&file=%25u0424%25u0430%25u0440%25u043c%25u0430%25u0441%25u0442%25u043e%25u0440%20%25u0437%25u0430%25u043c%25u043e%25u0432%25u043b%25u0435%25u043d%25u043d%25u044f%20%25u0442%25u0442.xlsx&wdLOR=c06833412-A6C7-4B15-AE95-76BCF4AB9FD6&openShare=true&fromShare=true&action=default&mobileredirect=true';
 const MSL_BY_K={}; MSL.forEach(function(s){MSL_BY_K[s.k]=s;});
