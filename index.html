@@ -409,6 +409,14 @@ a.mi{text-decoration:none;color:inherit}
 .isl.no-anim,.isl.no-anim .isl-head,.isl.no-anim .isl-head>.isl-brand{transition:none}
 #s-home .isl.shrunk .toparea{padding-top:var(--devCollPadT)}
 #s-home .isl.no-anim .toparea,#s-home .isl.linked .toparea{transition:none}
+/* ── C · SLIDE: скло їде цілим шаром (translate3d), геометрії не чіпаємо ──
+   Спец підтверджує: звичайні трансформи НЕ утворюють backdrop-root, скло виживає.
+   ⚠️ opacity<1 на .isl або ВИЩЕ обрізало б скло — гасити можна лише ВСЕРЕДИНІ (бренд). */
+.isl.slide .isl-head{grid-template-rows:1fr}      /* у C головка не стискається взагалі */
+/* діагностичний важіль (НЕ дизайн): гасить drop-тіні контролів у русі, лише світла тема.
+   Питання, на яке відповідає: чи справді тіні = вартість? Якщо так — робимо їх на ::after (opacity). */
+.isl.motion.msh .bc,.isl.motion.msh .chip,.isl.motion.msh .netbtn,
+.isl.motion.msh .isl-menu,.isl.motion.msh .ntile{box-shadow:none}
 /* ⚠️ NAME-GUARD (§3a, b15_2): НЕ перейменовувати назад у `.brand` — база вже має `.brand`
    (р.~430 картка бренду-препарату: cardBg + radius16 + margin + ::before/::after glow/wash).
    Специфічність однакова (0,1,0) → правила МЕРЖАТЬСЯ, не перебиваються → фантомна плита + зсув ряду. */
@@ -1161,7 +1169,7 @@ const LAYOUT={
 const OTC_BRANDS=['strep','nuro','gavis'];
 const IW_BRANDS=['durex','contex','evi'];
 
-const APP_BUILD = { ver:'v2.8.0', build:'stockcheck-collapse.b17', date:'24.07.2026' }; // wsd 10.6 — §5-B collapse-on-scroll + dev-panel (A/B арбітраж)
+const APP_BUILD = { ver:'v2.8.1', build:'stockcheck-collapse.b17_2', date:'24.07.2026' }; // wsd 10.6 — §5-B collapse-on-scroll + dev-panel (A/B арбітраж)
 const NETWORK = { name:'Фармастор', tagline:'інструмент залишків', tg:'t.me/Konst_Andre' };
 const ORDER_FORM_URL = 'https://rbcom-my.sharepoint.com/:x:/r/personal/yuliia_syniuhina_reckitt_com/_layouts/15/Doc.aspx?sourcedoc=%7B361AB6BF-2AE9-410C-A81F-2AA3502C4EAD%7D&file=%25u0424%25u0430%25u0440%25u043c%25u0430%25u0441%25u0442%25u043e%25u0440%20%25u0437%25u0430%25u043c%25u043e%25u0432%25u043b%25u0435%25u043d%25u043d%25u044f%20%25u0442%25u0442.xlsx&wdLOR=c06833412-A6C7-4B15-AE95-76BCF4AB9FD6&openShare=true&fromShare=true&action=default&mobileredirect=true';
 const MSL_BY_K={}; MSL.forEach(function(s){MSL_BY_K[s.k]=s;});
@@ -1960,12 +1968,26 @@ var ISLC=(function(){
   var SH='shrunk', LK='linked', NA='no-anim', GAP=10;
 
   var D={mech:'A', thIn:56, thOut:10, range:56, dur:240, fade:140,
-         ease:'cubic-bezier(.32,.72,0,1)', padT:10, trayRad:22};
+         ease:'cubic-bezier(.32,.72,0,1)', padT:10, trayRad:22, msh:false};
   var C={padT:0, headH:0, tierH:0, bord:0, expH:0};
-  var shr=false, ticking=false;
+  var shr=false, ticking=false, moving=false;
 
-  function clearInline(){ head.style.gridTemplateRows=''; brand.style.opacity=''; brand.style.visibility=''; }
-  function setShr(v){ if(shr===v)return; shr=v; isl.classList.toggle(SH,v); }
+  function isLight(){
+    var t=document.documentElement.getAttribute('data-theme');
+    if(t==='light')return true; if(t==='dark')return false;
+    return !(window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches);
+  }
+  /* .motion — вікно, у якому діє діагностичний важіль тіней (msh лише на світлій) */
+  function setMotion(v){
+    if(moving===v)return; moving=v;
+    isl.classList.toggle('motion',v);
+    isl.classList.toggle('msh', !!(v&&D.msh&&isLight()));
+  }
+  function clearInline(){
+    head.style.gridTemplateRows=''; brand.style.opacity=''; brand.style.visibility='';
+    isl.style.transform=''; setMotion(false);
+  }
+  function setShr(v){ if(shr===v)return; shr=v; isl.classList.toggle(SH,v); setMotion(true); }
 
   /* --- вимір інваріантів: тимчасово знімаємо колапс БЕЗ анімації (патерн cap-no-anim, A56) --- */
   function remeasure(){
@@ -1989,10 +2011,21 @@ var ISLC=(function(){
     if(D.mech==='A'){
       if(!shr && st>D.thIn)       setShr(true);
       else if(shr && st<D.thOut)  setShr(false);
+    }else if(D.mech==='C'){
+      /* Δ = headH точно: після зсуву верх яруса лягає рівно на safe-area+10, зазор 10px зберігається */
+      var dC=C.headH||54, pC=Math.max(0, Math.min(1, st/dC));   /* шар (a) — clamp у [0,1] */
+      if(pC<=0){ clearInline(); }                               /* шар (c) — чистий rest */
+      else{
+        setMotion(pC<1);
+        isl.style.transform='translate3d(0,'+(-dC*pC).toFixed(2)+'px,0)';
+        brand.style.opacity=Math.max(0,1-pC*1.6).toFixed(3);
+        brand.style.visibility=(pC>=.999?'hidden':'visible');
+      }
     }else{
-      var p=Math.max(0, Math.min(1, st/Math.max(1,D.range)));   /* шар (a) — clamp у [0,1] */
+      var p=Math.max(0, Math.min(1, st/Math.max(1,D.range)));    /* шар (a) — clamp у [0,1] */
       if(p<=0){ clearInline(); }                                /* шар (c) — чистий rest */
       else{
+        setMotion(p<1);
         head.style.gridTemplateRows=(1-p).toFixed(4)+'fr';
         brand.style.opacity=Math.max(0,1-p*1.6).toFixed(3);
         brand.style.visibility=(p>=1?'hidden':'visible');
@@ -2006,11 +2039,17 @@ var ISLC=(function(){
   function reset(){ SC.scrollTop=0; setShr(false); clearInline(); }
 
   function setMech(m){
-    D.mech=m; isl.classList.toggle(LK, m==='B');
+    D.mech=m;
+    isl.classList.toggle(LK, m==='B');
+    isl.classList.toggle('slide', m==='C');
     isl.classList.add(NA); setShr(false); clearInline();
     void isl.offsetWidth; isl.classList.remove(NA);
     apply();
   }
+  /* A: вікно motion закривається, коли транзиція головки добігла */
+  head.addEventListener('transitionend',function(e){
+    if(e.propertyName==='grid-template-rows') setMotion(false);
+  });
   function vars(){
     var r=document.documentElement.style;
     r.setProperty('--islCollDur', D.dur+'ms');
@@ -2067,8 +2106,11 @@ var ISLC=(function(){
 
   var p=document.createElement('div'); p.id='devP';
   var h='<h5>§5-B COLLAPSE · dev</h5><div class="seg" id="dvMech">'+
-        '<button data-m="A" class="on">A · snap</button><button data-m="B">B · linked</button></div>'+
-        '<div class="seg" id="dvEase">'+EAS.map(function(e,i){return '<button data-e="'+i+'"'+(i?'':' class="on"')+'>'+e[0]+'</button>';}).join('')+'</div>';
+        '<button data-m="A" class="on">A · snap</button><button data-m="B">B · linked</button>'+
+        '<button data-m="C">C · slide</button></div>'+
+        '<div class="seg" id="dvEase">'+EAS.map(function(e,i){return '<button data-e="'+i+'"'+(i?'':' class="on"')+'>'+e[0]+'</button>';}).join('')+'</div>'+
+        '<div class="seg" id="dvMsh"><button data-s="0" class="on">тіні в русі: ON</button>'+
+        '<button data-s="1">OFF (діагностика)</button></div>';
   SL.forEach(function(s){ h+='<div class="rw"><label>'+s[1]+'</label><input type="range" id="dv_'+s[0]+
       '" min="'+s[2]+'" max="'+s[3]+'" step="'+s[4]+'" value="'+D[s[0]]+'"><span class="v" id="dvv_'+s[0]+'">'+D[s[0]]+'</span></div>'; });
   h+='<div class="act"><button id="dvFG">▶︎ frame-gap</button><button id="dvCopy">copy</button></div>'+
@@ -2085,6 +2127,10 @@ var ISLC=(function(){
     var b=e.target.closest('button'); if(!b)return;
     [].forEach.call(this.children,function(c){c.classList.toggle('on',c===b);});
     ISLC.setMech(b.getAttribute('data-m'));});
+  document.getElementById('dvMsh').addEventListener('click',function(e){
+    var b=e.target.closest('button'); if(!b)return;
+    [].forEach.call(this.children,function(c){c.classList.toggle('on',c===b);});
+    D.msh=(b.getAttribute('data-s')==='1'); ISLC.apply();});
   document.getElementById('dvEase').addEventListener('click',function(e){
     var b=e.target.closest('button'); if(!b)return;
     [].forEach.call(this.children,function(c){c.classList.toggle('on',c===b);});
@@ -2116,7 +2162,7 @@ var ISLC=(function(){
     var s='StockCheck §5-B collapse · b17 · theme='+th+'\n'+
       'mech='+D.mech+' thIn='+D.thIn+' thOut='+D.thOut+' range='+D.range+'\n'+
       'dur='+D.dur+'ms fade='+D.fade+'ms ease='+D.ease+'\n'+
-      'trayRad='+D.trayRad+' collPadT='+D.padT+'\n'+
+      'trayRad='+D.trayRad+' collPadT='+D.padT+' msh='+(D.msh?'OFF-shadows':'ON')+'\n'+
       'headH='+ISLC.C.headH+' tierH='+ISLC.C.tierH+' expH='+ISLC.C.expH+'\n'+
       'frame-gap: '+document.getElementById('roGap').textContent+
       ' · dropped '+document.getElementById('roDrop').textContent+
