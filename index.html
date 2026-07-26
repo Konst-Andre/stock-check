@@ -409,16 +409,21 @@ a.mi{text-decoration:none;color:inherit}
   background:rgba(245,249,247,.82);
   -webkit-backdrop-filter:blur(12px) saturate(170%);backdrop-filter:blur(12px) saturate(170%);
   border:1px solid rgba(20,50,42,.137);
+  /* b22_2 anchored top edge: ребро стало анкер-швом, не вільним → знімаємо прийоми «вільного ребра».
+     border-top-COLOR, а не border-top:0 — ширина лишається 1px, тож геометрія байт-в-байт та сама
+     і §5-B (head.offsetHeight) не рухається. Фон просвічує крізь прозорий бордер (background-clip:border-box)
+     → шов безшовний в ОБОХ темах. Парний ридж .isl::before видалено (його єдина робота була це ребро). */
+  border-top-color:transparent;
   box-shadow:0 5px 16px -6px rgba(20,50,42,.18),0 2px 6px rgba(20,50,42,.08)}
 [data-theme="dark"] .isl{background:rgba(38,51,46,.82);border-color:rgba(255,255,255,.091);
+  border-top-color:transparent;                        /* b22_2: після shorthand border-color — інакше він перебиває базове правило */
   box-shadow:0 6px 18px -8px rgba(0,0,0,.40)}
-[data-theme="dark"] .isl::before{content:"";position:absolute;inset:0 0 auto 0;height:1px;
-  background:rgba(255,255,255,.06);z-index:2;pointer-events:none} /* A66 dark top-ridge */
+/* b22_2: A66 dark top-ridge ВИДАЛЕНО тут. A66 не скасовано — його передумова «вільне верхнє ребро»
+   більше не виконується (анкер-шов). Ридж лишається валідним для скла з вільним ребром. */
 @media (prefers-color-scheme:dark){
   :root:not([data-theme="light"]) .isl{background:rgba(38,51,46,.82);border-color:rgba(255,255,255,.091);
-    box-shadow:0 6px 18px -8px rgba(0,0,0,.40)}
-  :root:not([data-theme="light"]) .isl::before{content:"";position:absolute;inset:0 0 auto 0;height:1px;
-    background:rgba(255,255,255,.06);z-index:2;pointer-events:none}}
+    border-top-color:transparent;
+    box-shadow:0 6px 18px -8px rgba(0,0,0,.40)}}
 /* brand row — carry-over #2: OWN header-row gap (NOT brand-internal 4px) */
 .isl-brand{display:flex;align-items:center;gap:9px;padding:0 12px 10px;overflow:hidden;min-height:0} /* рецепт .bbody (р.~500) 1:1 */
 /* ===== §5-B COLLAPSE-ON-SCROLL · механіка C (composite slide) · device-lock b17_4 =====
@@ -1210,7 +1215,7 @@ function updBrandMoney(bk){
   setMoney(document.getElementById('bm-'+bk),'fb',brandMoney(bk,tierForBrand(bk,ph),curVals(curPx)));
 }
 
-const APP_BUILD = { ver:'v2.11.0', build:'stockcheck-anchoredtile.b22', date:'26.07.2026' }; // wsd 10.6 — b22: острівець anchored unique-tile (квадратні верх.кути) · іконо-дії хедера 34→38 + хіт-експандер 44pt. (b20/b21 money-home бамп було пропущено — наздогнано тут)
+const APP_BUILD = { ver:'v2.11.1', build:'stockcheck-anchoredtile.b22_2', date:'26.07.2026' }; // wsd 10.6 — b22_2: anchored top edge — A66-ридж + верхній бордер зняті (передумова «вільне ребро» не виконується). b22: квадратні верх.кути · іконо-дії 34→38 + хіт-експандер 44pt
 const NETWORK = { name:'StockCheck', tagline:'інструмент залишків', tg:'t.me/Konst_Andre' };
 const ORDER_FORM_URL = 'https://rbcom-my.sharepoint.com/:x:/r/personal/yuliia_syniuhina_reckitt_com/_layouts/15/Doc.aspx?sourcedoc=%7B361AB6BF-2AE9-410C-A81F-2AA3502C4EAD%7D&file=%25u0424%25u0430%25u0440%25u043c%25u0430%25u0441%25u0442%25u043e%25u0440%20%25u0437%25u0430%25u043c%25u043e%25u0432%25u043b%25u0435%25u043d%25u043d%25u044f%20%25u0442%25u0442.xlsx&wdLOR=c06833412-A6C7-4B15-AE95-76BCF4AB9FD6&openShare=true&fromShare=true&action=default&mobileredirect=true';
 const MSL_BY_K={}; MSL.forEach(function(s){MSL_BY_K[s.k]=s;});
