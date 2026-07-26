@@ -157,6 +157,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);
 .bright{display:inline-flex;align-items:center;gap:2px}
 .bhdr .bcnt{min-width:56px}
 .money{font:700 12px/1 var(--font);font-variant-numeric:tabular-nums;white-space:nowrap;letter-spacing:.1px;padding:2.5px 7px;border-radius:9px;display:inline-flex;align-items:center}
+.money.empty{display:none}
 .money.pos{color:hsl(162 82% 27%);background:color-mix(in srgb,var(--accent-soft) 7%,var(--card));box-shadow:0 1px 2px rgba(20,50,42,.16)}
 .money.neg{color:#c0392b;background:color-mix(in srgb,#eab8b2 7%,var(--card));box-shadow:0 1px 2px rgba(80,20,20,.14)}
 .money.fa.pos{border:1px solid color-mix(in srgb,var(--accent) 37%,transparent)}
@@ -881,8 +882,8 @@ a.mi{text-decoration:none;color:inherit}
           <button class="icon-btn pressable" aria-label="Меню" onclick="openSheet()"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.95"/><circle cx="12" cy="12" r="1.95"/><circle cx="19" cy="12" r="1.95"/></svg></button>
         </div>
         <div class="hdr-sub">
-          <span class="pair fa"><span class="tchip" id="chipOtc">OTC —</span><span class="money fa pos" id="moneyOtc">+0 грн</span></span>
-          <span class="pair fa"><span class="tchip" id="chipIw">IW —</span><span class="money fa pos" id="moneyIw">+0 грн</span></span>
+          <span class="pair fa"><span class="tchip" id="chipOtc">OTC —</span><span class="money fa empty" id="moneyOtc"></span></span>
+          <span class="pair fa"><span class="tchip" id="chipIw">IW —</span><span class="money fa empty" id="moneyIw"></span></span>
         </div>
         <div class="prow">
           <div class="progress"><i id="fillBar"></i></div>
@@ -1179,22 +1180,25 @@ const IW_BRANDS=['durex','contex','evi'];
 /* ===== money-home: реальна арифметика Σ(MSL_ярус − порахував)×p ===== */
 var MONEY_PRICE={}; MSL.forEach(function(s){MONEY_PRICE[s.k]=s.p;});
 function fmtMoney(v){var neg=v<0,a=Math.abs(Math.round(v));return (neg?'\u2212':'+')+a.toLocaleString('uk-UA').replace(/\u00A0/g,' ')+' грн';}
-function moneyCls(fam,v){return 'money '+fam+' '+(v<0?'neg':'pos');}
-function brandMoney(bk,tier,data){var L=LAYOUT[bk],s=0;if(!L)return 0;L.subs.forEach(function(sub){sub.rows.forEach(function(r){s+=(normFor(r.k,tier)-(data[r.k]||0))*(MONEY_PRICE[r.k]||0);});});return s;}
-function catMoney(list,tier,data){var s=0;list.forEach(function(bk){s+=brandMoney(bk,tier,data);});return s;}
+/* рахуємо ЛИШЕ введені SKU (реп відмітив залишок); не введено — не рахуємо */
+function brandMoney(bk,tier,data){var L=LAYOUT[bk],s=0,any=false;if(!L)return {s:0,any:false};
+  L.subs.forEach(function(sub){sub.rows.forEach(function(r){
+    if(data[r.k]===undefined)return; any=true;
+    s+=(normFor(r.k,tier)-data[r.k])*(MONEY_PRICE[r.k]||0);
+  });});return {s:s,any:any};}
+function catMoney(list,tier,data){var s=0,any=false;list.forEach(function(bk){var m=brandMoney(bk,tier,data);s+=m.s;if(m.any)any=true;});return {s:s,any:any};}
 function tierForBrand(bk,ph){return OTC_BRANDS.indexOf(bk)>=0?ph.oTC:ph.iW;}
+function setMoney(el,fam,m){if(!el)return;
+  if(!m.any){el.className='money '+fam+' empty';el.textContent='';return;}
+  el.className='money '+fam+' '+(m.s<0?'neg':'pos');el.textContent=fmtMoney(m.s);}
 function updHeadMoney(){
   var ph=getPh(curPx); if(!ph)return; var data=curVals(curPx);
-  var mo=catMoney(OTC_BRANDS,ph.oTC,data), mi=catMoney(IW_BRANDS,ph.iW,data);
-  var eo=document.getElementById('moneyOtc'), ei=document.getElementById('moneyIw');
-  if(eo){eo.textContent=fmtMoney(mo);eo.className=moneyCls('fa',mo);}
-  if(ei){ei.textContent=fmtMoney(mi);ei.className=moneyCls('fa',mi);}
+  setMoney(document.getElementById('moneyOtc'),'fa',catMoney(OTC_BRANDS,ph.oTC,data));
+  setMoney(document.getElementById('moneyIw'),'fa',catMoney(IW_BRANDS,ph.iW,data));
 }
 function updBrandMoney(bk){
-  var ph=getPh(curPx); if(!ph)return; var data=curVals(curPx);
-  var el=document.getElementById('bm-'+bk); if(!el)return;
-  var bm=brandMoney(bk,tierForBrand(bk,ph),data);
-  el.textContent=fmtMoney(bm); el.className=moneyCls('fb',bm);
+  var ph=getPh(curPx); if(!ph)return;
+  setMoney(document.getElementById('bm-'+bk),'fb',brandMoney(bk,tierForBrand(bk,ph),curVals(curPx)));
 }
 
 const APP_BUILD = { ver:'v2.9.1', build:'stockcheck-tails.b19',   date:'24.07.2026' }; // wsd 10.6 — H1 де-пігулено · H2 gcard opust.підлоги · H3 About A58 + чистка бренд-хардкодів
@@ -1577,10 +1581,12 @@ function brandCard(bk,tier,data){
   if(openBrands[bk]===undefined)openBrands[bk]=!done;
   var isOpen=openBrands[bk];
   var bmv=brandMoney(bk,tier,data);
+  var bmCls=bmv.any?('money fb '+(bmv.s<0?'neg':'pos')):'money fb empty';
+  var bmTxt=bmv.any?fmtMoney(bmv.s):'';
   var h='<div class="brand'+(isOpen?'':' collapsed')+'"><div class="bhdr" onclick="toggleBrand(\''+bk+'\')">'
     +'<span class="arr" id="ba-'+bk+'">'+(isOpen?'▾':'▸')+'</span>'
     +'<span class="bnm">'+L.brand+'</span>'
-    +'<span class="bright"><span class="'+moneyCls('fb',bmv)+'" id="bm-'+bk+'">'+fmtMoney(bmv)+'</span>'
+    +'<span class="bright"><span class="'+bmCls+'" id="bm-'+bk+'">'+bmTxt+'</span>'
     +'<span class="bcnt'+(done?' done':'')+'" id="bs-'+bk+'">'+(done?'✓':filled+'/'+total)+'</span></span></div>'
     +'<div class="bwrap"><div class="bbody" id="bb-'+bk+'">';
   L.subs.forEach(function(sub,si){
