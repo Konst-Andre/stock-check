@@ -31,6 +31,9 @@ input,textarea,[contenteditable]{-webkit-user-select:text;user-select:text;-webk
   --font:'Manrope',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
   --inkStr:14; --tintMix:50; --mutL:46; --valL:100; --ghostOp:.34;
   --r-card:16px; --r-chip:8px; --r-pill:9px;
+  /* b22: плашка іконо-дій хедера (шеврон+кебаб, симетрично). Хіт-зона авто-добирається до 44pt
+     через .icon-btn::after → тримати --icoBtn ≤ 44px, інакше inset стане + і зону ЗВУЗИТЬ. */
+  --icoBtn:38px; --icoRad:11px;
   --spring:cubic-bezier(.34,1.56,.64,1);
   --seg-dur:500ms; --seg-ease:cubic-bezier(.34,1.80,.64,1);
   --bg:#eef3f1; --bg-soft:#e4ece9; --card:#ffffff; --surface-2:#f4f8f6; --surface-3:#eef4f1;
@@ -135,10 +138,13 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);
 
 .hdr{position:sticky;top:0;z-index:20;background:var(--bg);
   padding:calc(env(safe-area-inset-top) + 10px) 14px 10px;border-bottom:1px solid var(--border-subtle)}
-.hdr-row{display:flex;align-items:center;gap:10px;min-height:34px}
-.icon-btn{flex:0 0 auto;width:34px;height:34px;border-radius:10px;border:1px solid rgba(20,50,42,.12);
+.hdr-row{display:flex;align-items:center;gap:10px;min-height:var(--icoBtn)}
+.icon-btn{flex:0 0 auto;position:relative;width:var(--icoBtn);height:var(--icoBtn);border-radius:var(--icoRad);border:1px solid rgba(20,50,42,.12);
   background:color-mix(in srgb,#fff 55%,var(--bg));color:var(--text-2);display:flex;align-items:center;justify-content:center;
   font-size:17px;line-height:1;cursor:pointer;box-shadow:0 1.4px 3.6px rgba(20,50,42,.081);transition:transform .22s var(--spring),background .12s ease}
+/* b22 хіт-експандер: тач-таргет ⟂ візуальна плашка. Невидимо добирає зону до 44pt (Apple HIG).
+   Псевдоелемент не є event.target → .pressable(closest) і onclick лишаються на кнопці. */
+.icon-btn::after{content:"";position:absolute;inset:calc((var(--icoBtn) - 44px) / 2)}
 [data-theme="dark"] .icon-btn{background:color-mix(in srgb,#fff 6%,var(--surface-3));border-color:rgba(255,255,255,.045);box-shadow:inset 0 1px 0 rgba(255,255,255,.096)}
 .icon-btn svg{width:19px;height:19px;display:block}
 .hdr-title{flex:1;min-width:0}
@@ -395,7 +401,10 @@ a.mi{text-decoration:none;color:inherit}
 /* ===== Node 5 · TopArea (§5.3 · harness v4 device✓) ===== */
 /* ===== StockCheck ISLAND (Frosted-Liquid · FINDINGS §4-preset · device-locked, in-product verify pending) ===== */
 .isl-spacer{flex:none;height:200px} /* JS refines to island height (ResizeObserver, shell plumbing) */
-.isl{position:absolute;top:0;left:12px;right:12px;z-index:20;border-radius:24px;overflow:hidden;
+.isl{position:absolute;top:0;left:12px;right:12px;z-index:20;border-radius:0 0 24px 24px;overflow:hidden;
+  /* b22 anchored unique-tile: верхнє ребро прибите до top:0 — круглі верхні кути давали сливери
+     фону й читались як «обрізаний острів». Квадратура = честний анкор. §5-B не чіпається (жодна
+     висота не змінилась); FINDINGS §6a/§6b тримаються на нижньому/внутрішньому радіусі (бейдж 16, таця 22). */
   padding-top:calc(env(safe-area-inset-top) + 10px);   /* b17: перенесено з .isl-brand — інакше колапс з'їдає safe-area */
   background:rgba(245,249,247,.82);
   -webkit-backdrop-filter:blur(12px) saturate(170%);backdrop-filter:blur(12px) saturate(170%);
@@ -1201,7 +1210,7 @@ function updBrandMoney(bk){
   setMoney(document.getElementById('bm-'+bk),'fb',brandMoney(bk,tierForBrand(bk,ph),curVals(curPx)));
 }
 
-const APP_BUILD = { ver:'v2.9.1', build:'stockcheck-tails.b19',   date:'24.07.2026' }; // wsd 10.6 — H1 де-пігулено · H2 gcard opust.підлоги · H3 About A58 + чистка бренд-хардкодів
+const APP_BUILD = { ver:'v2.11.0', build:'stockcheck-anchoredtile.b22', date:'26.07.2026' }; // wsd 10.6 — b22: острівець anchored unique-tile (квадратні верх.кути) · іконо-дії хедера 34→38 + хіт-експандер 44pt. (b20/b21 money-home бамп було пропущено — наздогнано тут)
 const NETWORK = { name:'StockCheck', tagline:'інструмент залишків', tg:'t.me/Konst_Andre' };
 const ORDER_FORM_URL = 'https://rbcom-my.sharepoint.com/:x:/r/personal/yuliia_syniuhina_reckitt_com/_layouts/15/Doc.aspx?sourcedoc=%7B361AB6BF-2AE9-410C-A81F-2AA3502C4EAD%7D&file=%25u0424%25u0430%25u0440%25u043c%25u0430%25u0441%25u0442%25u043e%25u0440%20%25u0437%25u0430%25u043c%25u043e%25u0432%25u043b%25u0435%25u043d%25u043d%25u044f%20%25u0442%25u0442.xlsx&wdLOR=c06833412-A6C7-4B15-AE95-76BCF4AB9FD6&openShare=true&fromShare=true&action=default&mobileredirect=true';
 const MSL_BY_K={}; MSL.forEach(function(s){MSL_BY_K[s.k]=s;});
