@@ -250,6 +250,74 @@ a.mi{text-decoration:none;color:inherit}
 [data-theme="dark"] .cf-cancel{background:color-mix(in srgb,var(--surface-3),#fff 3%)}
 .cf-ok{background:var(--crit);color:#fff}
 .cf-cancel.is-pressed,.cf-ok.is-pressed{transform:scale(.96);transition-duration:.06s}
+
+/* ═══════════ §5.1-PICKER · шіт вибору пари візитів (b24, порт stagebench v2_3) ═══════════
+   Модель anchor: слоти = ТАБЛО (<div>, не кнопки) — у шіті рівно один інтерактивний
+   об'єкт, список візитів. Режим у продукті один, тож pointer-events-хак і .slot.act
+   зі стенду НЕ переїжджають (там вони обслуговували важіль pickMode).
+   Усе скоуплено під #sh-period: .slot/.vrow/.vtag — імена, що легко колідують із FILL. */
+/* well-матеріал (A65). Токени --well* оголошені у скоупі #s-cmp (р.~678), а шіт живе
+   на рівні <body> → до них не дотягується. Локальна копія 1:1.
+   БОРГ (A45-маніфест): підняти --well* у :root і прибрати цей дубль. */
+#sh-period{--wellBg:color-mix(in srgb,var(--bg-soft) 68%,var(--card));
+  --wellBd:var(--border-subtle);
+  --wellSh:inset 0 1px 2px rgba(20,50,42,.10)}
+[data-theme="dark"] #sh-period{--wellBg:color-mix(in srgb,var(--card),#000 22%);
+  --wellBd:color-mix(in srgb,var(--border),#000 18%);
+  --wellSh:inset 0 1.5px 3px rgba(0,0,0,.5),inset 0 -1px 0 rgba(255,255,255,.07)}
+
+#sh-period .slots{display:flex;align-items:center;gap:8px;margin:0 12px}
+#sh-period .slot{flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:3px;
+  padding:9px 12px 10px;border-radius:13px;font-family:var(--font);text-align:left;
+  background:var(--wellBg);border:1px solid var(--wellBd);box-shadow:var(--wellSh)}
+#sh-period .sl-k{font:800 9.5px/1 var(--font);text-transform:uppercase;letter-spacing:.7px;color:var(--muted)}
+#sh-period .sl-v{font:800 17px/1 var(--font);color:var(--text);font-variant-numeric:tabular-nums;letter-spacing:-.3px}
+#sh-period .sl-arr{flex:0 0 auto;color:var(--muted);font-size:15px;font-weight:800}
+/* рядок-підказка ЗАВЖДИ в потоці з фіксованою висотою: текст міняється, коробка — ні.
+   Поява/зникнення рядка перебудовувала б висоту bottom-anchored шіта → ривок. */
+#sh-period .pkhint{margin:9px 14px 0;height:16px;font:600 11.5px/16px var(--font);color:var(--muted);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:color .18s ease}
+#sh-period .pkhint.warn{color:var(--warn)}
+
+#sh-period .vlist{max-height:40dvh;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+#sh-period .vlist::-webkit-scrollbar{display:none}
+/* ФІКСОВАНА висота рядка. .vtag вищий за .vd (9.5px+8 padding+2 border ≈ 19.5 проти 15),
+   тож рядок З бейджем був на ~4.5px вищим за рядок БЕЗ: 1 бейдж (якір) → 2 бейджі (пара)
+   давало +4.5px списку і шіт підстрибував. Висота не залежить від вмісту рядка. */
+#sh-period .vrow{display:flex;align-items:center;gap:10px;width:100%;height:44px;padding:0 13px;
+  background:transparent;border:none;border-bottom:1px solid var(--border-subtle);
+  font-family:var(--font);cursor:pointer;text-align:left}
+[data-theme="dark"] #sh-period .vrow{border-bottom-color:var(--border)}
+#sh-period .vrow:last-child{border-bottom:none}
+#sh-period .vd{font:800 15px/1 var(--font);color:var(--text);font-variant-numeric:tabular-nums;letter-spacing:-.2px;flex:0 0 auto;min-width:48px}
+#sh-period .vm{flex:1;min-width:0;font:600 11.5px/1 var(--font);color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* теги дзеркалять таблицю Динаміки: was = нейтральний (.well.was) · now = accent (.well.now) */
+#sh-period .vtag{flex:0 0 auto;font:800 9.5px/1 var(--font);text-transform:uppercase;letter-spacing:.5px;padding:4px 7px;border-radius:7px;white-space:nowrap}
+#sh-period .vtag.was{color:var(--text-2);background:var(--surface-2);border:1px solid var(--border)}
+[data-theme="dark"] #sh-period .vtag.was{background:var(--surface-3)}
+#sh-period .vtag.now{color:var(--accent-ink);background:color-mix(in srgb,var(--accent) 16%,var(--card));border:1px solid color-mix(in srgb,var(--accent) 38%,transparent)}
+[data-theme="dark"] #sh-period .vtag.now{background:color-mix(in srgb,var(--accent) 24%,var(--surface-3));border-color:color-mix(in srgb,var(--accent) 45%,transparent)}
+#sh-period .vrow.sel{background:color-mix(in srgb,var(--accent) 7%,transparent)}
+[data-theme="dark"] #sh-period .vrow.sel{background:color-mix(in srgb,var(--accent) 12%,transparent)}
+#sh-period .vrow.is-pressed{background:var(--surface-2)}
+[data-theme="dark"] #sh-period .vrow.is-pressed{background:var(--surface-3)}
+
+/* CTA-гама ПОРТОВАНА з білда 1:1 — .btn-copy (FILL) + .cf-cancel. Акцент/насиченість
+   для цього класу кнопок уже залочені окремими бенчами; одна гама на всі первинні дії. */
+#sh-period .pkcta{display:flex;gap:9px;margin:14px 12px 0}
+#sh-period .pkcta button{flex:1;padding:14px 0;border-radius:12px;font:800 14px/1 var(--font);cursor:pointer;border:none;
+  transition:transform .22s var(--spring),filter .12s ease,opacity .18s ease}
+#sh-period .pkcta .sec{background:var(--surface-3);color:var(--text)}
+[data-theme="dark"] #sh-period .pkcta .sec{background:color-mix(in srgb,var(--surface-3),#fff 3%)}
+#sh-period .pkcta .pri{color:#fff;
+  background:linear-gradient(180deg,color-mix(in srgb,#fff 16%,var(--accent)),var(--accent));
+  box-shadow:0 3px 10px -3px color-mix(in srgb,var(--accent) 27%,transparent),0 1px 2px rgba(20,50,42,.14)}
+[data-theme="dark"] #sh-period .pkcta .pri{background:linear-gradient(180deg,hsl(163 55% 34%),hsl(163 55% 30%));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.10)}
+#sh-period .pkcta button.is-pressed{transform:scale(.96);transition-duration:.06s}
+#sh-period .pkcta .pri.off{opacity:.42;pointer-events:none}
+[data-theme="dark"] #sh-period .pkcta .pri.off{opacity:.30}   /* на OLED .42 ще читалось як активна */
+
 /* ===== About sheet (A58) ===== */
 .about-hd{display:flex;align-items:center;gap:12px;padding:6px 20px 14px}
 .about-logo{width:44px;height:44px;border-radius:12px;flex-shrink:0;display:flex;align-items:center;justify-content:center;
@@ -451,12 +519,20 @@ a.mi{text-decoration:none;color:inherit}
   transition:transform .22s var(--spring)}
 .netbtn.is-pressed,.isl-menu.is-pressed{transform:scale(.9)}
 .isl-menu svg{width:19px;height:19px;display:block;color:var(--text-2)}
-/* net tile — 35/R16/inset4 · SOLID anchor, does NOT inherit island glass (FINDINGS §3) */
-.ntile{width:35px;height:35px;border-radius:16px;display:grid;place-items:center;overflow:hidden;
-  box-shadow:0 1px 4px rgba(20,50,42,.11)}
-[data-theme="dark"] .ntile{box-shadow:0 2px 5px rgba(0,0,0,.20),inset 0 1px 0 rgba(255,255,255,.06)}
+/* net tile — 35/R12 · SOLID anchor, does NOT inherit island glass (FINDINGS §3)
+   b23: заливка/радіус/масштаб — glyph_valuesLOCK §2-§4 (device-pick 27.07).
+   NB §5-п.4: rad 12 і bScale 1.55 ЗЧЕПЛЕНІ — повернення rad до 16 вимагає перегляду bScale. */
+.ntile{width:35px;height:35px;border-radius:12px;display:grid;place-items:center;overflow:hidden;
+  background:linear-gradient(180deg,rgb(89,170,109),rgb(66,158,89));
+  box-shadow:0 2px 5px rgba(20,50,42,.10)}
+[data-theme="dark"] .ntile,:root:not([data-theme="light"]) .ntile{
+  background:linear-gradient(180deg,rgb(77,153,96),rgb(68,136,85));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.08),inset 0 -1px 0 rgba(0,0,0,.10)}
 .ntile svg{display:block}
-.ntile .bscale{display:grid;place-items:center;transform:scale(1.28)} /* badgeScale */
+/* вісь B (glyph_valuesLOCK §4) — незалежна від заливки: чисто-білий знак на OLED пече */
+.ntile{--ntile-gl:#ffffff}
+[data-theme="dark"] .ntile,:root:not([data-theme="light"]) .ntile{--ntile-gl:rgb(233,241,235)}
+.ntile .bscale{display:grid;place-items:center;transform:scale(1.55)} /* badgeScale */
 /* filter-tier inside island: toparea relocated here → transparent so glass shows through */
 #s-home .isl .toparea{background:transparent;border-bottom:none;padding:10px 0 12px} /* tierPadT/B (valuesLOCK §4) */
 .toparea{--chipH:30px;--chipGap:6px;--chipPadX:14px;--chipRad:10px;--searchH:40px;
@@ -638,6 +714,21 @@ a.mi{text-decoration:none;color:inherit}
   :root:not([data-theme="light"]) .thseg{background:color-mix(in srgb,var(--card),#000 20%);border-color:color-mix(in srgb,var(--border),#000 16%);box-shadow:inset 0 2px 5px rgba(0,0,0,.5),inset 0 -1px 0 rgba(255,255,255,.08)}
   :root:not([data-theme="light"]) .seg-thumb{background:linear-gradient(180deg,hsl(163 55% 34%),hsl(163 55% 30%))}
   :root:not([data-theme="light"]) .cf-cancel{background:color-mix(in srgb,var(--surface-3),#fff 3%)}
+  /* §5.1-PICKER (b24) — дзеркала ВСЕРЕДИНІ media, як вимагає A69.
+     ⚠️ Секція #s-cmp (р.~750+) ставить такі правила ПОЗА media — в режимі «авто»
+     на світлій системі там вмикається темний одяг поверх світлих токенів.
+     Це чинний борг, окремий вузол; сюди його не тягнемо. */
+  :root:not([data-theme="light"]) #sh-period{--wellBg:color-mix(in srgb,var(--card),#000 22%);
+    --wellBd:color-mix(in srgb,var(--border),#000 18%);
+    --wellSh:inset 0 1.5px 3px rgba(0,0,0,.5),inset 0 -1px 0 rgba(255,255,255,.07)}
+  :root:not([data-theme="light"]) #sh-period .vrow{border-bottom-color:var(--border)}
+  :root:not([data-theme="light"]) #sh-period .vtag.was{background:var(--surface-3)}
+  :root:not([data-theme="light"]) #sh-period .vtag.now{background:color-mix(in srgb,var(--accent) 24%,var(--surface-3));border-color:color-mix(in srgb,var(--accent) 45%,transparent)}
+  :root:not([data-theme="light"]) #sh-period .vrow.sel{background:color-mix(in srgb,var(--accent) 12%,transparent)}
+  :root:not([data-theme="light"]) #sh-period .vrow.is-pressed{background:var(--surface-3)}
+  :root:not([data-theme="light"]) #sh-period .pkcta .sec{background:color-mix(in srgb,var(--surface-3),#fff 3%)}
+  :root:not([data-theme="light"]) #sh-period .pkcta .pri{background:linear-gradient(180deg,hsl(163 55% 34%),hsl(163 55% 30%));box-shadow:inset 0 1px 0 rgba(255,255,255,.10)}
+  :root:not([data-theme="light"]) #sh-period .pkcta .pri.off{opacity:.30}
   :root:not([data-theme="light"]) .fld{background:color-mix(in srgb,var(--card),#000 calc(var(--dWellDip)*1%));
     box-shadow:inset 0 2px calc(var(--dWellInset)*1px) rgba(0,0,0,.55),inset 0 -1px 0 rgba(255,255,255,var(--dWellLight));
     border:1px solid color-mix(in srgb,var(--border),#000 20%)}
@@ -734,6 +825,10 @@ a.mi{text-decoration:none;color:inherit}
 #s-cmp .dpill .dp-ic svg{width:14px;height:14px;display:block}
 #s-cmp .dpill .dp-c{width:12px;height:12px;color:var(--muted);flex:0 0 12px}
 #s-cmp .dpill .dp-c svg{width:12px;height:12px;display:block}
+/* b24 — пігулка стала входом у пікер. При N=2 пул вичерпано: рендериться <span class="dpill static">
+   без шеврона, бо клікабельна кнопка, що нікуди не веде, — глухий кут (мертва кнопка, wsd 3.9). */
+#s-cmp .dpill.static{cursor:default}
+#s-cmp .dpill.is-pressed{transform:scale(.965);transition:transform .06s ease}
 
 /* 3 плитки-tally (ПІДНЯТІ · A66/A45) */
 #s-cmp .tally{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:13px}
@@ -873,8 +968,8 @@ a.mi{text-decoration:none;color:inherit}
             <span class="sc-wm"><span class="s1"><span style="font-size:1.16em">S</span>tock</span><span class="s2"><span style="font-size:1.16em">C</span>heck</span></span>
           </div>
           <div class="isl-actions">
-            <button class="netbtn pressable" aria-label="Мережа: Аптека доброго дня" id="netBtn">
-              <span class="ntile" style="background:#3fae5a"><span class="bscale"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.4M12 19.1v2.4M4.2 4.2l1.7 1.7M18.1 18.1l1.7 1.7M2.5 12h2.4M19.1 12h2.4M4.2 19.8l1.7-1.7M18.1 5.9l1.7-1.7"/></svg></span></span>
+            <button class="netbtn pressable" aria-label="Мережа: Фармастор" id="netBtn">
+              <span class="ntile"><span class="bscale"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><rect x="8" y="2.4" width="8" height="19.2" rx="4" fill="none" stroke="var(--ntile-gl)" stroke-width="2.7"/><rect x="2.4" y="8" width="19.2" height="8" rx="4" fill="none" stroke="var(--ntile-gl)" stroke-width="2.7"/></svg></span></span>
             </button>
             <button class="isl-menu pressable" aria-label="Меню" onclick="openSheet()"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.95"/><circle cx="12" cy="12" r="1.95"/><circle cx="19" cy="12" r="1.95"/></svg></button>
           </div>
@@ -1007,6 +1102,26 @@ a.mi{text-decoration:none;color:inherit}
       <button class="cf-cancel pressable" onclick="closeNamed('sh-confirm')">Скасувати</button>
       <button class="cf-ok pressable" id="cf-ok">Видалити</button>
     </div>
+  </div>
+</div>
+
+<!-- §5.1-PICKER (b24) · вибір пари візитів. Слоти = табло (не кнопки), єдиний інтерактивний
+     об'єкт шіта — список. Підказка #pkHint має фіксовану висоту навіть коли порожня. -->
+<!-- ⚠ у коментарях розмітки не писати літеральних тегів: tag-balance їх рахує (b24) -->
+<div class="sheet" id="sh-period" role="dialog" aria-label="Порівняння візитів">
+  <div class="grip"></div>
+  <div class="eb">Порівняння</div>
+  <div class="slots">
+    <div class="slot"><span class="sl-k" id="pkFk">було</span><span class="sl-v" id="pkFv">—</span></div>
+    <span class="sl-arr" aria-hidden="true">→</span>
+    <div class="slot"><span class="sl-k" id="pkTk">стало</span><span class="sl-v" id="pkTv">—</span></div>
+  </div>
+  <div class="pkhint" id="pkHint" aria-live="polite"></div>
+  <div class="eb" id="pkVEb">Візити</div>
+  <div class="gcard vlist" id="pkList"></div>
+  <div class="pkcta">
+    <button class="sec pressable" id="pkReset">Скинути</button>
+    <button class="pri pressable" id="pkOk">Показати</button>
   </div>
 </div>
 
@@ -1215,7 +1330,7 @@ function updBrandMoney(bk){
   setMoney(document.getElementById('bm-'+bk),'fb',brandMoney(bk,tierForBrand(bk,ph),curVals(curPx)));
 }
 
-const APP_BUILD = { ver:'v2.11.1', build:'stockcheck-anchoredtile.b22_2', date:'26.07.2026' }; // wsd 10.6 — b22_2: anchored top edge — A66-ридж + верхній бордер зняті (передумова «вільне ребро» не виконується). b22: квадратні верх.кути · іконо-дії 34→38 + хіт-експандер 44pt
+const APP_BUILD = { ver:'v2.13.0', build:'stockcheck-dpicker.b24', date:'28.07.2026' }; // wsd 10.6 — b24: порт пікера візитів (модель anchor, stagebench v2_3) · нова мова «порівняння/було→стало» · netBtn: тост+aria на Фармастор
 const NETWORK = { name:'StockCheck', tagline:'інструмент залишків', tg:'t.me/Konst_Andre' };
 const ORDER_FORM_URL = 'https://rbcom-my.sharepoint.com/:x:/r/personal/yuliia_syniuhina_reckitt_com/_layouts/15/Doc.aspx?sourcedoc=%7B361AB6BF-2AE9-410C-A81F-2AA3502C4EAD%7D&file=%25u0424%25u0430%25u0440%25u043c%25u0430%25u0441%25u0442%25u043e%25u0440%20%25u0437%25u0430%25u043c%25u043e%25u0432%25u043b%25u0435%25u043d%25u043d%25u044f%20%25u0442%25u0442.xlsx&wdLOR=c06833412-A6C7-4B15-AE95-76BCF4AB9FD6&openShare=true&fromShare=true&action=default&mobileredirect=true';
 const MSL_BY_K={}; MSL.forEach(function(s){MSL_BY_K[s.k]=s;});
@@ -1325,7 +1440,8 @@ function openSheet(){updateCsvLabel();updateClearLabel();document.getElementById
 function closeSheet(){document.getElementById('scrim').classList.remove('on');document.getElementById('sheet').classList.remove('on');}
 function closeSheets(){document.getElementById('scrim').classList.remove('on');
   document.getElementById('sheet').classList.remove('on');document.getElementById('sh-about').classList.remove('on');
-  document.getElementById('sh-confirm').classList.remove('on');}
+  document.getElementById('sh-confirm').classList.remove('on');
+  document.getElementById('sh-period').classList.remove('on');}   // b24
 /* A58 sheet→sheet handoff: закрити меню → 120ms (≈ fade) → відкрити About */
 function openAbout(){closeSheet();setTimeout(function(){
   document.getElementById('scrim').classList.add('on');document.getElementById('sh-about').classList.add('on');},120);}
@@ -1342,6 +1458,13 @@ function updateClearLabel(){var lbl=document.getElementById('clearLbl'),sub=docu
 function plApt(n){var a=n%10,b=n%100;if(a===1&&b!==11)return'аптека';if(a>=2&&a<=4&&(b<12||b>14))return'аптеки';return'аптек';}
 let _tt;
 function toast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('on');clearTimeout(_tt);_tt=setTimeout(function(){t.classList.remove('on')},2200);}
+/* b23 — netBtn більше не мертва кнопка (wsd 3.9/10.2). Тост ТИМЧАСОВИЙ:
+   поки мережа одна, він пояснює навіщо кнопка. Коли мереж стане більше —
+   у кнопку інтегрується назва мережі + к-сть аптек, і тост іде. */
+(function(){var b=document.getElementById('netBtn');if(!b)return;
+  b.addEventListener('click',function(){
+    toast('Фармастор · поки що єдина мережа');
+  });})();
 
 /* ---- home cards (Node 7 · §5.2/§6.4 · state from visits[]) ---- */
 function esc(s){return(''+s).replace(/&/g,'&amp;').replace(/</g,'&lt;');}
@@ -1809,29 +1932,37 @@ var CMP_DN='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-wi
 var CMP_EQ='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9h14M5 15h14"/></svg>';
 var CMP_TREND='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M17 7h4v4"/></svg>';
 var CMP_TRENDDN='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7l6 6 4-4 8 8"/><path d="M17 17h4v-4"/></svg>';
-var CMP_CAL='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="16.5" rx="2.5"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg>';
+/* b24 — двоточковий гліф: ДВА СТАНИ + перехід. Календар обіцяв діапазон, якого нема:
+   Динаміка порівнює рівно два зрізи, проміжні візити не враховуються ніяк. */
+var CMP_CMP='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.5" cy="12" r="2.6"/><circle cx="18.5" cy="12" r="2.6"/><path d="M9.2 12h5.6"/></svg>';
 var CMP_CRT='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>';
 
-var CMP={px:null,sfilter:'all',data:null};
+/* b24 — пара живе як ІНДЕКСИ в pool, не як об'єкти візитів: індекс дає сортування,
+   сусідство ("між ними ще N") і дефолт одним порівнянням чисел. */
+var CMP={px:null,pool:[],fi:0,ti:1,sfilter:'all',data:null};
 
-/* ---- вибір двох знімків: дефолт = останні два transferred (§5.1) ---- */
-function cmpPickVisits(px){
-  var e=ST.phs[px]; if(!e||!e.visits)return null;
+/* ---- ПУЛ кандидатів. Правило допуску 1:1 з b23: transferred+withVals, а якщо таких
+   менше двох — усі withVals. Розпил проти b23: раніше вибір пари був ЗАШИТИЙ у пул
+   (функція повертала одразу два останні знімки) — пікеру не було з чого вибирати. ---- */
+function cmpPool(px){
+  var e=ST.phs[px]; if(!e||!e.visits)return [];
   var withVals=function(v){return v&&v.vals&&Object.keys(v.vals).length;};
   var tr=e.visits.filter(function(v){return v.transferred&&withVals(v);});
-  var pool=tr.length>=2?tr:e.visits.filter(withVals);
-  if(pool.length<2)return null;
-  return {from:pool[pool.length-2],to:pool[pool.length-1]};
+  return tr.length>=2?tr:e.visits.filter(withVals);
 }
-/* ---- адаптер visits[].vals → model (cat→brand→sub→items) ---- */
-function cmpBuild(px){
-  var pk=cmpPickVisits(px); if(!pk)return null;
-  var fromV=pk.from,toV=pk.to,ph=getPh(px);
+/* ---- адаптер visits[].vals → model (cat→brand→sub→items). Пара — АРГУМЕНТАМИ ---- */
+function cmpBuild(px,fromV,toV){
+  if(!fromV||!toV)return null;
+  var ph=getPh(px);
   var cats=[{c:'OTC',brands:OTC_BRANDS},{c:'IW',brands:IW_BRANDS}];
   var model=cats.map(function(cat){
     var isOtc=cat.c==='OTC';
-    var tF=(fromV.tier&&(isOtc?fromV.tier.oTC:fromV.tier.iW))||(isOtc?ph.oTC:ph.iW);
-    var tT=(toV.tier&&(isOtc?toV.tier.oTC:toV.tier.iW))||(isOtc?ph.oTC:ph.iW);
+    /* b23 — ОДНА норма на обидва боки (Konst, 27.07). Тір аптеки МІЖ візитами не міняється:
+       зміна тіру = масштабна подія по всьому файлу, вона оголошується окремо.
+       Отже норма — властивість ПОТОЧНОГО файлу, а не архівна властивість візиту.
+       Наслідок: nF===nT завжди → «MSL 4→6» зникає, і бурштинова Δ=0 (яка була
+       артефактом двох різних норм, а не станом залишку) зникає разом із нею. */
+    var tT=(isOtc?ph.oTC:ph.iW), tF=tT;
     var brands=cat.brands.map(function(bk){
       var L=LAYOUT[bk];
       var subgroups=L.subs.map(function(sub){
@@ -1897,7 +2028,21 @@ function cmpStHeadHTML(wcls,word){
   var ico=wcls==='up'?CMP_TREND:wcls==='down'?CMP_TRENDDN:CMP_EQ;
   return '<div class="st-head '+wcls+'"><span class="st-ico">'+ico+'</span><div class="st-txt"><span class="st-word">'+word+'</span><span class="st-cap">відносно MSL</span></div></div>';
 }
-function cmpDpillHTML(fromV,toV){return '<button class="dpill" aria-label="Період"><span class="dp-ic">'+CMP_CAL+'</span><span>'+fmtDate(fromV.date)+'–'+fmtDate(toV.date)+'</span><span class="dp-c">'+CMP_CRT+'</span></button>';}
+/* b24 — пігулка стала входом у пікер. При пулі рівно з 2 візитів вибирати нема з чого:
+   рендеримо <span class="dpill static"> без шеврона. Клікабельна кнопка, що відкриває
+   шіт, у якому єдина можлива пара вже стоїть, — глухий кут (мертва кнопка, wsd 3.9).
+   ⚠ Поріг саме <3, не <2: у пулі рівно з 2 візитів пара вже єдина. Стенд v2_3 ніс тут
+   <2 — тобто ЛОК §1.4 («N=2 → пігулка статична») стендом не був реалізований і на
+   девайсі цей край не перевірявся. Порт іде за ЛОКом; спіймано runtime-матрицею b24. */
+function cmpDpillHTML(fromV,toV){
+  var st=CMP.pool.length<3, tag=st?'span':'button';   // ≤2 у пулі = єдина можлива пара
+  var lbl=fmtDate(fromV.date)+' → '+fmtDate(toV.date);
+  return '<'+tag+' class="dpill'+(st?' static':' pressable')+'"'
+    +(st?'':' onclick="openPeriod()"')
+    +' aria-label="Порівняння: '+lbl+(st?'':'. Змінити')+'">'
+    +'<span class="dp-ic">'+CMP_CMP+'</span><span>'+lbl+'</span>'
+    +(st?'':'<span class="dp-c">'+CMP_CRT+'</span>')+'</'+tag+'>';
+}
 function renderCmpTop(){
   var built=CMP.data,v=cmpTally(built.model);
   var wcls=v.b>v.w?'up':(v.w>v.b?'down':'flat');
@@ -1938,7 +2083,8 @@ function cmpDynHTML(it,lv){
 }
 function cmpRowHTML(it){
   var lv=cmpLevel(it.f,it.t,it.nF,it.nT);
-  var normNote=(it.nF!==it.nT)?'<span class="normchg">MSL '+it.nF+'→'+it.nT+'</span>':'MSL <span class="nm">'+it.nT+'</span>';
+  /* b23: гілка nF!==nT знята разом із per-visit нормою. `.normchg` CSS лишився невикористаним — у хвости. */
+  var normNote='MSL <span class="nm">'+it.nT+'</span>';
   var nameMain=it.n||it.fd||'';
   var fdSuf=(it.n&&it.fd)?'<span class="rfd">'+esc(it.fd)+'</span>':'';
   var pkChip=it.pk?'<span class="rpk">'+esc(it.pk)+'</span>':'';
@@ -1978,9 +2124,10 @@ function renderCmpList(){
 /* ---- ВХІД ---- */
 function openCmp(px){
   var ph=getPh(px); if(!ph)return;
-  var built=cmpBuild(px);
-  if(!built){try{toast('Недостатньо візитів для порівняння');}catch(e){}return;}
-  CMP={px:px,sfilter:'all',data:built};
+  var pool=cmpPool(px);
+  if(pool.length<2){try{toast('Недостатньо візитів для порівняння');}catch(e){}return;}
+  var fi=pool.length-2, ti=pool.length-1;                 // дефолт = два останні знімки
+  CMP={px:px,pool:pool,fi:fi,ti:ti,sfilter:'all',data:cmpBuild(px,pool[fi],pool[ti])};
   document.getElementById('cmpAddr').textContent=displayAddr(ph.addr);
   document.getElementById('cmpSub').textContent=ph.city+' · Proxima '+ph.px;
   renderCmpTop();
@@ -1992,6 +2139,98 @@ function openCmp(px){
     cmpPlaceThumb(true);
   });
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   §5.1-PICKER · вибір пари візитів (b24 · порт stagebench v2_3, device✓)
+
+   МОДЕЛЬ: anchor. 1-й тап = якір · 2-й тап = пара готова й СОРТУЄТЬСЯ САМА ·
+   3-й тап починає нову пару. Слоти — табло, не контроли: у шіті рівно один
+   інтерактивний об'єкт (список), тож "куди прилетить наступний тап" видно завжди.
+
+   АНТИПАТЕРН (урок v1, не повторювати): автоперекид фокуса після присвоєння.
+   Фокус мутував після кожного тапу → невидимий режим; розробник не зміг
+   зрозуміти власний елемент з першого дотику. Економія тапу ціною
+   передбачуваності — погана угода.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* застосувати пару до екрана. sfilter НЕ чіпаємо: renderCmpTop читає CMP.sfilter
+   сам, тож фільтр переживає зміну пари (зміна періоду ≠ скидання зрізу). */
+function cmpApply(fi,ti){
+  CMP.fi=fi; CMP.ti=ti;
+  CMP.data=cmpBuild(CMP.px,CMP.pool[fi],CMP.pool[ti]);
+  renderCmpTop();
+  renderCmpList();
+  requestAnimationFrame(function(){                  // дзеркалить rAF-блок openCmp
+    var hd=document.getElementById('cmp-hdr');
+    if(hd)document.getElementById('s-cmp').style.setProperty('--cmpHdrH',hd.offsetHeight+'px');
+    cmpPlaceThumb(true);
+  });
+}
+
+var PK={fi:0,ti:1,anchor:null};                      // чернетка шіта, окремо від CMP
+function plPos(n){var a=n%10,b=n%100;if(a===1&&b!==11)return'позиція';if(a>=2&&a<=4&&(b<12||b>14))return'позиції';return'позицій';}
+function plVis(n){var a=n%10,b=n%100;if(a===1&&b!==11)return'візит';if(a>=2&&a<=4&&(b<12||b>14))return'візити';return'візитів';}
+/* автосвоп = СОРТУВАННЯ пари, а не перевірка "чи не навпаки": інверсію набрати неможливо */
+function pkSetPair(a,b){PK.fi=Math.min(a,b);PK.ti=Math.max(a,b);}
+function pkTap(i){
+  if(PK.anchor===null){PK.anchor=i;}                        // 1-й тап: якір
+  else if(i!==PK.anchor){pkSetPair(PK.anchor,i);PK.anchor=null;}  // 2-й: пара готова
+  /* i===PK.anchor ігнорується структурно → рівну пару набрати неможливо */
+  renderPk();
+}
+function renderPk(){
+  var anch=PK.anchor!==null, pool=CMP.pool;
+  document.getElementById('pkFk').textContent=anch?'перший':'було';
+  document.getElementById('pkTk').textContent=anch?'другий':'стало';
+  document.getElementById('pkFv').textContent=anch?fmtDate(pool[PK.anchor].date):fmtDate(pool[PK.fi].date);
+  document.getElementById('pkTv').textContent=anch?'…':fmtDate(pool[PK.ti].date);
+
+  var hint;
+  if(anch)hint='обери другий візит';
+  else{
+    var gap=PK.ti-PK.fi-1;
+    hint=gap>0?('між ними ще '+gap+' '+plVis(gap)+' — вони не враховуються')
+              :'сусідні візити — нічого не пропущено';
+  }
+  var hEl=document.getElementById('pkHint');
+  hEl.textContent=hint; hEl.classList.toggle('warn',anch);
+  document.getElementById('pkOk').classList.toggle('off',anch);
+
+  var idx=[];for(var i=0;i<pool.length;i++)idx.push(i);
+  idx.reverse();                                            // новіші зверху
+  var h='';
+  idx.forEach(function(i){
+    var v=pool[i], n=Object.keys(v.vals||{}).length;
+    var isA=anch&&i===PK.anchor, isF=!anch&&i===PK.fi, isT=!anch&&i===PK.ti;
+    var tag=isA?'<span class="vtag was">перший</span>'
+          :(isF?'<span class="vtag was">було</span>'
+          :(isT?'<span class="vtag now">стало</span>':''));
+    h+='<button class="vrow pressable'+((isA||isF||isT)?' sel':'')+'" data-i="'+i+'">'
+      +'<span class="vd">'+fmtDate(v.date)+'</span>'
+      +'<span class="vm">'+n+' '+plPos(n)+'</span>'+tag+'</button>';
+  });
+  document.getElementById('pkList').innerHTML=h;
+  document.getElementById('pkVEb').textContent='Візити · '+pool.length;
+}
+function openPeriod(){
+  if(!CMP.pool||CMP.pool.length<3)return;   // ≤2 → вибирати нема з чого (див. cmpDpillHTML)
+  PK={fi:CMP.fi,ti:CMP.ti,anchor:null};
+  renderPk();
+  openNamed('sh-period');
+}
+document.getElementById('pkList').addEventListener('click',function(e){
+  var r=e.target.closest('.vrow'); if(!r)return;
+  pkTap(+r.getAttribute('data-i'));
+});
+document.getElementById('pkReset').addEventListener('click',function(){
+  PK={fi:CMP.pool.length-2,ti:CMP.pool.length-1,anchor:null};
+  renderPk();
+});
+document.getElementById('pkOk').addEventListener('click',function(){
+  if(PK.anchor!==null)return;                               // напівнабрана пара
+  cmpApply(PK.fi,PK.ti);
+  setTimeout(function(){closeNamed('sh-period');},250);     // A18.1: даємо press-пружині дочитатись
+});
 
 /* ═══════════════════════════════════════════════════════════════════════════
    §5-B COLLAPSE-ON-SCROLL · механіка C (composite slide) · ship b18
