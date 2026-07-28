@@ -7,7 +7,13 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#eef3f1" id="metaTheme">
-<link rel="manifest" href='data:application/manifest+json,{"name":"StockCheck Залишки","short_name":"StockCheck","display":"standalone","orientation":"portrait","background_color":"%230d1512","theme_color":"%23eef3f1","start_url":"."}'>
+<!-- b25 · PWA-гігієна. Маніфест винесено з data:-URI: відносні "./" та icons[] резолвляться
+     проти URL самого маніфеста, а в data:-рядка базового URL немає → start_url був недетермінований.
+     Вимога: manifest.json лежить ПОРУЧ з index.html (не в підтеці) — тоді шлях репозиторію ніде не зашитий.
+     ?v= — wsd 6.5: GitHub Pages віддає max-age=600, без суфікса оновлений ресурс не доїде. -->
+<link rel="manifest" href="manifest.json?v=b25">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=b25">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png?v=b25">
 <title>StockCheck · Залишки v2</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -307,16 +313,16 @@ a.mi{text-decoration:none;color:inherit}
 #sh-period .pkcta{display:flex;gap:9px;margin:14px 12px 0}
 #sh-period .pkcta button{flex:1;padding:14px 0;border-radius:12px;font:800 14px/1 var(--font);cursor:pointer;border:none;
   transition:transform .22s var(--spring),filter .12s ease,opacity .18s ease}
-#sh-period .pkcta .sec{background:var(--surface-3);color:var(--text)}
-[data-theme="dark"] #sh-period .pkcta .sec{background:color-mix(in srgb,var(--surface-3),#fff 3%)}
-#sh-period .pkcta .pri{color:#fff;
+#sh-period .pkcta .pk-sec{background:var(--surface-3);color:var(--text)}
+[data-theme="dark"] #sh-period .pkcta .pk-sec{background:color-mix(in srgb,var(--surface-3),#fff 3%)}
+#sh-period .pkcta .pk-pri{color:#fff;
   background:linear-gradient(180deg,color-mix(in srgb,#fff 16%,var(--accent)),var(--accent));
   box-shadow:0 3px 10px -3px color-mix(in srgb,var(--accent) 27%,transparent),0 1px 2px rgba(20,50,42,.14)}
-[data-theme="dark"] #sh-period .pkcta .pri{background:linear-gradient(180deg,hsl(163 55% 34%),hsl(163 55% 30%));
+[data-theme="dark"] #sh-period .pkcta .pk-pri{background:linear-gradient(180deg,hsl(163 55% 34%),hsl(163 55% 30%));
   box-shadow:inset 0 1px 0 rgba(255,255,255,.10)}
 #sh-period .pkcta button.is-pressed{transform:scale(.96);transition-duration:.06s}
-#sh-period .pkcta .pri.off{opacity:.42;pointer-events:none}
-[data-theme="dark"] #sh-period .pkcta .pri.off{opacity:.30}   /* на OLED .42 ще читалось як активна */
+#sh-period .pkcta .pk-pri.off{opacity:.42;pointer-events:none}
+[data-theme="dark"] #sh-period .pkcta .pk-pri.off{opacity:.30}   /* на OLED .42 ще читалось як активна */
 
 /* ===== About sheet (A58) ===== */
 .about-hd{display:flex;align-items:center;gap:12px;padding:6px 20px 14px}
@@ -726,9 +732,9 @@ a.mi{text-decoration:none;color:inherit}
   :root:not([data-theme="light"]) #sh-period .vtag.now{background:color-mix(in srgb,var(--accent) 24%,var(--surface-3));border-color:color-mix(in srgb,var(--accent) 45%,transparent)}
   :root:not([data-theme="light"]) #sh-period .vrow.sel{background:color-mix(in srgb,var(--accent) 12%,transparent)}
   :root:not([data-theme="light"]) #sh-period .vrow.is-pressed{background:var(--surface-3)}
-  :root:not([data-theme="light"]) #sh-period .pkcta .sec{background:color-mix(in srgb,var(--surface-3),#fff 3%)}
-  :root:not([data-theme="light"]) #sh-period .pkcta .pri{background:linear-gradient(180deg,hsl(163 55% 34%),hsl(163 55% 30%));box-shadow:inset 0 1px 0 rgba(255,255,255,.10)}
-  :root:not([data-theme="light"]) #sh-period .pkcta .pri.off{opacity:.30}
+  :root:not([data-theme="light"]) #sh-period .pkcta .pk-sec{background:color-mix(in srgb,var(--surface-3),#fff 3%)}
+  :root:not([data-theme="light"]) #sh-period .pkcta .pk-pri{background:linear-gradient(180deg,hsl(163 55% 34%),hsl(163 55% 30%));box-shadow:inset 0 1px 0 rgba(255,255,255,.10)}
+  :root:not([data-theme="light"]) #sh-period .pkcta .pk-pri.off{opacity:.30}
   :root:not([data-theme="light"]) .fld{background:color-mix(in srgb,var(--card),#000 calc(var(--dWellDip)*1%));
     box-shadow:inset 0 2px calc(var(--dWellInset)*1px) rgba(0,0,0,.55),inset 0 -1px 0 rgba(255,255,255,var(--dWellLight));
     border:1px solid color-mix(in srgb,var(--border),#000 20%)}
@@ -1120,8 +1126,8 @@ a.mi{text-decoration:none;color:inherit}
   <div class="eb" id="pkVEb">Візити</div>
   <div class="gcard vlist" id="pkList"></div>
   <div class="pkcta">
-    <button class="sec pressable" id="pkReset">Скинути</button>
-    <button class="pri pressable" id="pkOk">Показати</button>
+    <button class="pk-sec pressable" id="pkReset">Скинути</button>
+    <button class="pk-pri pressable" id="pkOk">Показати</button>
   </div>
 </div>
 
@@ -1330,7 +1336,7 @@ function updBrandMoney(bk){
   setMoney(document.getElementById('bm-'+bk),'fb',brandMoney(bk,tierForBrand(bk,ph),curVals(curPx)));
 }
 
-const APP_BUILD = { ver:'v2.13.0', build:'stockcheck-dpicker.b24', date:'28.07.2026' }; // wsd 10.6 — b24: порт пікера візитів (модель anchor, stagebench v2_3) · нова мова «порівняння/було→стало» · netBtn: тост+aria на Фармастор
+const APP_BUILD = { ver:'v2.14.0', build:'stockcheck-pwa.b25', date:'28.07.2026' }; // wsd 10.6 — b25: PWA-гігієна — manifest.json окремим файлом (був data:-URI), apple-touch-icon + favicon, cache-bust ?v=b25
 const NETWORK = { name:'StockCheck', tagline:'інструмент залишків', tg:'t.me/Konst_Andre' };
 const ORDER_FORM_URL = 'https://rbcom-my.sharepoint.com/:x:/r/personal/yuliia_syniuhina_reckitt_com/_layouts/15/Doc.aspx?sourcedoc=%7B361AB6BF-2AE9-410C-A81F-2AA3502C4EAD%7D&file=%25u0424%25u0430%25u0440%25u043c%25u0430%25u0441%25u0442%25u043e%25u0440%20%25u0437%25u0430%25u043c%25u043e%25u0432%25u043b%25u0435%25u043d%25u043d%25u044f%20%25u0442%25u0442.xlsx&wdLOR=c06833412-A6C7-4B15-AE95-76BCF4AB9FD6&openShare=true&fromShare=true&action=default&mobileredirect=true';
 const MSL_BY_K={}; MSL.forEach(function(s){MSL_BY_K[s.k]=s;});
@@ -2031,11 +2037,14 @@ function cmpStHeadHTML(wcls,word){
 /* b24 — пігулка стала входом у пікер. При пулі рівно з 2 візитів вибирати нема з чого:
    рендеримо <span class="dpill static"> без шеврона. Клікабельна кнопка, що відкриває
    шіт, у якому єдина можлива пара вже стоїть, — глухий кут (мертва кнопка, wsd 3.9).
-   ⚠ Поріг саме <3, не <2: у пулі рівно з 2 візитів пара вже єдина. Стенд v2_3 ніс тут
-   <2 — тобто ЛОК §1.4 («N=2 → пігулка статична») стендом не був реалізований і на
-   девайсі цей край не перевірявся. Порт іде за ЛОКом; спіймано runtime-матрицею b24. */
+   ⚠ b24_1 · РЕВЕРС ЛОКу §1.4 (device-арбітраж). Спершу поріг був <3 («N=2 → статична»).
+   Девайс показав інше: користувач ТЯГНЕТЬСЯ до пігулки саме щоб ПЕРЕВІРИТИ, які дати
+   взято — це запит на підтвердження, не на вибір. Мертва пігулка при першому ж вході
+   вчить «сюди не тиснути», і згодом, коли візитів стане більше, він туди не повернеться.
+   Ціна відкритого шіта при N=2 — нуль; ціна втраченої звички — увесь механізм.
+   Поріг <2 фактично недосяжний (openCmp не пускає при пулі <2) — гілка страхувальна. */
 function cmpDpillHTML(fromV,toV){
-  var st=CMP.pool.length<3, tag=st?'span':'button';   // ≤2 у пулі = єдина можлива пара
+  var st=CMP.pool.length<2, tag=st?'span':'button';   // <2 недосяжно (гейт openCmp) — гілка лишається як страхувальна
   var lbl=fmtDate(fromV.date)+' → '+fmtDate(toV.date);
   return '<'+tag+' class="dpill'+(st?' static':' pressable')+'"'
     +(st?'':' onclick="openPeriod()"')
@@ -2213,7 +2222,7 @@ function renderPk(){
   document.getElementById('pkVEb').textContent='Візити · '+pool.length;
 }
 function openPeriod(){
-  if(!CMP.pool||CMP.pool.length<3)return;   // ≤2 → вибирати нема з чого (див. cmpDpillHTML)
+  if(!CMP.pool||CMP.pool.length<2)return;
   PK={fi:CMP.fi,ti:CMP.ti,anchor:null};
   renderPk();
   openNamed('sh-period');
