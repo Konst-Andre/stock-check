@@ -233,6 +233,88 @@ a.mi{text-decoration:none;color:inherit}
 [data-theme="dark"] .doact{color:var(--accent);background:color-mix(in srgb,var(--accent) 16%,transparent)}
 .mi.danger .mi-ic{color:var(--crit);background:color-mix(in srgb,var(--crit) 10%,transparent)}
 .mi.danger b{color:var(--crit)}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   NODE 2.2 · ОБСЛУГОВУВАННЯ (порт зі stage-bench maint_v3, значення §2 самері)
+   Крапка · антистрибок · стани рядка · інструкція · ефект duo.
+   ⚠ кожне [data-theme="dark"] тут ПРОДУБЛЬОВАНО в @media(prefers-color-scheme)
+     нижче — A69 auto-dark parity (різниця стенд↔продукт, стенд дубля не має).
+   ═══════════════════════════════════════════════════════════════════════════ */
+:root{
+  /* крапка — device-lock: size 10 · dx 3 · dy 3 · col accent · ring OFF · pulse OFF */
+  --dotS:10px; --dotX:3px; --dotY:3px; --dotRW:0px;
+  /* антистрибок — слот-хвіст 84px тримає текстову колонку рівно на 187px (Д1) */
+  --miH:54px; --actW:84px;
+  /* ефект duo — device-lock: delay 120 (у JS) · dur 990 · rep 3 · int 60 · duo 3% */
+  --fxDur:990ms; --fxRep:3; --fxInt:60; --fxDuo:3;
+}
+
+/* ─── тиха крапка апдейта: три кебаби (острівець 44 + два хедери 38) ─── */
+.kdot{display:none;position:absolute;top:var(--dotY);right:var(--dotX);
+  width:var(--dotS);height:var(--dotS);border-radius:50%;background:var(--accent);
+  pointer-events:none;box-shadow:0 0 0 var(--dotRW) var(--dotRC,var(--bg))}
+.kdot.on{display:block}
+.isl-menu{position:relative}          /* ⚠ у b25 його не було — без нього крапка тікає з кнопки */
+.isl-menu .kdot{--dotRC:var(--surface-2)}
+.icon-btn .kdot{--dotRC:var(--bg)}
+
+/* ─── антистрибок (device-знахідка 28.07): бейдж забирає ширину в текстової
+       колонки → підпис іде у 2-й рядок → рядок росте. Три замки:
+       слот-хвіст фіксованої ширини · min-height рядка · без переносу.
+       Копія переписана під 187px ≈ 34 симв. → ellipsis тут аварійна сітка (Д1). ─── */
+#sheet .mi{min-height:var(--miH)}
+#sheet .mi-tx b,#sheet .mi-tx span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mi-act{flex:none;display:flex;align-items:center;justify-content:flex-end;min-width:var(--actW)}
+
+/* ─── стани рядка версії ─── */
+.mi.upd .mi-ic{color:var(--accent);background:color-mix(in srgb,var(--accent) 10%,transparent)}
+.mi.warnst .mi-ic{color:var(--warn);background:color-mix(in srgb,var(--warn) 12%,transparent)}
+.mi.quiet{cursor:default}
+.mi.quiet b{color:var(--text-2);font-weight:700}
+
+/* ─── інструкція «Додати на екран Додому» · стиль glyph + крок 0 банером ─── */
+.ins-hd{padding:4px 18px 2px;font:800 17px/1.25 var(--font);color:var(--text)}
+.ins-sub{padding:4px 18px 10px;font:600 12px/1.45 var(--font);color:var(--muted)}
+.step0b{margin:0 12px 10px;padding:10px 12px;border-radius:12px;display:flex;gap:10px;align-items:flex-start;
+  background:color-mix(in srgb,var(--warn) 12%,transparent);border:1px solid color-mix(in srgb,var(--warn) 34%,transparent)}
+.step0b .s0i{flex:none;color:var(--warn);display:flex;margin-top:1px}
+.step0b .s0i svg{width:17px;height:17px}
+.step0b .s0t{font:700 12px/1.4 var(--font);color:var(--text)}
+.step0b .s0t span{display:block;font-weight:600;color:var(--text-2);margin-top:3px}
+.stp{display:flex;gap:11px;align-items:flex-start;padding:11px 13px;border-bottom:1px solid var(--border-subtle)}
+[data-theme="dark"] .stp{border-bottom-color:var(--border)}
+.stp:last-child{border-bottom:none}
+.stp .tx{flex:1;font:700 13px/1.35 var(--font);color:var(--text)}
+.stp .tx span{display:block;font:600 11.5px/1.35 var(--font);color:var(--muted);margin-top:3px}
+.stp .gl{flex:none;width:30px;height:30px;border-radius:9px;display:grid;place-items:center;
+  background:color-mix(in srgb,#fff 80%,var(--surface-3));border:1px solid rgba(20,50,42,.12);color:var(--text-2)}
+[data-theme="dark"] .stp .gl{background:color-mix(in srgb,#fff 9%,var(--surface-3));border-color:rgba(255,255,255,.045)}
+.stp .gl svg{width:16px;height:16px}
+/* крок 0 у glyph-стилі не має цифри — позначкою лишається тон, інакше
+   обов'язковий передкрок мовчки прирівнюється до звичайного */
+.stp.zero .gl{color:var(--warn);background:color-mix(in srgb,var(--warn) 12%,transparent);
+  border-color:color-mix(in srgb,var(--warn) 34%,transparent)}
+.ins-cta{margin:14px 12px 2px;display:flex;gap:8px}
+.ins-cta button{flex:1;border:none;border-radius:12px;padding:13px 0;font:800 13.5px/1 var(--font);cursor:pointer}
+.ins-cta .sec{background:var(--surface-3);color:var(--text-2);border:1px solid var(--border)}
+.ins-cta .pri{background:var(--accent);color:#fff}
+[data-theme="dark"] .ins-cta .pri{background:linear-gradient(180deg,hsl(163 55% 34%),hsl(163 55% 30%))}
+.ins-cta .sec.is-pressed,.ins-cta .pri.is-pressed{transform:scale(.96);transition-duration:.06s}
+
+/* ─── ефект duo (ореол + мікропульс) · грає ПІСЛЯ осідання шіта (Д3) ───
+   Клас вішається на body, знімається на закритті → ефект можна повторити.
+   Ореол праворуч підрізається .gcard{overflow:hidden} — так само, як на стенді,
+   де значення й арбітрувались; паритет свідомий, не недогляд. */
+.fx-duo .mi.upd .doact{animation:fxGlow var(--fxDur) ease-in-out var(--fxRep),
+  fxDuo var(--fxDur) ease-in-out var(--fxRep)}
+@keyframes fxGlow{0%,100%{box-shadow:0 0 0 0 transparent}
+  50%{box-shadow:0 0 calc(var(--fxInt)/4 * 1px) calc(var(--fxInt)/30 * 1px) color-mix(in srgb,var(--accent) 55%,transparent)}}
+@keyframes fxDuo{0%,100%{transform:scale(1)}50%{transform:scale(calc(1 + var(--fxDuo)/100))}}
+/* reduced-motion: рух геть, ореол лишається робочою заміною (§3 п.8) */
+@media(prefers-reduced-motion:reduce){
+  .fx-duo .mi.upd .doact{animation:fxGlow var(--fxDur) ease-in-out var(--fxRep)}
+}
+/* ══════════════════════ кінець NODE 2.2 CSS ══════════════════════ */
 .throw{display:flex;align-items:center;gap:12px;padding:11px 13px 3px}
 .thlbl{flex:1;font:700 13.5px/1 var(--font);color:var(--text)}
 .thseg{display:flex;gap:0;margin:0 13px;padding:3px;border-radius:11px;position:relative;overflow:hidden;
@@ -744,6 +826,11 @@ a.mi{text-decoration:none;color:inherit}
   :root:not([data-theme="light"]) .row .rpk{background:var(--surface-3);border-color:var(--border)}
   /* Node 5 TopArea auto-dark parity — bc/chip/srch/act тепер несуть --m-* токени (γ′), оверрайди зайві */
   :root:not([data-theme="light"]) .chip.on{background:linear-gradient(180deg,hsl(163 46% 50%),hsl(163 46% 44%));color:#08120e;box-shadow:inset 0 1px 0 rgba(255,255,255,.16)}
+  /* NODE 2.2 — три дзеркала. Решта правил блоку тримається на токенах
+     (--warn/--accent/--text-2/color-mix) і перемикається сама. */
+  :root:not([data-theme="light"]) .stp{border-bottom-color:var(--border)}
+  :root:not([data-theme="light"]) .stp .gl{background:color-mix(in srgb,#fff 9%,var(--surface-3));border-color:rgba(255,255,255,.045)}
+  :root:not([data-theme="light"]) .ins-cta .pri{background:linear-gradient(180deg,hsl(163 55% 34%),hsl(163 55% 30%))}
 }
 
 
@@ -977,7 +1064,7 @@ a.mi{text-decoration:none;color:inherit}
             <button class="netbtn pressable" aria-label="Мережа: Фармастор" id="netBtn">
               <span class="ntile"><span class="bscale"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><rect x="8" y="2.4" width="8" height="19.2" rx="4" fill="none" stroke="var(--ntile-gl)" stroke-width="2.7"/><rect x="2.4" y="8" width="19.2" height="8" rx="4" fill="none" stroke="var(--ntile-gl)" stroke-width="2.7"/></svg></span></span>
             </button>
-            <button class="isl-menu pressable" aria-label="Меню" onclick="openSheet()"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.95"/><circle cx="12" cy="12" r="1.95"/><circle cx="19" cy="12" r="1.95"/></svg></button>
+            <button class="isl-menu pressable js-keb" aria-label="Меню" onclick="openSheet()"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.95"/><circle cx="12" cy="12" r="1.95"/><circle cx="19" cy="12" r="1.95"/></svg><span class="kdot js-kdot"></span></button>
           </div>
         </div>
        </div>
@@ -994,7 +1081,7 @@ a.mi{text-decoration:none;color:inherit}
             <div class="t" id="fillAddr">Аптека</div>
             <div class="s" id="fillSub">—</div>
           </div>
-          <button class="icon-btn pressable" aria-label="Меню" onclick="openSheet()"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.95"/><circle cx="12" cy="12" r="1.95"/><circle cx="19" cy="12" r="1.95"/></svg></button>
+          <button class="icon-btn pressable js-keb" aria-label="Меню" onclick="openSheet()"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.95"/><circle cx="12" cy="12" r="1.95"/><circle cx="19" cy="12" r="1.95"/></svg><span class="kdot js-kdot"></span></button>
         </div>
         <div class="hdr-sub">
           <span class="pair fa"><span class="tchip" id="chipOtc">OTC —</span><span class="money fa empty" id="moneyOtc"></span></span>
@@ -1023,7 +1110,7 @@ a.mi{text-decoration:none;color:inherit}
             <div class="t" id="cmpAddr">Динаміка</div>
             <div class="s" id="cmpSub">—</div>
           </div>
-          <button class="icon-btn pressable" aria-label="Меню" onclick="openSheet()"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.95"/><circle cx="12" cy="12" r="1.95"/><circle cx="19" cy="12" r="1.95"/></svg></button>
+          <button class="icon-btn pressable js-keb" aria-label="Меню" onclick="openSheet()"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.95"/><circle cx="12" cy="12" r="1.95"/><circle cx="19" cy="12" r="1.95"/></svg><span class="kdot js-kdot"></span></button>
         </div>
       </header>
       <div id="cmp-sum"></div>
@@ -1056,12 +1143,24 @@ a.mi{text-decoration:none;color:inherit}
     <a class="mi pressable js-order-link" target="_blank" rel="noopener">
       <span class="mi-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></span>
       <span class="mi-tx"><b>Excel онлайн</b><span>Форма замовлення для вставки</span></span>
-      <span class="doact">Відкрити</span>
+      <span class="mi-act"><span class="doact">Відкрити</span></span>
     </a>
     <div class="mi pressable" onclick="exportCSV()">
       <span class="mi-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></span>
       <span class="mi-tx"><b>Експорт CSV</b><span id="csvSub">Ця аптека</span></span>
-      <span class="doact">CSV</span>
+      <span class="mi-act"><span class="doact">CSV</span></span>
+    </div>
+  </div>
+
+  <!-- NODE 2.2 · ОБСЛУГОВУВАННЯ. Вміст перебудовує renderMaint(); статичний рядок
+       нижче — це КОРЕКТНИЙ перший кадр (стан idle: перевірка ще не відповіла),
+       а не заглушка, тож підміни-миготіння немає. -->
+  <div class="eb" id="mtEb">Обслуговування</div>
+  <div class="gcard" id="mtCard">
+    <div class="mi quiet">
+      <span class="mi-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.6-6.4"/><polyline points="21 4 21 10 15 10"/></svg></span>
+      <span class="mi-tx"><b id="mtIdleVer">Версія</b><span>Перевіряємо оновлення…</span></span>
+      <span class="mi-act"></span>
     </div>
   </div>
 
@@ -1070,12 +1169,12 @@ a.mi{text-decoration:none;color:inherit}
     <div class="mi pressable" onclick="openAbout()">
       <span class="mi-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg></span>
       <span class="mi-tx"><b>Про додаток</b><span id="aboutVer">Версія — шелл</span></span>
-      <span class="mi-chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>
+      <span class="mi-act"><span class="mi-chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span></span>
     </div>
     <div class="mi danger pressable" onclick="clearData()">
       <span class="mi-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></span>
       <span class="mi-tx"><b id="clearLbl">Очистити всі дані</b><span id="clearSub">Усі аптеки та візити</span></span>
-      <span class="mi-chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>
+      <span class="mi-act"><span class="mi-chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span></span>
     </div>
   </div>
 </div>
@@ -1096,6 +1195,20 @@ a.mi{text-decoration:none;color:inherit}
     <div class="kv"><span>Версія</span><b id="ab-ver">—</b></div>
     <div class="kv"><span>Білд</span><b id="ab-build">—</b></div>
     <div class="kv"><span>Дата</span><b id="ab-date">—</b></div>
+  </div>
+</div>
+
+<!-- NODE 2.2 · інструкція встановлення. Тіло (#insBody) будує renderInstall():
+     набір кроків залежить від середовища, тож літералів кроків тут немає.
+     ⚠ у коментарях розмітки не писати літеральних тегів — tag-balance їх рахує (b24) -->
+<div class="sheet" id="sh-install" role="dialog" aria-label="Додати на екран Додому">
+  <div class="grip"></div>
+  <div class="ins-hd" id="insHd">Додати на екран Додому</div>
+  <div class="ins-sub" id="insSub">Кілька кроків у Safari — далі StockCheck відкривається з робочого столу.</div>
+  <div id="insBody"></div>
+  <div class="ins-cta">
+    <button class="sec pressable" onclick="closeSheets()">Закрити</button>
+    <button class="pri pressable" onclick="closeSheets()">Готово</button>
   </div>
 </div>
 
@@ -1336,7 +1449,7 @@ function updBrandMoney(bk){
   setMoney(document.getElementById('bm-'+bk),'fb',brandMoney(bk,tierForBrand(bk,ph),curVals(curPx)));
 }
 
-const APP_BUILD = { ver:'v2.14.0', build:'stockcheck-pwa.b25', date:'28.07.2026' }; // wsd 10.6 — b25: PWA-гігієна — manifest.json окремим файлом (був data:-URI), apple-touch-icon + favicon, cache-bust ?v=b25
+const APP_BUILD = { ver:'v2.15.0', build:'stockcheck-pwa.b26', date:'29.07.2026' }; // wsd 10.6 — b26: Node 2.2 блок «Обслуговування» — самоперевірка версії + «Додати на екран» (порт зі stage-bench maint_v3)
 const NETWORK = { name:'StockCheck', tagline:'інструмент залишків', tg:'t.me/Konst_Andre' };
 const ORDER_FORM_URL = 'https://rbcom-my.sharepoint.com/:x:/r/personal/yuliia_syniuhina_reckitt_com/_layouts/15/Doc.aspx?sourcedoc=%7B361AB6BF-2AE9-410C-A81F-2AA3502C4EAD%7D&file=%25u0424%25u0430%25u0440%25u043c%25u0430%25u0441%25u0442%25u043e%25u0440%20%25u0437%25u0430%25u043c%25u043e%25u0432%25u043b%25u0435%25u043d%25u043d%25u044f%20%25u0442%25u0442.xlsx&wdLOR=c06833412-A6C7-4B15-AE95-76BCF4AB9FD6&openShare=true&fromShare=true&action=default&mobileredirect=true';
 const MSL_BY_K={}; MSL.forEach(function(s){MSL_BY_K[s.k]=s;});
@@ -2347,6 +2460,301 @@ var ISLC=(function(){
   var _rh=renderHome; renderHome=function(){ _rh.apply(this,arguments); ISLC.guard(); };
   var _rt=renderTop;  renderTop =function(){ _rt.apply(this,arguments);  ISLC.remeasure(); };
   var _sh=show;       show      =function(id){ _sh.apply(this,arguments); if(id==='s-home')ISLC.reset(); };
+})();
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   NODE 2.2 · ОБСЛУГОВУВАННЯ — самоперевірка версії + «Додати на екран Додому»
+   Порт зі stage-bench maint_v3. Значення §2 самері (device-lock 29.07).
+   Самодостатній модуль: назовні віддає лише обгортки над openSheet/closeSheet/
+   closeSheets — тіла наявних функцій не переписуються (wsd 10.7).
+   ══════════════════════════════════════════════════════════════════════════════ */
+(function(){
+  var $=function(id){return document.getElementById(id);};
+
+  /* ── гліфи: інлайн-SVG, без емодзі (правило продукту) ────────────────────── */
+  var MG={
+    refresh:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.6-6.4"/><polyline points="21 4 21 10 15 10"/></svg>',
+    check:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="8.5 12.2 11 14.7 15.7 9.6"/></svg>',
+    cloudoff:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 16.5a3.5 3.5 0 0 0-1.6-6.6A5.5 5.5 0 0 0 7 8.2"/><path d="M6.5 9A4.5 4.5 0 0 0 7 18h9"/><line x1="3" y1="3" x2="21" y2="21"/></svg>',
+    home:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1z"/></svg>',
+    share:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3.5"/><polyline points="8 7 12 3 16 7"/><path d="M6 12H4.6A1.6 1.6 0 0 0 3 13.6v6.8A1.6 1.6 0 0 0 4.6 22h14.8a1.6 1.6 0 0 0 1.6-1.6v-6.8A1.6 1.6 0 0 0 19.4 12H18"/></svg>',
+    scroll:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2.5"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/><polyline points="9.5 16 12 18.5 14.5 16"/></svg>',
+    add:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>',
+    dots:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><circle cx="8" cy="12" r=".9" fill="currentColor"/><circle cx="12" cy="12" r=".9" fill="currentColor"/><circle cx="16" cy="12" r=".9" fill="currentColor"/></svg>',
+    warn:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4.5 21 20H3z"/><line x1="12" y1="10" x2="12" y2="14.5"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
+    chev:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>'
+  };
+
+  /* ── стан. env НЕ зберігається — обчислюється щоразу (Д4: детект спроможності,
+        не платформи; факт події важливіший за будь-який запам'ятований прапорець) ── */
+  var MT={ ver:'idle', newVer:'', newBuild:'', bip:null, installed:false, pending:null, last:0 };
+
+  function mtStandalone(){
+    try{ if(window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) return true; }catch(e){}
+    return navigator.standalone===true;
+  }
+  function mtIOS(){
+    return /iP(hone|od|ad)/.test(navigator.userAgent)
+        || (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1);   /* iPad з desktop-UA */
+  }
+  /* [07.2026] Telegram-webview — ЄДИНИЙ дозволений UA-виняток (Д2/Д4): пункту
+     «На Початковий екран» там немає взагалі, і жоден API про це не повідомляє.
+     Три сигнали, бо iOS-webview не завжди несе «Telegram» у UA.
+     Промах деградує м'яко: користувач отримає звичайну iOS-інструкцію без кроку 0.
+     Перевірити при мажорному оновленні Telegram. */
+  function mtTG(){
+    try{
+      if(/Telegram/i.test(navigator.userAgent)) return true;
+      if(typeof window.TelegramWebviewProxy!=='undefined') return true;
+      if(window.TelegramWebview) return true;
+    }catch(e){}
+    return false;
+  }
+  function mtEnv(){
+    if(MT.installed || mtStandalone()) return 'standalone';
+    if(MT.bip) return 'android';                       /* подія прилетіла → КНОПКА */
+    if(mtIOS()) return mtTG() ? 'telegram' : 'safari';
+    return 'android_np';                               /* не iOS, події не було → інструкція */
+  }
+
+  /* ── рядок версії: варіант B — живе завжди, показує стан ─────────────────── */
+  function mtUpdRow(){
+    if(MT.ver==='upd'){
+      return '<div class="mi upd pressable" id="miUpd"><span class="mi-ic">'+MG.refresh+'</span>'
+        +'<span class="mi-tx"><b>Оновити до '+esc(MT.newVer||'нової версії')+'</b>'
+        +'<span>Зараз '+esc(APP_BUILD.ver)+' \u00b7 з перезапуском</span></span>'
+        +'<span class="mi-act"><span class="doact">Оновити</span></span></div>';
+    }
+    if(MT.ver==='ok'){
+      return '<div class="mi quiet"><span class="mi-ic">'+MG.check+'</span>'
+        +'<span class="mi-tx"><b>Версія актуальна</b>'
+        +'<span>'+esc(APP_BUILD.ver)+' \u00b7 щойно перевірено</span></span>'
+        +'<span class="mi-act"></span></div>';
+    }
+    if(MT.ver==='fail'){
+      return '<div class="mi warnst pressable" id="miRetry"><span class="mi-ic">'+MG.cloudoff+'</span>'
+        +'<span class="mi-tx"><b>Не вдалося перевірити</b>'
+        +'<span>Немає зв\u0027язку \u00b7 спробує пізніше</span></span>'
+        +'<span class="mi-act"><span class="doact">Ще раз</span></span></div>';
+    }
+    return '<div class="mi quiet"><span class="mi-ic">'+MG.refresh+'</span>'
+      +'<span class="mi-tx"><b id="mtIdleVer">Версія '+esc(APP_BUILD.ver)+'</b>'
+      +'<span>Перевіряємо оновлення\u2026</span></span>'
+      +'<span class="mi-act"></span></div>';
+  }
+
+  function mtInsRow(){
+    var env=mtEnv();
+    if(env==='android'){
+      return '<div class="mi pressable" id="miIns"><span class="mi-ic">'+MG.home+'</span>'
+        +'<span class="mi-tx"><b>Встановити застосунок</b><span>Запуск без браузера</span></span>'
+        +'<span class="mi-act"><span class="doact">Встановити</span></span></div>';
+    }
+    var sub = env==='telegram'   ? 'Спершу відкрити в Safari'
+            : env==='android_np' ? 'Через меню браузера'
+            :                      'Без адресного рядка';
+    return '<div class="mi pressable" id="miIns"><span class="mi-ic">'+MG.home+'</span>'
+      +'<span class="mi-tx"><b>Додати на екран Додому</b><span>'+sub+'</span></span>'
+      +'<span class="mi-act"><span class="mi-chev">'+MG.chev+'</span></span></div>';
+  }
+
+  function renderMaint(){
+    var card=$('mtCard'); if(!card) return;
+    var h=mtUpdRow();
+    if(mtEnv()!=='standalone') h+=mtInsRow();          /* у standalone рядок зайвий */
+    card.innerHTML=h;
+    var u=$('miUpd');   if(u) u.addEventListener('click',mtDoUpdate);
+    var r=$('miRetry'); if(r) r.addEventListener('click',function(){ mtCheck(true); });
+    var i=$('miIns');   if(i) i.addEventListener('click', mtEnv()==='android' ? mtDoInstall : openInstall);
+    mtApplyDot();
+  }
+
+  /* ── крапка: тихий сигнал апдейта на всіх трьох кебабах ──────────────────── */
+  function mtApplyDot(){
+    var on = MT.ver==='upd';
+    var list=document.querySelectorAll('.js-kdot');
+    Array.prototype.forEach.call(list,function(d){ d.classList.toggle('on',on); });
+  }
+
+  /* ── інструкція ─────────────────────────────────────────────────────────── */
+  function mtSteps(){
+    var env=mtEnv(), a=[];
+    if(env==='android_np'){
+      /* назви пунктів НЕ цитуємо дослівно — скріншота Android немає (Д2) */
+      a.push({g:MG.dots,t:'Меню браузера — «⋮» вгорі праворуч',
+        s:'Три крапки в правому верхньому куті Chrome.'});
+      a.push({g:MG.home,t:'Пункт про встановлення застосунку',
+        s:'Формулювання різниться між версіями браузера; це пункт із іконкою додавання на екран.'});
+      a.push({g:MG.add,t:'Підтвердити',
+        s:'Іконка стане на головний екран; далі запуск звідти.'});
+      return a;
+    }
+    /* кроки iOS — із вбудованим запасним шляхом, БЕЗ гілки по версії iOS:
+       лейаут Safari обирає користувач, не версія, і детектувати його нічим */
+    a.push({g:MG.share,t:'Тап на «Поділитися»',
+      s:'Стрілка вгору в нижній панелі. Не бачиш стрілки — тапни «…» біля адреси, там «Поділитися».'});
+    a.push({g:MG.scroll,t:'Знайти «На Початковий екран»',
+      s:'Прогорни список дій. Немає в списку — тапни «Ще» в кінці ряду.'});
+    a.push({g:MG.add,t:'«Додати» вгорі праворуч',
+      s:'Якщо в діалозі є перемикачі — не чіпай їх, лиши як є.'});
+    return a;
+  }
+  function renderInstall(){
+    var body=$('insBody'); if(!body) return;
+    var env=mtEnv(), h='';
+    if(env==='telegram'){                              /* крок 0 — банером, не кроком */
+      h+='<div class="step0b"><span class="s0i">'+MG.warn+'</span>'
+        +'<span class="s0t">Спершу відкрий у Safari'
+        +'<span>Ти зараз у браузері Telegram — у ньому пункту «На Початковий екран» немає взагалі. '
+        +'Тап «…» внизу праворуч → «Відкрити в Safari».</span></span></div>';
+    }
+    h+='<div class="gcard">';
+    mtSteps().forEach(function(s){
+      h+='<div class="stp"><span class="gl">'+s.g+'</span>'
+        +'<span class="tx">'+s.t+'<span>'+s.s+'</span></span></div>';
+    });
+    h+='</div>';
+    body.innerHTML=h;
+    $('insHd').textContent = env==='android_np' ? 'Встановити застосунок' : 'Додати на екран Додому';
+    $('insSub').textContent = env==='telegram'
+      ? 'У Telegram потрібен зайвий крок — інакше пункту просто не буде.'
+      : env==='android_np'
+        ? 'Браузер не запропонував встановлення сам — тоді через його меню.'
+        : 'Кілька кроків у Safari — далі StockCheck відкривається з робочого столу.';
+  }
+
+  /* ── ЗАМОРОЗКА (Д5): асинхронний результат не вставляє рядок під палець ──── */
+  function mtAnySheet(){ return !!document.querySelector('.sheet.on'); }
+  function mtSet(k,v){
+    if(mtAnySheet()){ MT.pending=MT.pending||{}; MT.pending[k]=v; return; }
+    MT[k]=v; mtApply();
+  }
+  function mtApply(){ renderMaint(); renderInstall(); }
+  function mtFlush(){
+    if(!MT.pending) return;
+    var p=MT.pending; MT.pending=null;
+    Object.keys(p).forEach(function(k){ MT[k]=p[k]; });
+    mtApply();
+  }
+  /* Гард зливу. closeSheet() у продукті — це ще й ПЕРШИЙ КРОК передачі
+     меню→About / меню→confirm / меню→install. Злити стан прямо на closeSheet
+     означало б перебудувати рядок за 120 мс до появи наступного шіта — рівно те,
+     від чого заморозка й захищає. 320 мс перекриває хід шіта (260) і паузу
+     передачі (120), а умова «жоден шіт не відкритий» відрізняє справжнє
+     закриття від проміжного. */
+  var mtFlushT=null;
+  function mtScheduleFlush(){
+    clearTimeout(mtFlushT);
+    mtFlushT=setTimeout(function(){ if(!mtAnySheet()) mtFlush(); },320);
+  }
+
+  /* ── САМОПЕРЕВІРКА ВЕРСІЇ ───────────────────────────────────────────────── */
+  var MT_MIN=5*60*1000;                                /* тротлінг visibilitychange */
+  function mtCheck(force){
+    var now=Date.now();
+    if(!force && now-MT.last<MT_MIN) return;
+    MT.last=now;
+    if(!window.fetch){ mtSet('ver','fail'); return; }
+    /* location.pathname, а не './index.html': у standalone start_url — тека,
+       і pathname віддає той самий документ у обох випадках, не залежачи від імені файлу */
+    fetch(location.pathname+'?cb='+now,{cache:'no-store'})
+      .then(function(r){ if(!r.ok) throw new Error('http'); return r.text(); })
+      .then(function(txt){
+        /* ⚠ ПАСТКА САМО-ЗБІГУ: сторінка читає власний текст, у якому лежить і цей
+           код. Патерн зібраний конкатенацією — суцільного літерала в файлі не
+           існує, тож знайти сам себе він фізично не може. Порядок рядків
+           (APP_BUILD вище) — слабша, друга страховка: її ламає будь-який патч. */
+        var q=String.fromCharCode(39);
+        var reB=new RegExp('build'+'\\s*:\\s*'+q+'([^'+q+']+)'+q);
+        var reV=new RegExp('ver'+'\\s*:\\s*'+q+'(v[0-9][^'+q+']*)'+q);
+        var mb=reB.exec(txt); if(!mb) throw new Error('nomatch');
+        var mv=reV.exec(txt);
+        MT.newBuild=mb[1]; MT.newVer=mv?mv[1]:'';
+        mtSet('ver', mb[1]===APP_BUILD.build ? 'ok' : 'upd');
+      })
+      .catch(function(){ mtSet('ver','fail'); });
+  }
+  function mtDoUpdate(){
+    var v=MT.newBuild||('t'+Date.now());
+    location.replace(location.pathname+'?v='+encodeURIComponent(v));
+  }
+
+  /* ── ANDROID: детект по ФАКТУ події, не по бренду/версії (Д4) ───────────── */
+  window.addEventListener('beforeinstallprompt',function(e){
+    e.preventDefault();                                /* перехоплюємо банер Chrome (§1-7) */
+    mtSet('bip',e);
+  });
+  window.addEventListener('appinstalled',function(){
+    mtSet('installed',true); mtSet('bip',null);        /* рядок зникає без перезавантаження */
+  });
+  function mtDoInstall(){
+    var e=MT.bip; if(!e){ openInstall(); return; }
+    try{ e.prompt(); }catch(err){}
+    var done=function(){ mtSet('bip',null); };         /* подія одноразова, повторно не годиться */
+    if(e.userChoice && e.userChoice.then) e.userChoice.then(done,done); else done();
+  }
+
+  /* ── ДВИГУН ЕФЕКТУ duo (Д3): грає ПІСЛЯ осідання шіта, ніколи одночасно ──
+     transitionend — основний канал, setTimeout(340) — страхувальний (подія не
+     приходить, коли переходити не було чому: шіт уже відкритий, reduced-motion,
+     переривання), fxArmed гарантує рівно один запуск із двох. */
+  var mtSheet=$('sheet'), fxArmed=false, fxT=null, fxClr=null;
+  var FX_DELAY=120, FX_TOTAL=990*3+400;
+  function fxStrip(){ document.body.classList.remove('fx-duo'); }
+  function mtDisarm(){ fxArmed=false; clearTimeout(fxT); fxStrip(); }
+  function fxFire(){
+    if(!fxArmed) return;
+    fxArmed=false; clearTimeout(fxT);
+    if(MT.ver!=='upd') return;                         /* коли=every, але лише за реального апдейта */
+    setTimeout(function(){
+      if(!mtSheet.classList.contains('on')) return;
+      fxStrip(); void document.body.offsetWidth;       /* reflow — інакше animation не рестартує */
+      document.body.classList.add('fx-duo');
+      clearTimeout(fxClr); fxClr=setTimeout(fxStrip,FX_TOTAL);
+    },FX_DELAY);
+  }
+  if(mtSheet){
+    mtSheet.addEventListener('transitionend',function(e){
+      if(e.target!==mtSheet || e.propertyName!=='transform') return;
+      if(!mtSheet.classList.contains('on')) return;    /* закриття — не тригер */
+      fxFire();
+    });
+  }
+
+  /* ── шіт інструкції: передача меню→install за зразком A58 ───────────────── */
+  function openInstall(){
+    mtDisarm();
+    closeSheet();
+    setTimeout(function(){
+      $('scrim').classList.add('on');
+      $('sh-install').classList.add('on');
+    },120);
+  }
+
+  /* ── обгортки над наявними функціями (10.7: інтерфейс, не переписування) ── */
+  var _openSheet=openSheet;
+  openSheet=function(){
+    _openSheet.apply(this,arguments);
+    fxArmed=true; clearTimeout(fxT); fxT=setTimeout(fxFire,340);
+  };
+  var _closeSheet=closeSheet;
+  closeSheet=function(){
+    _closeSheet.apply(this,arguments);
+    mtDisarm(); mtScheduleFlush();
+  };
+  var _closeSheets=closeSheets;
+  closeSheets=function(){
+    _closeSheets.apply(this,arguments);
+    var si=$('sh-install'); if(si) si.classList.remove('on');
+    mtDisarm(); mtScheduleFlush();
+  };
+
+  /* ── старт ──────────────────────────────────────────────────────────────── */
+  document.addEventListener('visibilitychange',function(){
+    if(document.visibilityState==='visible') mtCheck(false);
+  });
+  mtApply();
+  setTimeout(function(){ mtCheck(true); },800);        /* не конкуруємо з першим кадром */
 })();
 
 </script>
