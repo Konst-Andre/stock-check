@@ -294,12 +294,18 @@ a.mi{text-decoration:none;color:inherit}
    обов'язковий передкрок мовчки прирівнюється до звичайного */
 .stp.zero .gl{color:var(--warn);background:color-mix(in srgb,var(--warn) 12%,transparent);
   border-color:color-mix(in srgb,var(--warn) 34%,transparent)}
-.ins-cta{margin:14px 12px 2px;display:flex;gap:8px}
-.ins-cta button{flex:1;border:none;border-radius:12px;padding:13px 0;font:800 13.5px/1 var(--font);cursor:pointer}
-.ins-cta .sec{background:var(--surface-3);color:var(--text-2);border:1px solid var(--border)}
-.ins-cta .pri{background:var(--accent);color:#fff}
-[data-theme="dark"] .ins-cta .pri{background:linear-gradient(180deg,hsl(163 55% 34%),hsl(163 55% 30%))}
-.ins-cta .sec.is-pressed,.ins-cta .pri.is-pressed{transform:scale(.96);transition-duration:.06s}
+.ins-cta{margin:14px 12px 2px;display:flex;gap:8px;align-items:stretch}
+/* ⚠ ПРЕФІКСОВАНІ ІМЕНА (правило b24 §4.2-bis, прецедент dpicker): голі .sec/.pri
+   у single-file продукті вже зайняті — .sec (р.~600) це заголовок секції.
+   Скоуп .ins-cta .sec НЕ рятує: він перебиває лише оголошені властивості,
+   а text-transform / display / margin протікають і ламають пару кнопок. */
+.ins-cta button{flex:1 1 0;display:block;box-sizing:border-box;margin:0;
+  border:none;border-radius:12px;padding:13px 0;text-align:center;
+  text-transform:none;letter-spacing:normal;font:800 13.5px/1 var(--font);cursor:pointer}
+.ins-cta .ins-sec{background:var(--surface-3);color:var(--text-2);border:1px solid var(--border)}
+.ins-cta .ins-pri{background:var(--accent);color:#fff}
+[data-theme="dark"] .ins-cta .ins-pri{background:linear-gradient(180deg,hsl(163 55% 34%),hsl(163 55% 30%))}
+.ins-cta .ins-sec.is-pressed,.ins-cta .ins-pri.is-pressed{transform:scale(.96);transition-duration:.06s}
 
 /* ─── ефект duo (ореол + мікропульс) · грає ПІСЛЯ осідання шіта (Д3) ───
    Клас вішається на body, знімається на закритті → ефект можна повторити.
@@ -830,7 +836,7 @@ a.mi{text-decoration:none;color:inherit}
      (--warn/--accent/--text-2/color-mix) і перемикається сама. */
   :root:not([data-theme="light"]) .stp{border-bottom-color:var(--border)}
   :root:not([data-theme="light"]) .stp .gl{background:color-mix(in srgb,#fff 9%,var(--surface-3));border-color:rgba(255,255,255,.045)}
-  :root:not([data-theme="light"]) .ins-cta .pri{background:linear-gradient(180deg,hsl(163 55% 34%),hsl(163 55% 30%))}
+  :root:not([data-theme="light"]) .ins-cta .ins-pri{background:linear-gradient(180deg,hsl(163 55% 34%),hsl(163 55% 30%))}
 }
 
 
@@ -1207,8 +1213,8 @@ a.mi{text-decoration:none;color:inherit}
   <div class="ins-sub" id="insSub">Кілька кроків у Safari — далі StockCheck відкривається з робочого столу.</div>
   <div id="insBody"></div>
   <div class="ins-cta">
-    <button class="sec pressable" onclick="closeSheets()">Закрити</button>
-    <button class="pri pressable" onclick="closeSheets()">Готово</button>
+    <button class="ins-sec pressable" onclick="closeSheets()">Закрити</button>
+    <button class="ins-pri pressable" onclick="closeSheets()">Готово</button>
   </div>
 </div>
 
@@ -1449,7 +1455,7 @@ function updBrandMoney(bk){
   setMoney(document.getElementById('bm-'+bk),'fb',brandMoney(bk,tierForBrand(bk,ph),curVals(curPx)));
 }
 
-const APP_BUILD = { ver:'v2.15.0', build:'stockcheck-pwa.b26', date:'29.07.2026' }; // wsd 10.6 — b26: Node 2.2 блок «Обслуговування» — самоперевірка версії + «Додати на екран» (порт зі stage-bench maint_v3)
+const APP_BUILD = { ver:'v2.15.0', build:'stockcheck-pwa.b26_1', date:'29.07.2026' }; // wsd 10.6 — b26_1: Node 2.2 блок «Обслуговування» (самоперевірка версії + «Додати на екран»); _1 — фікс колізії класів .sec/.pri у CTA-ряду інструкції (прецедент dpicker b24)
 const NETWORK = { name:'StockCheck', tagline:'інструмент залишків', tg:'t.me/Konst_Andre' };
 const ORDER_FORM_URL = 'https://rbcom-my.sharepoint.com/:x:/r/personal/yuliia_syniuhina_reckitt_com/_layouts/15/Doc.aspx?sourcedoc=%7B361AB6BF-2AE9-410C-A81F-2AA3502C4EAD%7D&file=%25u0424%25u0430%25u0440%25u043c%25u0430%25u0441%25u0442%25u043e%25u0440%20%25u0437%25u0430%25u043c%25u043e%25u0432%25u043b%25u0435%25u043d%25u043d%25u044f%20%25u0442%25u0442.xlsx&wdLOR=c06833412-A6C7-4B15-AE95-76BCF4AB9FD6&openShare=true&fromShare=true&action=default&mobileredirect=true';
 const MSL_BY_K={}; MSL.forEach(function(s){MSL_BY_K[s.k]=s;});
