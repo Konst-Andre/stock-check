@@ -55,6 +55,16 @@ input,textarea,[contenteditable]{-webkit-user-select:text;user-select:text;-webk
   --popDur:800ms; --popEase:ease-in-out; --popOver:4.5;
   --glowSpread:16; --glowOp:.9; --glowDur:900ms;
   --washOp:.7; --washDur:900ms; --ringW:5; --ringOp:.9;
+  /* ===== b27 · CTA HANDOFF SWEEP (кандидат C, device✓ 30.07, bench v3 ×1) =====
+     Семантика моменту 📋 = «ПЕРЕДАНО», не «завершено» (завершення вже сталося
+     на 83/83 і вже нагороджене per-brand через fireReward). Тому напрям: смуга
+     йде злива направо й ВИХОДИТЬ за край — вектор «звідси туди». Замкнена петля
+     (border-beam) кодувала б «об'єкт активний», а не «вміст пішов» → відхилено.
+     dur 1400 — device-обраний БАЛАНС, не «повільно»: коротші значення (≈650)
+     око не встигає зареєструвати. Стеля не перевірялась свідомо (Konst).
+     swOp однаковий в обох темах (bench: opL=opD=55) → БЕЗ theme-split (A39
+     вимагає перевірки, а не обов'язкового розщеплення). */
+  --swDur:1400ms; --swW:40; --swOp:55; --swSkew:-14;
   /* ===== MATERIALITY γ′ (valuesLOCK §6) — LIGHT: об'єм несе DROP ===== */
   /* набір важелів L = grad · dropB · dropA · fillD · bord (drop-важіль існує лише тут) */
   --b-bc:var(--surface-2); --b-chip:#f7fbf9; --b-act:var(--surface-2);
@@ -270,7 +280,12 @@ a.mi{text-decoration:none;color:inherit}
 .mi.upd .mi-ic{color:var(--accent);background:color-mix(in srgb,var(--accent) 10%,transparent)}
 .mi.warnst .mi-ic{color:var(--warn);background:color-mix(in srgb,var(--warn) 12%,transparent)}
 .mi.quiet{cursor:default}
-.mi.quiet b{color:var(--text-2);font-weight:700}
+/* b27: колір ПРИБРАНО. Неінтерактивність рядка вже несуть три сигнали —
+   немає .doact, немає .mi-chev, немає .pressable (отже й прес-анімації).
+   Приглушення ЗАГОЛОВКА заявляло «вміст менш важливий» (хибно: версія важлива)
+   і робило весь блок «Обслуговування» блідішим за ДІЇ/СЕАНС (device, 30.07).
+   Прецедент каналу: .mi.danger b — заголовок несе СЕМАНТИКУ, не ІЄРАРХІЮ. */
+.mi.quiet b{font-weight:700}
 
 /* ─── інструкція «Додати на екран Додому» · стиль glyph + крок 0 банером ─── */
 .ins-hd{padding:4px 18px 2px;font:800 17px/1.25 var(--font);color:var(--text)}
@@ -431,8 +446,18 @@ a.mi{text-decoration:none;color:inherit}
 .mi-ic.tg{background:#229ED9;border-color:transparent;box-shadow:none;color:#fff}
 .tg-arr{margin-left:auto;opacity:.7;font-size:13px}
 
-.toast{position:fixed;left:50%;bottom:calc(22px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(12px);
+/* b27 · ПІДЙОМ НАД CTA (device 30.07, обидві теми).
+   Геометрія перекриття була детермінованою, не випадковою:
+     #s-fill.active padding-bottom 20+sab · .cta-row margin …6px → низ кнопки 26+sab
+     кнопка padding 14 + font 14 → висота ≈42px → верх кнопки 68+sab
+     тост bottom 22+sab, висота ≈62px (3 рядки) → 22…84+sab = ПОВНЕ накриття.
+   78px: низ тоста 78 проти верху кнопки 68 → зазор 10px.
+   white-space:pre-line — копія ламається ЯВНИМ \n, а не автопереносом (Д1:
+   автоперенос давав 3 рядки й розривав «Proxima 1688723»). Однорядкові тости
+   не зачеплені. Дарк-оверрайду в .toast немає → дзеркало A69 не потрібне. */
+.toast{position:fixed;left:50%;bottom:calc(78px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(12px);
   z-index:60;max-width:88%;background:var(--text);color:var(--bg);font:700 12.5px/1.35 var(--font);
+  white-space:pre-line;text-align:center;
   padding:11px 16px;border-radius:14px;opacity:0;pointer-events:none;transition:opacity .2s ease,transform .2s ease;box-shadow:0 6px 22px rgba(0,0,0,.28)}
 .toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
 
@@ -769,6 +794,7 @@ a.mi{text-decoration:none;color:inherit}
 /* copy + Excel CTA row (§4 material LOCK b11, layout 2.5:1) */
 .cta-row{display:flex;gap:10px;margin:18px 14px 6px}
 .btn-copy{flex:2.5;padding:14px;border:none;border-radius:12px;color:#fff;
+  position:relative;overflow:hidden;                 /* b27: контейнер шару .cta-sweep */
   font:800 14px/1 var(--font);cursor:pointer;transition:transform .22s var(--spring),filter .12s ease;
   background:linear-gradient(180deg,color-mix(in srgb,#fff 16%,var(--accent)),var(--accent));
   box-shadow:0 3px 10px -3px color-mix(in srgb,var(--accent) 27%,transparent),0 1px 2px rgba(20,50,42,.14)}
@@ -788,6 +814,29 @@ a.mi{text-decoration:none;color:inherit}
   border:1px solid color-mix(in srgb,var(--accent) 26%,var(--border));
   color:color-mix(in srgb,var(--accent-ink) 58%,var(--accent));
   box-shadow:inset 0 1px 0 rgba(255,255,255,.08)}
+
+/* ═══ b27 · CTA HANDOFF SWEEP — нагорода моменту 📋 (значення у :root вище) ═══
+   ⚠ ІМЕНА ПРЕФІКСОВАНІ (.cta-*) — правило з b26_1 §4 / b24 §4.2-bis.
+     Зворотний аудит проти b26_1: cta-lbl 0 · cta-sweep 0 · swGo 0 збігів.
+   ⚠ .cta-lbl ОБОВ'ЯЗКОВИЙ: голий текстовий вузол не може мати z-index,
+     тож без обгортки напис пішов би ПІД смугу.
+   Вартість: composite-only (transform + opacity на дочірньому шарі) — нуль
+   per-frame repaint, на відміну від анімованого контуру по рамці (A70/A72).
+   Кольорів теми не бере (чистий білий rgba) → дзеркало A69 не потрібне. */
+.cta-lbl{position:relative;z-index:3;display:block}
+.cta-sweep{position:absolute;z-index:2;top:0;bottom:0;left:0;pointer-events:none;
+  width:calc(var(--swW) * 1%);opacity:0;
+  transform:translateX(-160%) skewX(calc(var(--swSkew) * 1deg));
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,calc(var(--swOp)/100)),transparent)}
+.btn-copy.sweeping .cta-sweep{animation:swGo var(--swDur) cubic-bezier(.32,.72,0,1) forwards}
+@keyframes swGo{
+  0%{opacity:0;transform:translateX(-160%) skewX(calc(var(--swSkew) * 1deg))}
+  12%{opacity:1}
+  88%{opacity:1}
+  100%{opacity:0;transform:translateX(400%) skewX(calc(var(--swSkew) * 1deg))}
+}
+/* Глобальне правило reduced-motion нижче гасить animation-duration до .01ms;
+   JS-гард reduceOn() у copyValues() усе одно НЕ вішає клас — подвійний замок. */
 
 /* ===== auto-dark parity (A69) — mirror EVERY [data-theme="dark"] component (shell + added) ===== */
 @media(prefers-color-scheme:dark){
@@ -1100,7 +1149,7 @@ a.mi{text-decoration:none;color:inherit}
       </header>
       <div id="fill-body"></div>
       <div class="cta-row">
-        <button class="btn-copy pressable" onclick="copyValues()">Копіювати 83 значення</button>
+        <button class="btn-copy pressable" onclick="copyValues()"><span class="cta-lbl">Копіювати 83 значення</span><span class="cta-sweep" aria-hidden="true"></span></button>
         <a class="btn-form pressable js-order-link" target="_blank" rel="noopener" aria-label="Відкрити форму замовлення в Excel">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
           <span>Excel</span>
@@ -1455,7 +1504,7 @@ function updBrandMoney(bk){
   setMoney(document.getElementById('bm-'+bk),'fb',brandMoney(bk,tierForBrand(bk,ph),curVals(curPx)));
 }
 
-const APP_BUILD = { ver:'v2.15.0', build:'stockcheck-pwa.b26_1', date:'29.07.2026' }; // wsd 10.6 — b26_1: Node 2.2 блок «Обслуговування» (самоперевірка версії + «Додати на екран»); _1 — фікс колізії класів .sec/.pri у CTA-ряду інструкції (прецедент dpicker b24)
+const APP_BUILD = { ver:'v2.16.0', build:'stockcheck-pwa.b27', date:'30.07.2026' }; // wsd 10.6 — b27: (1) фікс блідості блоку «Обслуговування» (.mi.quiet b); (2) тост піднято над CTA-рядом + детерміновані 2 рядки; (3) нагорода моменту 📋 = handoff-sweep (кандидат C, bench v3, device✓)
 const NETWORK = { name:'StockCheck', tagline:'інструмент залишків', tg:'t.me/Konst_Andre' };
 const ORDER_FORM_URL = 'https://rbcom-my.sharepoint.com/:x:/r/personal/yuliia_syniuhina_reckitt_com/_layouts/15/Doc.aspx?sourcedoc=%7B361AB6BF-2AE9-410C-A81F-2AA3502C4EAD%7D&file=%25u0424%25u0430%25u0440%25u043c%25u0430%25u0441%25u0442%25u043e%25u0440%20%25u0437%25u0430%25u043c%25u043e%25u0432%25u043b%25u0435%25u043d%25u043d%25u044f%20%25u0442%25u0442.xlsx&wdLOR=c06833412-A6C7-4B15-AE95-76BCF4AB9FD6&openShare=true&fromShare=true&action=default&mobileredirect=true';
 const MSL_BY_K={}; MSL.forEach(function(s){MSL_BY_K[s.k]=s;});
@@ -1955,21 +2004,43 @@ function updProg(){
 }
 
 /* ---- copy §4 (by-kode master order) — node-8 preview ---- */
+/* ---- b27 · нагорода моменту 📋: handoff-sweep (кандидат C, значення в :root) ----
+   Три гарди, кожен закриває свій відмовний режим:
+   1) reduceOn() — при reduced-motion клас НЕ вішається взагалі. Глобальне
+      @media гасить animation-duration до .01ms, але то косметика; тут ми не
+      запускаємо нічого. Подвійний замок: CSS + JS.
+   2) dataset.sweeping — анти-повтор. Без нього подвійний тап накладає другий
+      прохід на недограний перший (клас уже висить → animation не рестартує).
+   3) запуск ЛИШЕ на УСПІХ копіювання — у .then і в успішній гілці fallback,
+      НЕ перед ними. Нагороджувати треба факт передачі, а не намір: якщо
+      clipboard відмовив, смуга «значення пішли» була б брехнею.
+   Тривалість читається з --swDur, а не дублюється числом (одна правда). */
+function fireSweep(){
+  var b=document.querySelector('#s-fill .btn-copy');
+  if(!b||reduceOn()||b.dataset.sweeping==='1')return;
+  b.dataset.sweeping='1';
+  b.classList.remove('sweeping'); void b.offsetWidth;            // reflow → рестарт анімації
+  b.classList.add('sweeping');
+  var d=parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--swDur'))||1400;
+  setTimeout(function(){b.classList.remove('sweeping');b.dataset.sweeping='';},d+80);
+}
 function copyValues(){
   var vis=todayVisit(curPx), data=vis?vis.vals:{};
   var col=MSL.map(function(s){return data[s.k]!==undefined?data[s.k]:'';}).join('\n');
   if(vis){vis.transferred=true;saveST();}
   var idx=PH.findIndex(function(p){return p.px===curPx;});
   var mRow=2+idx*83;
-  var msg='✓ Скопійовано 83 → встав у M'+mRow+' · Proxima '+curPx;
+  /* b27 · копія під слот (Д1): перенос ЯВНИЙ \n + white-space:pre-line у .toast →
+     рівно 2 рядки завжди. Автоперенос давав 3 і рвав «Proxima 1688723» навпіл. */
+  var msg='✓ Скопійовано 83 значення\nВставити у M'+mRow+' · Proxima '+curPx;
   if(navigator.clipboard&&navigator.clipboard.writeText){
-    navigator.clipboard.writeText(col).then(function(){toast(msg);}).catch(function(){fallbackCopy(col,msg);});
+    navigator.clipboard.writeText(col).then(function(){toast(msg);fireSweep();}).catch(function(){fallbackCopy(col,msg);});
   }else{fallbackCopy(col,msg);}
 }
 function fallbackCopy(txt,msg){
   var ta=document.createElement('textarea');ta.value=txt;ta.style.position='fixed';ta.style.opacity='0';
   document.body.appendChild(ta);ta.focus();ta.select();
-  try{document.execCommand('copy');toast(msg);}catch(e){toast('Не вдалось скопіювати');}
+  try{document.execCommand('copy');toast(msg);fireSweep();}catch(e){toast('Не вдалось скопіювати');}
   document.body.removeChild(ta);
 }
 
