@@ -1200,10 +1200,10 @@ a.mi{text-decoration:none;color:inherit}
       <span class="mi-tx"><b>Excel онлайн</b><span>Форма замовлення для вставки</span></span>
       <span class="mi-act"><span class="doact">Відкрити</span></span>
     </a>
-    <div class="mi pressable" onclick="exportCSV()">
+    <div class="mi pressable" onclick="exportXLSX()">
       <span class="mi-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></span>
-      <span class="mi-tx"><b>Експорт CSV</b><span id="csvSub">Ця аптека</span></span>
-      <span class="mi-act"><span class="doact">CSV</span></span>
+      <span class="mi-tx"><b>Експорт Excel</b><span id="csvSub">Ця аптека</span></span>
+      <span class="mi-act"><span class="doact">XLSX</span></span>
     </div>
   </div>
 
@@ -1504,7 +1504,7 @@ function updBrandMoney(bk){
   setMoney(document.getElementById('bm-'+bk),'fb',brandMoney(bk,tierForBrand(bk,ph),curVals(curPx)));
 }
 
-const APP_BUILD = { ver:'v2.16.0', build:'stockcheck-pwa.b27', date:'30.07.2026' }; // wsd 10.6 — b27: (1) фікс блідості блоку «Обслуговування» (.mi.quiet b); (2) тост піднято над CTA-рядом + детерміновані 2 рядки; (3) нагорода моменту 📋 = handoff-sweep (кандидат C, bench v3, device✓)
+const APP_BUILD = { ver:'v2.17.0', build:'stockcheck-pwa.b28', date:'31.07.2026' }; // wsd 10.6 — b28: експорт CSV→справжній .xlsx (бланк «АП» 1:1, Table TableStyleMedium7, формули N/O з кешем, deflate через CompressionStream). Було b27: (1) фікс блідості блоку «Обслуговування» (.mi.quiet b); (2) тост піднято над CTA-рядом + детерміновані 2 рядки; (3) нагорода моменту 📋 = handoff-sweep (кандидат C, bench v3, device✓)
 const NETWORK = { name:'StockCheck', tagline:'інструмент залишків', tg:'t.me/Konst_Andre' };
 const ORDER_FORM_URL = 'https://rbcom-my.sharepoint.com/:x:/r/personal/yuliia_syniuhina_reckitt_com/_layouts/15/Doc.aspx?sourcedoc=%7B361AB6BF-2AE9-410C-A81F-2AA3502C4EAD%7D&file=%25u0424%25u0430%25u0440%25u043c%25u0430%25u0441%25u0442%25u043e%25u0440%20%25u0437%25u0430%25u043c%25u043e%25u0432%25u043b%25u0435%25u043d%25u043d%25u044f%20%25u0442%25u0442.xlsx&wdLOR=c06833412-A6C7-4B15-AE95-76BCF4AB9FD6&openShare=true&fromShare=true&action=default&mobileredirect=true';
 const MSL_BY_K={}; MSL.forEach(function(s){MSL_BY_K[s.k]=s;});
@@ -2044,45 +2044,231 @@ function fallbackCopy(txt,msg){
   document.body.removeChild(ta);
 }
 
-/* ---- CSV export §4.4 (тиха страховка; context-split) ---- */
-function csvCell(v){v=(v==null?'':''+v);return /[;"\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;}
+/* ---- XLSX export §4.4 (b28) — бланк «АП» 1:1 зі структурою корпоративного файлу.
+   Замінив CSV: у xlsx роздільників немає, тож локаль ПК більше не впливає на розкладку. */
 function normOfVisit(vis,ph,s){ // норма per-tier-per-visit (§1/§3)
   var tOtc=vis&&vis.tier?vis.tier.oTC:(ph?ph.oTC:''), tIw=vis&&vis.tier?vis.tier.iW:(ph?ph.iW:'');
   return normFor(s.k, s.c==='OTC'?tOtc:tIw);
 }
-function csvSingle(px){
-  var ph=getPh(px), vis=todayVisit(px)||(function(){var e=ST.phs[px];return e&&e.visits&&e.visits.length?e.visits[e.visits.length-1]:null;})();
-  var data=vis?vis.vals:{};
-  var rows=['Товар;Категорія;MSL;Залишок'];
-  MSL.forEach(function(s){
-    var val=data[s.k]!==undefined?data[s.k]:'';
-    rows.push([csvCell(s.n),s.c,normOfVisit(vis,ph,s),val].join(';'));
-  });
-  return rows.join('\n');
+var FN='АП[[#This Row],[Кількіть MSL]]-АП[[#This Row],[Залишок]]';
+var FO='АП[[#This Row],[Замовлення]]*АП[[#This Row],[Custom.Price]]';
+/* ---- CRC32 ---- */
+var CRC_T=(function(){var t=new Uint32Array(256),c,n,k;
+  for(n=0;n<256;n++){c=n;for(k=0;k<8;k++)c=(c&1)?(0xEDB88320^(c>>>1)):(c>>>1);t[n]=c>>>0;}
+  return t;})();
+function crc32(buf){var c=0xFFFFFFFF;for(var i=0;i<buf.length;i++)c=CRC_T[(c^buf[i])&0xFF]^(c>>>8);return (c^0xFFFFFFFF)>>>0;}
+
+/* ---- deflate (нативний, з фолбеком на store) ---- */
+async function deflateRaw(bytes){
+  if(typeof CompressionStream==='undefined') return null;
+  try{
+    var cs=new CompressionStream('deflate-raw');
+    var w=cs.writable.getWriter(); w.write(bytes); w.close();
+    var buf=await new Response(cs.readable).arrayBuffer();
+    var out=new Uint8Array(buf);
+    return (out.length<bytes.length)?out:null;
+  }catch(e){ return null; }
 }
-function csvAll(){
-  var rows=['Proxima;Місто;Адреса;M;Товар;Категорія;MSL;Залишок;Дата'];
-  PH.forEach(function(ph,idx){
-    var e=ST.phs[ph.px]; if(!e||!e.visits||!e.visits.length)return;
-    var vis=e.visits[e.visits.length-1], data=vis.vals||{}, base=2+idx*83, addr=displayAddr(ph.addr);
-    MSL.forEach(function(s,i){ if(data[s.k]===undefined)return;
-      rows.push([ph.px,csvCell(ph.city),csvCell(addr),base+i,csvCell(s.n),s.c,normOfVisit(vis,ph,s),data[s.k],vis.date].join(';'));
+
+/* ---- ZIP (deflate, фолбек store) ---- */
+async function zipBuild(files){ // files:[{name,data:Uint8Array}]
+  var enc=new TextEncoder(), parts=[], central=[], off=0;
+  function u16(v){return [v&255,(v>>8)&255];}
+  function u32(v){return [v&255,(v>>>8)&255,(v>>>16)&255,(v>>>24)&255];}
+  for(var fi=0;fi<files.length;fi++){
+    var f=files[fi];
+    var nm=enc.encode(f.name), crc=crc32(f.data), sz=f.data.length;
+    var comp=await deflateRaw(f.data);
+    var body=comp||f.data, mth=comp?8:0, csz=body.length;
+    var lh=[].concat([0x50,0x4B,0x03,0x04],u16(20),u16(0x0800),u16(mth),u16(0),u16(0),
+                     u32(crc),u32(csz),u32(sz),u16(nm.length),u16(0));
+    parts.push(new Uint8Array(lh),nm,body);
+    central.push({nm:nm,crc:crc,sz:sz,csz:csz,mth:mth,off:off});
+    off+=lh.length+nm.length+csz;
+  }
+  var cd=[], cdLen=0;
+  central.forEach(function(c){
+    var h=[].concat([0x50,0x4B,0x01,0x02],u16(20),u16(20),u16(0x0800),u16(c.mth),u16(0),u16(0),
+                    u32(c.crc),u32(c.csz),u32(c.sz),u16(c.nm.length),u16(0),u16(0),u16(0),u16(0),
+                    u32(0),u32(c.off));
+    cd.push(new Uint8Array(h),c.nm); cdLen+=h.length+c.nm.length;
+  });
+  var eo=[].concat([0x50,0x4B,0x05,0x06],u16(0),u16(0),u16(central.length),u16(central.length),
+                   u32(cdLen),u32(off),u16(0));
+  var all=parts.concat(cd,[new Uint8Array(eo)]);
+  var total=0; all.forEach(function(p){total+=p.length;});
+  var out=new Uint8Array(total), pos=0;
+  all.forEach(function(p){out.set(p,pos);pos+=p.length;});
+  return out;
+}
+
+/* ---- XML helpers ---- */
+function xe(s){return (''+s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function colName(n){var s='';while(n>0){var m=(n-1)%26;s=String.fromCharCode(65+m)+s;n=(n-m-1)/26;}return s;}
+function u8(str){return new TextEncoder().encode(str);}
+
+var HEAD=['Proxima Pharmacy ID','Area','City','Outlet Address','Network','Category OTC',
+          'Category IW','Custom.SKY','Custom.Category','Custom.Kode','Custom.Price',
+          'Кількіть MSL','Залишок','Замовлення','Column1'];
+var WIDTH=[13,18,14,44,11,9,9,44,11,12,10,11,10,12,12];
+
+/* ---- аркуш ---- */
+function sheetXml(rows,useTable){
+  var last=rows.length+1, ref='A1:O'+last, x=[];
+  x.push('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>');
+  x.push('<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">');
+  x.push('<dimension ref="'+ref+'"/>');
+  x.push('<sheetViews><sheetView tabSelected="1" workbookViewId="0">');
+  x.push('<pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/>');
+  x.push('</sheetView></sheetViews><sheetFormatPr defaultRowHeight="15"/>');
+  x.push('<cols>');
+  WIDTH.forEach(function(w,i){x.push('<col min="'+(i+1)+'" max="'+(i+1)+'" width="'+w+'" customWidth="1"/>');});
+  x.push('</cols><sheetData>');
+  /* заголовок */
+  x.push('<row r="1">');
+  var hs = useTable ? '' : ' s="1"';   /* у Table заголовок малює сам стиль таблиці */
+  HEAD.forEach(function(h,i){
+    x.push('<c r="'+colName(i+1)+'1" t="inlineStr"'+hs+'><is><t>'+xe(h)+'</t></is></c>');
+  });
+  x.push('</row>');
+  /* дані */
+  rows.forEach(function(r,ri){
+    var n=ri+2; x.push('<row r="'+n+'">');
+    r.forEach(function(v,ci){
+      var cr=colName(ci+1)+n, st=(ci===10||ci===14)?' s="2"':'';
+      if(v===null||v===undefined||v===''){ if(st)x.push('<c r="'+cr+'"'+st+'/>'); return; }
+      if(v&&v.f!==undefined){
+        x.push('<c r="'+cr+'"'+st+'><f>'+xe(v.f)+'</f>'+(v.v===''?'':'<v>'+v.v+'</v>')+'</c>');
+      } else if(typeof v==='number'){
+        x.push('<c r="'+cr+'"'+st+'><v>'+v+'</v></c>');
+      } else {
+        x.push('<c r="'+cr+'" t="inlineStr"'+st+'><is><t>'+xe(v)+'</t></is></c>');
+      }
+    });
+    x.push('</row>');
+  });
+  x.push('</sheetData>');
+  if(useTable) x.push('<tableParts count="1"><tablePart r:id="rId1"/></tableParts>');
+  else         x.push('<autoFilter ref="'+ref+'"/>');
+  x.push('</worksheet>');
+  return x.join('');
+}
+
+function tableXml(rowCount){
+  var ref='A1:O'+(rowCount+1), x=[];
+  x.push('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>');
+  x.push('<table xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" id="1" name="АП" displayName="АП" ref="'+ref+'" totalsRowShown="0">');
+  x.push('<autoFilter ref="'+ref+'"/><tableColumns count="15">');
+  HEAD.forEach(function(h,i){
+    var id=i+1;
+    if(id===14) x.push('<tableColumn id="14" name="'+xe(h)+'"><calculatedColumnFormula>АП[[#This Row],[Кількіть MSL]]-АП[[#This Row],[Залишок]]</calculatedColumnFormula></tableColumn>');
+    else if(id===15) x.push('<tableColumn id="15" name="'+xe(h)+'"><calculatedColumnFormula>АП[[#This Row],[Замовлення]]*АП[[#This Row],[Custom.Price]]</calculatedColumnFormula></tableColumn>');
+    else x.push('<tableColumn id="'+id+'" name="'+xe(h)+'"/>');
+  });
+  x.push('</tableColumns><tableStyleInfo name="TableStyleMedium7" showFirstColumn="0" showLastColumn="0" showRowStripes="1" showColumnStripes="0"/></table>');
+  return x.join('');
+}
+
+var STYLES='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
++'<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'
++'<fonts count="2"><font><sz val="11"/><name val="Calibri"/></font>'
++'<font><b/><sz val="11"/><name val="Calibri"/></font></fonts>'
++'<fills count="3"><fill><patternFill patternType="none"/></fill>'
++'<fill><patternFill patternType="gray125"/></fill>'
++'<fill><patternFill patternType="solid"><fgColor rgb="FFDCE6F1"/><bgColor indexed="64"/></patternFill></fill></fills>'
++'<borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders>'
++'<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>'
++'<cellXfs count="3">'
++'<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>'
++'<xf numFmtId="0" fontId="1" fillId="2" borderId="0" xfId="0" applyFont="1" applyFill="1"/>'
++'<xf numFmtId="2" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/>'
++'</cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles>'
++'</styleSheet>';
+
+async function buildXlsx(rows,useTable){
+  var files=[];
+  var ct='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+   +'<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">'
+   +'<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>'
+   +'<Default Extension="xml" ContentType="application/xml"/>'
+   +'<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>'
+   +'<Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>'
+   +'<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>'
+   +(useTable?'<Override PartName="/xl/tables/table1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.table+xml"/>':'')
+   +'</Types>';
+  files.push({name:'[Content_Types].xml',data:u8(ct)});
+  files.push({name:'_rels/.rels',data:u8('<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>')});
+  files.push({name:'xl/workbook.xml',data:u8('<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets><sheet name="АП" sheetId="1" r:id="rId1"/></sheets></workbook>')});
+  files.push({name:'xl/_rels/workbook.xml.rels',data:u8('<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>')});
+  files.push({name:'xl/styles.xml',data:u8(STYLES)});
+  files.push({name:'xl/worksheets/sheet1.xml',data:u8(sheetXml(rows,useTable))});
+  if(useTable){
+    files.push({name:'xl/worksheets/_rels/sheet1.xml.rels',data:u8('<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/table" Target="../tables/table1.xml"/></Relationships>')});
+    files.push({name:'xl/tables/table1.xml',data:u8(tableXml(rows.length))});
+  }
+  return await zipBuild(files);
+}
+
+/* ---- збірка рядків бланка ---- */
+function blankRows(list,MSL,useTable){ // list:[{ph,vals}]
+  var rows=[];
+  list.forEach(function(it){
+    var ph=it.ph, vals=it.vals||{};
+    MSL.forEach(function(s){
+      var tier = (s.c==='OTC')?ph.oTC:ph.iW;
+      var norm = s[tier]||0;
+      var rest = (vals[s.k]!==undefined)?vals[s.k]:'';
+      var n    = rows.length+2;
+      var fN   = useTable ? 'АП[[#This Row],[Кількіть MSL]]-АП[[#This Row],[Залишок]]' : ('L'+n+'-M'+n);
+      var fO   = useTable ? 'АП[[#This Row],[Замовлення]]*АП[[#This Row],[Custom.Price]]' : ('N'+n+'*K'+n);
+      var ordV = (rest==='')?norm:(norm-rest);
+      rows.push([ph.px, ph.area, ph.city, ph.addr, ph.net, ph.oTC, ph.iW,
+                 s.n, s.c, s.k, s.p, norm, rest,
+                 {f:fN,v:ordV}, {f:fO,v:Math.round(ordV*s.p*100)/100}]);
     });
   });
-  return rows.join('\n');
+  return rows;
 }
-function exportCSV(){
+
+/* ---- рядки бланка ---- */
+function blankRows(list){ // list:[{ph,vis}]
+  var rows=[];
+  list.forEach(function(it){
+    var ph=it.ph, vis=it.vis, vals=(vis&&vis.vals)||{};
+    var tOtc=vis&&vis.tier?vis.tier.oTC:ph.oTC, tIw=vis&&vis.tier?vis.tier.iW:ph.iW;
+    MSL.forEach(function(s){
+      var norm=normOfVisit(vis,ph,s);
+      var rest=(vals[s.k]!==undefined)?vals[s.k]:'';
+      var ordV=(rest==='')?norm:(norm-rest);
+      rows.push([ph.px, ph.area, ph.city, ph.addr, ph.net, tOtc, tIw,
+                 s.n, s.c, s.k, s.p, norm, rest,
+                 {f:FN,v:ordV}, {f:FO,v:Math.round(ordV*s.p*100)/100}]);
+    });
+  });
+  return rows;
+}
+
+function exportXLSX(){
   var atFill=document.getElementById('s-fill').classList.contains('active');
-  var csv,name;
-  if(atFill&&curPx){ csv=csvSingle(curPx); name='Фармастор_'+curPx+'_'+today()+'.csv'; }
-  else{ csv=csvAll(); name='Фармастор_усі_'+today()+'.csv';
-    if(csv.indexOf('\n')<0){closeSheets();toast('Немає даних для експорту');return;} }
+  var list=[], name;
+  if(atFill&&curPx){
+    var ph=getPh(curPx);
+    var vis=todayVisit(curPx)||(function(){var e=ST.phs[curPx];return e&&e.visits&&e.visits.length?e.visits[e.visits.length-1]:null;})();
+    list=[{ph:ph,vis:vis}]; name='Фармастор_'+curPx+'_'+today()+'.xlsx';
+  } else {
+    PH.forEach(function(ph){var e=ST.phs[ph.px];
+      if(e&&e.visits&&e.visits.length) list.push({ph:ph,vis:e.visits[e.visits.length-1]});});
+    name='Фармастор_усі_'+today()+'.xlsx';
+    if(!list.length){closeSheets();toast('Немає даних для експорту');return;}
+  }
   closeSheets();
-  deliverCSV(name,csv);
+  buildXlsx(blankRows(list),true).then(function(bytes){deliverXLSX(name,bytes);})
+    .catch(function(){toast('Не вдалось експортувати');});
 }
-function deliverCSV(name,csv){
-  var BOM='\ufeff', blob=new Blob([BOM+csv],{type:'text/csv;charset=utf-8'});
-  try{ if(navigator.canShare){var file=new File([blob],name,{type:'text/csv'});
+function deliverXLSX(name,bytes){
+  var MT='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+  var blob=new Blob([bytes],{type:MT});
+  try{ if(navigator.canShare){var file=new File([blob],name,{type:MT});
     if(navigator.canShare({files:[file]})){navigator.share({files:[file],title:name}).catch(function(){});return;} } }catch(e){}
   try{ var url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;
     document.body.appendChild(a);a.click();document.body.removeChild(a);
