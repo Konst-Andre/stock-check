@@ -274,6 +274,13 @@ a.mi{text-decoration:none;color:inherit}
        Копія переписана під 187px ≈ 34 симв. → ellipsis тут аварійна сітка (Д1). ─── */
 #sheet .mi{min-height:var(--miH)}
 #sheet .mi-tx b,#sheet .mi-tx span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* b29.4a · підпис експорту — єдиний рядок у шіті зі ЗМІННОЮ довжиною: він несе
+   область/місто + числа зрізу. Однорядний ellipsis різав саме хвіст із числами,
+   тобто те, заради чого підпис існує («Дніпропетровська · 2 аптеки з да…»).
+   Даємо ЙОМУ два рядки; решта пунктів лишаються однорядковими, бо їхні підписи
+   статичні. line-clamp, а не звичайний wrap: третій рядок ніколи не з'явиться,
+   тож висота шіта передбачувана. Специфічність 2id+1class перебиває правило вище. */
+#sheet .mi-tx #csvSub{white-space:normal;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;line-height:1.25;text-overflow:clip}
 .mi-act{flex:none;display:flex;align-items:center;justify-content:flex-end;min-width:var(--actW)}
 
 /* ─── стани рядка версії ─── */
@@ -310,10 +317,11 @@ a.mi{text-decoration:none;color:inherit}
 .stp.zero .gl{color:var(--warn);background:color-mix(in srgb,var(--warn) 12%,transparent);
   border-color:color-mix(in srgb,var(--warn) 34%,transparent)}
 .ins-cta{margin:14px 12px 2px;display:flex;gap:8px;align-items:stretch}
-/* ⚠ ПРЕФІКСОВАНІ ІМЕНА (правило b24 §4.2-bis, прецедент dpicker): голі .sec/.pri
-   у single-file продукті вже зайняті — .sec (р.~600) це заголовок секції.
-   Скоуп .ins-cta .sec НЕ рятує: він перебиває лише оголошені властивості,
-   а text-transform / display / margin протікають і ламають пару кнопок. */
+/* ⚠ ПРЕФІКСОВАНІ ІМЕНА (правило b24 §4.2-bis, прецедент dpicker).
+   b29.3: голий .sec (заголовок «Перенесені») знято разом із режимом all —
+   ім'я формально вільне. .ins-sec/.ins-pri НЕ повертаємо до голих імен:
+   причина вже не колізія, а те, що скоуп .ins-cta .sec перебивав би лише
+   оголошені властивості, а text-transform / display / margin протікали б. */
 .ins-cta button{flex:1 1 0;display:block;box-sizing:border-box;margin:0;
   border:none;border-radius:12px;padding:13px 0;text-align:center;
   text-transform:none;letter-spacing:normal;font:800 13.5px/1 var(--font);cursor:pointer}
@@ -565,9 +573,19 @@ a.mi{text-decoration:none;color:inherit}
 .hist.dis{opacity:calc(var(--bDisOp)*.01);pointer-events:none;cursor:default}
 .hist.pressing{transform:scale(var(--bPress));transition-duration:80ms}
 @media (prefers-reduced-motion:reduce){.hist{transition-duration:.01ms!important}}
-.sec{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);
-  margin:14px 16px 8px;display:flex;align-items:center;gap:9px}
-.sec .ln{flex:1;height:1px;background:var(--border-subtle)}
+/* ── F2/b29.3 · READONLY-ПЕРЕГЛЯД ЗДАНОГО ВІЗИТУ (R4) ──────────────────────
+   -webkit-text-fill-color обов'язковий: iOS фарбує disabled-поле власним
+   сірим і ігнорує color, тож без нього цифри згасають до нечитабельних —
+   а саме цифри й прийшли дивитись. Приглушення робимо контрольовано, на .fld. */
+.ro-flag{display:flex;align-items:center;gap:6px;margin-top:4px;
+  font:800 10.5px/1.2 var(--font);letter-spacing:.4px;text-transform:uppercase;color:var(--muted)}
+.ro-flag[hidden]{display:none}
+.ro-flag .rf-ic{display:inline-flex;align-items:center;justify-content:center;
+  width:14px;height:14px;border-radius:50%;font-size:9px;font-weight:900;line-height:1;
+  color:var(--ok);border:1px solid color-mix(in srgb,var(--ok) 48%,transparent)}
+#s-fill.ro .fld-in:disabled{-webkit-text-fill-color:var(--text);opacity:1;caret-color:transparent}
+#s-fill.ro .fld{background:color-mix(in srgb,var(--surface-2) 62%,transparent)}
+#s-fill.ro .row:not(.settled) .fld{opacity:.55}
 /* §5.2 перенесена: dim БЕЗ whole-card opacity → ринг тримається на arcLift, текст-привид на dimOp */
 :root{--arcLift:.82}
 .card.tr{filter:saturate(calc(var(--dimSat)*1%));
@@ -669,7 +687,6 @@ a.mi{text-decoration:none;color:inherit}
   white-space:nowrap;max-width:calc(100% - 92px);box-shadow:var(--m-bc-sh)}
 .bc .bc-c{color:var(--accent);font-weight:800;display:inline-block;transition:transform .22s ease}
 .bc.open .bc-c{transform:rotate(180deg)}
-.bc-count{margin-left:auto;font:700 11px/1 var(--font);color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums}
 /* chip band (свайп + edge-fade) */
 .chiprow{display:flex;gap:var(--chipGap);overflow-x:auto;scroll-behavior:smooth;padding:0 14px 2px;
   -webkit-overflow-scrolling:touch;scrollbar-width:none}
@@ -700,6 +717,65 @@ a.mi{text-decoration:none;color:inherit}
 .srch input::placeholder{color:var(--muted)}
 /* list breathing under topArea + empty */
 #homeList{margin-top:12px}
+
+/* ═══════════ ЖУРНАЛ · рядок (F2/b29.2) ═══════════════════════════════════════
+   Набір із compare-lock F1.2 §1, згорнутий у фіксовані класи. НЕ перенесено:
+     · --jrOtc*/--jrIw*  — дубль живих --hcOtc*/--hcIw* (Д-1), тир бере їх напряму
+     · hdrBg=well        — згашений комбінацією hdrPos=в картці
+     · tagBdS/tagBdL     — жива лише гілка «плита», у нас tierStyle=ink
+     · hdrMode=sticky    — у wrap=card + hdrPos=в картці заголовок усередині картки,
+                           липнути нема до чого (стенд сам ставить position:static)
+   Композиція З-6: дуга ПРАВОРУЧ · тир кольором у meta · ліва зона віддана тексту. */
+.jr{padding:0 0 8px;margin:0}
+/* b29.6 · ЕТАЛОН — картка ДОШКИ, не острів. Замір лінійкою (03.08.2026, XS/375):
+   .list 14…14 · .card 14…14 · .isl 12…12 → Δ картка−острів = 2/2. Саме ця
+   вкладеність у 2px і читається як «плавний перехід». Журнал рівнявся на 12,
+   тобто на рівність з островом — стан, якого на Home ніколи не було.
+   Знято обидва бічні поля: .jr більше не компенсує контейнер (від'ємний margin
+   на flex-item тут ефекту не давав — заміряно, jr показував 14…14), .jr-grp
+   більше не додає свої 12. Група успадковує 14 від .list = піксель-у-піксель
+   як .card. Мертве правило margin:0 -14px знято НАВМИСНО: одного дня воно
+   могло б ожити й тихо поїхати на 0…0. */
+.jr-grp{margin:0 0 12px;border-radius:16px;overflow:hidden;
+  background:var(--card);border:1px solid var(--border-subtle)}
+[data-theme="dark"] .jr-grp{border-color:var(--border)}
+.jr-hdr{display:flex;align-items:baseline;gap:8px;margin:10px 0 7px;padding:3px 14px;
+  font:800 11px/1.1 var(--font);color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+.jr-hdr .n{margin-left:auto;font:700 10.5px/1 var(--font);letter-spacing:0;text-transform:none;
+  color:color-mix(in srgb,var(--muted) 78%,var(--bg));font-variant-numeric:tabular-nums}
+.jr-row{display:flex;align-items:center;gap:11px;width:100%;min-height:44px;
+  padding:10px 14px;background:transparent;border:none;position:relative;
+  font-family:var(--font);text-align:left;cursor:pointer}
+/* divL/divR розщеплені (П-10) — але обидва якорі заміряні й дали 14:
+   ліва сторона стоїть на початку тексту (padding-left рядка, дуга праворуч),
+   права — на паддінгу картки. Було 16/18 — асиметрія без якоря. */
+.jr-row::after{content:"";position:absolute;left:14px;right:14px;bottom:0;height:1px;
+  background:color-mix(in srgb,var(--border) 73%,transparent)}
+[data-theme="dark"] .jr-row::after{background:color-mix(in srgb,var(--border) 82%,transparent)}
+.jr-grp .jr-row:last-child::after{display:none}
+.jr-row.is-pressed{background:color-mix(in srgb,var(--accent) 9%,transparent)}
+/* ringSide=right через flex order — DOM стабільний, рядок не перебудовується */
+.jr-ring{flex:0 0 auto;position:relative;width:28px;height:28px;display:grid;place-items:center;order:5}
+.jr-ring svg{display:block;position:absolute;inset:0}
+.jr-ring .rn{position:relative;font:800 9.24px/1 var(--font);color:var(--text-2);
+  font-variant-numeric:tabular-nums;letter-spacing:-.3px}
+.jr-txt{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;justify-content:center;order:2}
+/* nameFit=повністю — еліпсиса НЕМА свідомо: обрізане ядро гірше за перенесене (анти-правило QR B59) */
+.jr-name{font:700 14px/1.28 var(--font);white-space:normal;color:var(--text)}
+/* D-7: overflow:hidden потрібен еліпсису орієнтира і він же різав inline-бокс тира.
+   Розщеплення: .jr-mt несе текст+еліпсис, .jr-mtier — сусідній flex:none бокс. */
+.jr-meta{font:600 11.5px/1.3 var(--font);display:flex;align-items:center;gap:5px;min-width:0;
+  color:color-mix(in srgb,var(--muted) 90%,var(--bg))}
+.jr-mt{min-width:0;overflow:hidden;text-overflow:ellipsis}
+.jr-mtier{flex:0 0 auto;display:flex;align-items:center;gap:5px}
+/* З-7: тир успадковує представлення активної картки — ті самі --hcOtc*/--hcIw*, що .tier */
+.jr-tg{font:700 11px/1.2 var(--font);white-space:nowrap;letter-spacing:.1px}
+.jr-otc{color:hsl(var(--hcOtcH) calc(var(--hcOtcS)*1%) calc(var(--hcOtcL)*1%))}
+.jr-iw{color:hsl(var(--hcIwH) calc(var(--hcIwS)*1%) calc(var(--hcIwL)*1%))}
+.jr-dot{color:color-mix(in srgb,var(--muted) 90%,var(--bg));font-weight:400;opacity:.75}
+/* шеврон нейтральний за задумом: колір у рядку вже семантичний канал (OTC/IW/дуга) */
+.jr-chev{width:15px;height:15px;flex:none;opacity:.44;color:var(--muted);order:9}
+.jr-empty{padding:26px 16px;text-align:center;color:var(--muted);font-size:13px}
 .empty{padding:34px 14px;text-align:center;color:var(--muted);font:600 13px/1.5 var(--font)}
 
 /* ===== category divider ===== */
@@ -1135,6 +1211,7 @@ a.mi{text-decoration:none;color:inherit}
           <div class="hdr-title">
             <div class="t" id="fillAddr">Аптека</div>
             <div class="s" id="fillSub">—</div>
+            <div class="ro-flag" id="roFlag" hidden><span class="rf-ic">✓</span><span class="rf-t"></span></div>
           </div>
           <button class="icon-btn pressable js-keb" aria-label="Меню" onclick="openSheet()"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.95"/><circle cx="12" cy="12" r="1.95"/><circle cx="19" cy="12" r="1.95"/></svg><span class="kdot js-kdot"></span></button>
         </div>
@@ -1226,7 +1303,7 @@ a.mi{text-decoration:none;color:inherit}
       <span class="mi-tx"><b>Про додаток</b><span id="aboutVer">Версія — шелл</span></span>
       <span class="mi-act"><span class="mi-chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span></span>
     </div>
-    <div class="mi danger pressable" onclick="clearData()">
+    <div class="mi danger pressable" id="miClear" onclick="clearData()">
       <span class="mi-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></span>
       <span class="mi-tx"><b id="clearLbl">Очистити всі дані</b><span id="clearSub">Усі аптеки та візити</span></span>
       <span class="mi-act"><span class="mi-chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span></span>
@@ -1495,16 +1572,16 @@ function setMoney(el,fam,m){if(!el)return;
   if(!m.any){el.className='money '+fam+' empty';el.textContent='';return;}
   el.className='money '+fam+' '+(m.s<0?'neg':'pos');el.textContent=fmtMoney(m.s);}
 function updHeadMoney(){
-  var ph=getPh(curPx); if(!ph)return; var data=curVals(curPx);
+  var ph=curPh(); if(!ph)return; var data=curVals(curPx);
   setMoney(document.getElementById('moneyOtc'),'fa',catMoney(OTC_BRANDS,ph.oTC,data));
   setMoney(document.getElementById('moneyIw'),'fa',catMoney(IW_BRANDS,ph.iW,data));
 }
 function updBrandMoney(bk){
-  var ph=getPh(curPx); if(!ph)return;
+  var ph=curPh(); if(!ph)return;
   setMoney(document.getElementById('bm-'+bk),'fb',brandMoney(bk,tierForBrand(bk,ph),curVals(curPx)));
 }
 
-const APP_BUILD = { ver:'v2.17.0', build:'stockcheck-pwa.b28', date:'31.07.2026' }; // wsd 10.6 — b28: експорт CSV→справжній .xlsx (бланк «АП» 1:1, Table TableStyleMedium7, формули N/O з кешем, deflate через CompressionStream). Було b27: (1) фікс блідості блоку «Обслуговування» (.mi.quiet b); (2) тост піднято над CTA-рядом + детерміновані 2 рядки; (3) нагорода моменту 📋 = handoff-sweep (кандидат C, bench v3, device✓)
+const APP_BUILD = { ver:'v2.22.0', build:'stockcheck-pwa.b29_6', date:'03.08.2026' }; // wsd 10.6 — b29.6: геометрія журналу закрита ЗАМІРОМ (лінійка b29_5a-RULER, XS/375): еталон — картка ДОШКИ (14…14), не острів (12…12); .jr і .jr-grp більше не несуть бічних полів, група успадковує 14 від .list → Δ до острова 2/2, як у .card. Роздільник 16/18→14/14 (обидва якорі заміряні), шеврон 16→15 (стенд P3). DEV_SEED=0 — робочий білд для поля. Було b29.5: 16-та колонка «Дата візиту» ВСЕРЕДИНІ таблиці АП (серійна дата + numFmt 164 dd.mm.yyyy, БЕЗ dataDxfId — dxfs у пакеті немає); дедуп D-2/B знято (кожен візит = свій блок); ім'я файлу 3візити/3аптеки повними словами, «аптеки» від УНІКАЛЬНИХ Proxima. b29.5a: ширина групи журналу зрівняна з островом (компенсація полів .list). Було b29.1: вузол F2, крок 1 — МОДЕЛЬ. Додано addrExt/addrParts (драбина адреси З-1/З-3) + visitModel()/journalGroups() (R1). Адитивно: жоден існуючий виклик не змінено, візуал b28 не рухався. Було b28: експорт CSV→справжній .xlsx (бланк «АП» 1:1, Table TableStyleMedium7, формули N/O з кешем, deflate через CompressionStream). Було b27: (1) фікс блідості блоку «Обслуговування» (.mi.quiet b); (2) тост піднято над CTA-рядом + детерміновані 2 рядки; (3) нагорода моменту 📋 = handoff-sweep (кандидат C, bench v3, device✓)
 const NETWORK = { name:'StockCheck', tagline:'інструмент залишків', tg:'t.me/Konst_Andre' };
 const ORDER_FORM_URL = 'https://rbcom-my.sharepoint.com/:x:/r/personal/yuliia_syniuhina_reckitt_com/_layouts/15/Doc.aspx?sourcedoc=%7B361AB6BF-2AE9-410C-A81F-2AA3502C4EAD%7D&file=%25u0424%25u0430%25u0440%25u043c%25u0430%25u0441%25u0442%25u043e%25u0440%20%25u0437%25u0430%25u043c%25u043e%25u0432%25u043b%25u0435%25u043d%25u043d%25u044f%20%25u0442%25u0442.xlsx&wdLOR=c06833412-A6C7-4B15-AE95-76BCF4AB9FD6&openShare=true&fromShare=true&action=default&mobileredirect=true';
 const MSL_BY_K={}; MSL.forEach(function(s){MSL_BY_K[s.k]=s;});
@@ -1538,7 +1615,10 @@ function ensureVisit(px){if(!ST.phs[px])ST.phs[px]={visits:[]};
   var ph=getPh(px);
   var nv={date:today(),vals:{},tier:{oTC:ph?ph.oTC:'',iW:ph?ph.iW:''},transferred:false};
   arr.push(nv);return nv;}
-function curVals(px){var v=todayVisit(px);return v?v.vals:{};}
+/* b29.3 · ro прив'язаний до ВІДКРИТОЇ аптеки (М-5): без гарда px===curPx
+   filledCount(інший_px) віддавав би значення переглянутого візиту. */
+function curVals(px){if(roVisit&&px===curPx)return roVisit.vals;
+  var v=todayVisit(px);return v?v.vals:{};}
 function migrateV1toV2(){
   if(localStorage.getItem('farmstore_v2'))return;
   var raw=localStorage.getItem('farmstore_v1');if(!raw)return;
@@ -1582,6 +1662,7 @@ function openNamed(id){document.getElementById('scrim').classList.add('on');docu
 function closeNamed(id){document.getElementById(id).classList.remove('on');document.getElementById('scrim').classList.remove('on');}
 /* §2.4 Очистити — context-aware + confirm (A59) */
 function clearData(){
+  if(roVisit){toast('Візит уже перенесено — очищення недоступне');return;}
   var atFill=document.getElementById('s-fill').classList.contains('active');
   var title,desc,onOk;
   if(atFill&&curPx){
@@ -1592,7 +1673,7 @@ function clearData(){
     var n=Object.keys(ST.phs||{}).filter(function(px){var e=ST.phs[px];return e&&e.visits&&e.visits.length;}).length;
     title='Очистити всі дані?';
     desc='Видалить залишки та історію візитів по всіх аптеках ('+n+' '+plApt(n)+'). Дію не скасувати.';
-    onOk=function(){ST.phs={};saveST();renderHome();toast('Усі дані очищено');};
+    onOk=function(){ST.phs={};saveST();renderList();toast('Усі дані очищено');};
   }
   confirmAction(title,desc,onOk);
 }
@@ -1608,7 +1689,7 @@ function show(id){
   document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active')});
   document.getElementById(id).classList.add('active');
   document.getElementById('app').scrollTop=0;
-  if(id==='s-home')renderHome();
+  if(id==='s-home'){clearRO();renderList();}
 }
 function openSheet(){updateCsvLabel();updateClearLabel();document.getElementById('scrim').classList.add('on');document.getElementById('sheet').classList.add('on');requestAnimationFrame(function(){placeThemeThumb(true);});}
 function closeSheet(){document.getElementById('scrim').classList.remove('on');document.getElementById('sheet').classList.remove('on');}
@@ -1620,15 +1701,17 @@ function closeSheets(){document.getElementById('scrim').classList.remove('on');
 function openAbout(){closeSheet();setTimeout(function(){
   document.getElementById('scrim').classList.add('on');document.getElementById('sh-about').classList.add('on');},120);}
 /* §4.4 CSV context-split: детект активного екрана → динам-лейбл */
+/* b29.4/R5 · підпис бере ТОЙ САМИЙ зріз, що й кнопка. Власного обходу тут більше
+   немає — інакше він знову розійдеться з дією при першій зміні умов (П-4). */
 function updateCsvLabel(){var sub=document.getElementById('csvSub');if(!sub)return;
-  var atFill=document.getElementById('s-fill').classList.contains('active');
-  if(atFill&&curPx){sub.textContent='Ця аптека';}
-  else{var n=Object.keys(ST.phs||{}).filter(function(px){var e=ST.phs[px];return e&&e.visits&&e.visits.length;}).length;
-    sub.textContent='Усі дані · '+n+' '+plApt(n);}}
+  sub.textContent=exportScope().label;}
 function updateClearLabel(){var lbl=document.getElementById('clearLbl'),sub=document.getElementById('clearSub');if(!lbl)return;
   var atFill=document.getElementById('s-fill').classList.contains('active');
-  if(atFill&&curPx){lbl.textContent='Очистити підрахунок';sub.textContent='Тільки ця аптека';}
-  else{lbl.textContent='Очистити всі дані';sub.textContent='Усі аптеки та візити';}}
+  var mi=document.getElementById('miClear');
+  if(atFill&&curPx&&roVisit){lbl.textContent='Очистити підрахунок';sub.textContent='Недоступно — візит уже перенесено';}
+  else if(atFill&&curPx){lbl.textContent='Очистити підрахунок';sub.textContent='Тільки ця аптека';}
+  else{lbl.textContent='Очистити всі дані';sub.textContent='Усі аптеки та візити';}
+  if(mi)mi.classList.toggle('quiet',!!(atFill&&curPx&&roVisit));}
 function plApt(n){var a=n%10,b=n%100;if(a===1&&b!==11)return'аптека';if(a>=2&&a<=4&&(b<12||b>14))return'аптеки';return'аптек';}
 let _tt;
 function toast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('on');clearTimeout(_tt);_tt=setTimeout(function(){t.classList.remove('on')},2200);}
@@ -1647,7 +1730,7 @@ function esc(s){return(''+s).replace(/&/g,'&amp;').replace(/</g,'&lt;');}
 const AREAS=[]; PH.forEach(function(p){if(AREAS.indexOf(p.area)<0)AREAS.push(p.area);});
 function citiesOf(a){var s=[];PH.forEach(function(p){if(p.area===a&&s.indexOf(p.city)<0)s.push(p.city);});
   return s.sort(function(x,y){return x.localeCompare(y,'uk');});}
-var S={area:AREAS[0]||'',city:'',q:'',picking:'city',mode:'all'};   /* mode = §5.4 status-фільтр */
+var S={area:AREAS[0]||'',city:'',q:'',picking:'city',mode:'active'}; /* b29.3: режим all знято — фільтр і є перемикачем дошка⟂журнал */
 const AK='farmstore_area';
 function loadArea(){try{var r=JSON.parse(localStorage.getItem(AK));if(r&&AREAS.indexOf(r.a)>=0)S.area=r.a;}catch(e){}} /* B57 name-guard: область ∈ AREAS */
 function saveArea(){try{localStorage.setItem(AK,JSON.stringify({a:S.area}));}catch(e){}}
@@ -1672,32 +1755,35 @@ function bandChips(){if(S.picking==='area')return areaChips();if(S.picking==='fi
 
 function breadcrumb(){
   return '<div class="bcrow"><button class="bc area-bc pressable'+(S.picking==='area'?' open':'')+'" id="bc"><span class="lbl">'+esc(S.area)+'</span> <span class="bc-c">▾</span></button>'+
-    filtChip()+
-    '<span class="bc-count" id="bcCount"></span></div>';}
+    filtChip()+'</div>';}
 function searchField(){return '<div class="srch"><span class="si">'+SVG_SEARCH+'</span>'+
   '<input id="q" placeholder="Пошук вулиці / Proxima…" value="'+esc(S.q)+'"></div>';}
 
 
 /* ===== §5.4 STATUS-ФІЛЬТР — хелпери (порт b13) ===== */
-var FILTERS=[{k:'all',label:'Усі'},{k:'active',label:'Активні'},{k:'transferred',label:'Перенесені'}];
+var FILTERS=[{k:'active',label:'Активні'},{k:'transferred',label:'Перенесені'}];
 function phState(px){var e=ST.phs[px];if(!e||!e.visits||!e.visits.length)return'new';
   var v=e.visits[e.visits.length-1];
   return v.transferred?'transferred':(Object.keys(v.vals||{}).length?'ready':'new');}
-function counts(){var a=0,t=0;PH.forEach(function(p){if(p.area!==S.area)return;
-  (phState(p.px)==='transferred')?t++:a++;});return{a:a,t:t,all:a+t};}
+/* F2/b29.3 · ДВІ МОДЕЛІ, ОДИН ФІЛЬТР (О-6 + М-1).
+   Активні — АПТЕКИ (homeModel), Перенесені — ВІЗИТИ (visitModel). Одиниці різні,
+   складати не можна — тому c.all більше не існує, і спокуси скласти не лишається.
+   Обидві осі проходять topMatch: інакше лічильник рахує область, а список показує
+   область+місто+пошук — це і був відкритий дефект b28 «лічильник ⟂ список». */
+function counts(){
+  var a=homeModel().filter(topMatch).filter(function(p){return p.state!=='transferred';}).length;
+  var t=visitModel().filter(function(r){return r.transferred;}).filter(topMatch).length;
+  return{a:a,t:t};}
 function filtGlyph(){
-  if(S.mode==='active')return'<span class="g active"></span>';
-  if(S.mode==='transferred')return'<span class="g transferred">✓</span>';
-  return'<span class="g all"></span>';}
-function filtChip(){var c=counts(),lbl,cnt='';
-  if(S.mode==='active'){lbl='Активні';cnt='<span class="cnt">'+c.a+'</span>';}
-  else if(S.mode==='transferred'){lbl='Перенесені';cnt='<span class="cnt">'+c.t+'</span>';}
-  else lbl='Усі';
+  return S.mode==='transferred'?'<span class="g transferred">✓</span>':'<span class="g active"></span>';}
+function filtChip(){var c=counts(),lbl,cnt;
+  if(S.mode==='transferred'){lbl='Перенесені';cnt='<span class="cnt">'+c.t+'</span>';}
+  else{lbl='Активні';cnt='<span class="cnt">'+c.a+'</span>';}
   return'<button class="bc filt pressable'+(S.picking==='filter'?' open':'')+'" id="filtBc">'+filtGlyph()+
     '<span class="lbl">'+lbl+'</span>'+cnt+'<span class="bc-c">▾</span></button>';}
 function filterChips(){var c=counts();
   return FILTERS.map(function(f){
-    var n=f.k==='all'?c.all:(f.k==='active'?c.a:c.t);
+    var n=(f.k==='active')?c.a:c.t;
     return'<button class="chip'+(f.k===S.mode?' on':'')+'" data-filt="'+f.k+'"><span class="fg '+f.k+'"></span>'+f.label+'<span class="cn">'+n+'</span></button>';
   }).join('');}
 function renderCrumbState(){
@@ -1716,14 +1802,14 @@ function bindTop(){
   var cr=document.getElementById('cityrow');
   if(cr)cr.addEventListener('click',function(e){var b=e.target.closest('.chip');if(!b)return;
     if(b.hasAttribute('data-area')){        /* область-mode → вибір області */
-      S.area=b.getAttribute('data-area');S.city='';S.picking='city';saveArea();renderTop();renderHome();return;
+      S.area=b.getAttribute('data-area');S.city='';S.picking='city';saveArea();renderTop();renderList();return;
     }
     if(b.hasAttribute('data-filt')){        /* §5.4 фільтр-mode → вибір статусу */
-      S.mode=b.getAttribute('data-filt');S.picking='city';renderTop();renderHome();return;
+      S.mode=b.getAttribute('data-filt');S.picking='city';renderTop();renderList();return;
     }
     /* місто → in-place .on (scroll зберігається) */
     [].forEach.call(cr.querySelectorAll('.chip'),function(c){c.classList.remove('on');});
-    b.classList.add('on');S.city=b.getAttribute('data-city');renderHome();edgeRecalc();});
+    b.classList.add('on');S.city=b.getAttribute('data-city');renderList();edgeRecalc();});
   var bc=document.getElementById('bc');
   if(bc)bc.addEventListener('click',function(){
     S.picking=S.picking==='area'?'city':'area';renderCrumbState();renderBand();});
@@ -1731,7 +1817,7 @@ function bindTop(){
   if(fb)fb.addEventListener('click',function(){
     S.picking=S.picking==='filter'?'city':'filter';renderCrumbState();renderBand();});
   var q=document.getElementById('q');
-  if(q)q.addEventListener('input',function(){S.q=q.value;renderHome();});
+  if(q)q.addEventListener('input',function(){S.q=q.value;renderList();});
 }
 function renderBand(){var row=document.getElementById('cityrow');if(!row)return;
   row.innerHTML=bandChips();row.scrollLeft=0;
@@ -1745,6 +1831,97 @@ function edgeFade(){_edge=[];
     row.addEventListener('scroll',upd,{passive:true});upd();_edge.push(upd);});}
 function edgeRecalc(){_edge.forEach(function(f){f();});}
 function displayAddr(a){return(''+(a||'')).replace(/^\s*Україна,\s*/,'').replace(/^[^,]*?\sобл\.,\s*/,'').replace(/^\s*м\.[^,]*,\s*/,'');}
+/* ═══ F2/b29.1 · ДРАБИНА АДРЕСИ (З-1 · З-3) ═══════════════════════════════════
+   displayAddr = «донор» (Україна / обл. / м.) — НЕ чіпається: його споживають
+   hCard і openFill, обидва device✓ у b28. Розширена чистка живе окремою сходинкою.
+   addrExt зрізає ще дві сутності, яких донор не бачить: район і тип поселення.
+   Замір F1 по 63 PH: без спліту макс 90 симв.; ядро після спліту макс 34, медіана 20. */
+function addrExt(a){return displayAddr(a)
+  .replace(/^[^,]*?\sр-н\.?,\s*/,'')
+  .replace(/^\s*(м|смт|с|сел)\.[^,]*,\s*/,'').trim();}
+/* Якір регексу — ЦИФРА номера будинку перед крапкою. Без цифри «вул.»/«просп.»
+   стріляють власною крапкою і ріжуть адресу навпіл. Хибних на 63 адресах: 0. */
+var ADDR_SPLIT=/^(.+?\d[^.,]*)\.\s*(.+)$/;
+function addrParts(a){var e=addrExt(a),m=ADDR_SPLIT.exec(e);
+  return m?{core:m[1],note:m[2]}:{core:e,note:''};}
+
+/* ═══ F2/b29.1 · МОДЕЛЬ ВІЗИТУ (R1) ═══════════════════════════════════════════
+   homeModel() = один запис на АПТЕКУ (63 назавжди) — дошка сьогоднішнього дня.
+   visitModel() = один запис на ВІЗИТ — журнал. Одиниці різні, складати не можна.
+   Тут НЕ фільтрується transferred: модель нейтральна, зріз робить споживач. */
+function visitModel(){
+  var out=[];
+  PH.forEach(function(ph){
+    var e=ST.phs[ph.px]; if(!e||!e.visits||!e.visits.length)return;
+    var ap=addrParts(ph.addr), dAddr=displayAddr(ph.addr);
+    e.visits.forEach(function(v,i){
+      out.push({px:ph.px,date:v.date,idx:i,transferred:!!v.transferred,
+        area:ph.area,city:ph.city,
+        addr:dAddr,                      /* topMatch шукає по тому ж рядку, що й дошка */
+        core:ap.core,note:ap.note,
+        otc:(v.tier&&v.tier.oTC)||ph.oTC,iw:(v.tier&&v.tier.iW)||ph.iW,
+        filled:v.vals?Object.keys(v.vals).length:0});
+    });
+  });
+  return out;
+}
+/* Групи журналу: дати спадно (ISO-рядок сортується лексикографічно), усередині —
+   місто, далі ЯДРО адреси. Сортувати по core, а не по addr: у списку видно core. */
+function journalGroups(){
+  var L=visitModel().filter(function(r){return r.transferred;}).filter(topMatch);
+  var map={},order=[];
+  L.forEach(function(r){if(!map[r.date]){map[r.date]=[];order.push(r.date);}map[r.date].push(r);});
+  order.sort(function(a,b){return a<b?1:(a>b?-1:0);});
+  order.forEach(function(d){map[d].sort(function(x,y){
+    return x.city.localeCompare(y.city,'uk')||x.core.localeCompare(y.core,'uk');});});
+  return order.map(function(d){return{date:d,rows:map[d]};});
+}
+
+/* ═══ F2/b29.2 · РОЗМІТКА ЖУРНАЛУ ════════════════════════════════════════════
+   jrRing — ОКРЕМА функція, не перевантаження ringSVG(f): та зашита під d=62/w=5
+   і заливку hFill(f) для картки Home. Спільне ім'я мовчки перебило б кільце дошки. */
+function jrRing(pct,sz){
+  var w=Math.max(2.4,sz*.115),r=(sz-w)/2,c=sz/2,
+      st='transform:rotate(135deg);transform-origin:center',
+      off=(75-0.75*pct).toFixed(2);
+  return '<svg width="'+sz+'" height="'+sz+'" viewBox="0 0 '+sz+' '+sz+'">'
+    +'<circle cx="'+c+'" cy="'+c+'" r="'+r+'" pathLength="100" fill="none" stroke="var(--ringTrack)" stroke-width="'+w+'" stroke-linecap="round" stroke-dasharray="75 100" style="'+st+'"/>'
+    +(pct>0?'<circle cx="'+c+'" cy="'+c+'" r="'+r+'" pathLength="100" fill="none" stroke="var(--accent)" stroke-width="'+w+'" stroke-linecap="round" stroke-dasharray="75 100" stroke-dashoffset="'+off+'" style="'+st+'"/>':'')
+    +'</svg>';
+}
+var JR_WD=['нд','пн','вт','ср','чт','пт','сб'],
+    JR_MN=['січ','лют','бер','кві','тра','чер','лип','сер','вер','жов','лис','гру'];
+function jrDate(iso){var p=(iso||'').split('-');if(p.length!==3)return iso||'';
+  var d=new Date(+p[0],+p[1]-1,+p[2]);
+  return JR_WD[d.getDay()]+' '+d.getDate()+' '+JR_MN[d.getMonth()];}
+/* meta = орієнтир · місто · тир. Хвіст адреси (note) є лише у 21 з 63 — коли його
+   немає, місто лишається першим, і рядок не втрачає структури. */
+function jrRow(r){
+  var mtxt=(r.note?r.note+' · ':'')+r.city;
+  return '<button class="jr-row pressable" data-px="'+esc(r.px)+'" data-date="'+esc(r.date)+'">'
+    +'<span class="jr-txt"><span class="jr-name">'+esc(r.core)+'</span>'
+      +'<span class="jr-meta"><span class="jr-mt">'+esc(mtxt)+'</span>'
+      +'<span class="jr-mtier"><span class="jr-dot">·</span>'
+      +'<span class="jr-tg jr-otc">'+esc(r.otc)+'</span><span class="jr-dot">/</span>'
+      +'<span class="jr-tg jr-iw">'+esc(r.iw)+'</span></span></span></span>'
+    +'<span class="jr-ring">'+jrRing(hPct(r.filled),28)
+      +'<span class="rn">'+r.filled+'</span></span>'
+    +JR_CHEV+'</button>';
+}
+var JR_CHEV='<svg class="jr-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="9 6 15 12 9 18"/></svg>';
+function journalHTML(){
+  var G=journalGroups();
+  if(!G.length)return '<div class="jr-empty">Зданих візитів у цьому зрізі немає</div>';
+  return '<div class="jr">'+G.map(function(g){
+    return '<div class="jr-grp"><div class="jr-hdr">'+esc(jrDate(g.date))
+      +'<span class="n">'+g.rows.length+'</span></div>'
+      +g.rows.map(jrRow).join('')+'</div>';
+  }).join('')+'</div>';
+}
+/* Тимчасовий вхід для device-погляду: #homeList — ЄДИНИЙ контейнер списку (Д-6),
+   тому журнал показується замість дошки на вимогу. У b29.3 його замінює
+   розчеплення renderHome; цей рядок тоді видаляється. */
+window.__jrPreview=function(){document.getElementById('homeList').innerHTML=journalHTML();};
 function fmtDate(d){if(!d)return'';var p=(''+d).split('-');return p.length===3?p[2]+'.'+p[1]:d;}
 function hPct(f){return Math.round(f/TOTAL*100);}
 function hFill(f){var q=(f>=TOTAL)?'Full':'Part';
@@ -1828,28 +2005,57 @@ function hCard(p){
     '<div class="tier"><span class="otc">OTC '+esc(p.otc)+'</span><span class="dot">·</span><span class="iw">IW '+esc(p.iw)+'</span></div></div>'+
     heroHTML(p)+footHTML(p)+'</div>';
 }
+/* ══ F2/b29.3 · DEV-СІД — живе доки О-2 не закрито; знімається DEV_SEED=0 ══════
+   wsd 3.10 (scroll-bloat): ритм 7×4 неможливо відтворити з реальних даних, бо
+   ensureVisit пише date=today() — усе, перенесене за день, лягає в ОДНУ групу.
+   unshift, не push: phState/todayVisit читають ОСТАННІЙ візит, тож синтетика з
+   минулими датами не зачіпає ні дошку, ні твої сьогоднішні переноси — вони
+   лишаються видимими поряд. saveST() не кличеться: перезавантаження стирає сід. */
+var DEV_SEED=0;   /* b29.6 · РОБОЧИЙ БІЛД — сід вимкнено. Код seedDev() лишається
+                     на місці навмисно: вмикається одним числом для тестувань
+                     (див. StockCheck_port_b29_6_SEED.html). Знімати функцію не
+                     можна, доки О-2 (індикатор сховища) не закрито у вузлі F3. */
+function seedDev(){
+  if(!DEV_SEED)return;
+  var pool=PH.filter(function(p){return p.area===S.area;});
+  if(!pool.length)return;
+  var keys=MSL.map(function(m){return m.k;}), n=0;
+  [1,2,3,7].forEach(function(back,di){
+    var d=new Date(); d.setDate(d.getDate()-back);
+    var iso=d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2);
+    for(var i=0;i<7;i++){
+      var ph=pool[(di*7+i)%pool.length];
+      if(!ST.phs[ph.px])ST.phs[ph.px]={visits:[]};
+      var arr=ST.phs[ph.px].visits;
+      var dup=false; for(var z=0;z<arr.length;z++){if(arr[z].date===iso){dup=true;break;}}
+      if(dup)continue;
+      var frac=[1,.82,.55,.34,.21,.95,.68][i], cnt=Math.max(1,Math.round(keys.length*frac)), vals={};
+      for(var j=0;j<cnt;j++)vals[keys[j]]=(j*7)%14;
+      arr.unshift({date:iso,vals:vals,tier:{oTC:ph.oTC,iW:ph.iW},transferred:true});
+      n++;
+    }
+  });
+  try{console.log('DEV_SEED: +'+n+' \u0432\u0456\u0437\u0438\u0442\u0456\u0432');}catch(e){}
+}
 function hSort(a,b){return a.city.localeCompare(b.city,'uk')||a.addr.localeCompare(b.addr,'uk');}
+/* F2/b29.3 · РОЗЧЕПЛЕННЯ ДОШКА ⟂ ЖУРНАЛ (О-6).
+   renderList — єдина точка входу; ISLC.guard навішений САМЕ на неї (не на renderHome
+   і не на renderJournal), інакше після розчеплення журнальний шлях вийшов би з-під
+   хука, а подвійне навішування дало б два guard за один рендер. */
+function renderList(){ if(S.mode==='transferred')renderJournal(); else renderHome(); }
+function renderJournal(){ document.getElementById('homeList').innerHTML=journalHTML(); }
 function renderHome(){
   var full=homeModel();
-  var M=full.filter(topMatch);
-  var act=M.filter(function(p){return p.state!=='transferred';}).sort(hSort);
-  var tr=M.filter(function(p){return p.state==='transferred';}).sort(hSort);
-  var h,shown;
-  if(S.mode==='active'){shown=act;h=act.map(hCard).join('');}
-  else if(S.mode==='transferred'){shown=tr;h=tr.map(hCard).join('');}
-  else{shown=M;h=act.map(hCard).join('');
-    if(tr.length)h+='<div class="sec">Перенесені ('+tr.length+')<span class="ln"></span></div>'+tr.map(hCard).join('');}
-  if(!shown.length){
-    var mlbl=S.mode==='active'?' · активні':(S.mode==='transferred'?' · перенесені':'');
-    h='<div class="empty">Нічого не знайдено у «'+esc(S.area)+(S.city?' · '+esc(S.city):'')+
-      (S.q.trim()?' · «'+esc(S.q.trim())+'»':'')+mlbl+'»</div>';
-  }
+  var act=full.filter(topMatch).filter(function(p){return p.state!=='transferred';}).sort(hSort);
+  var h;
+  if(act.length)h=act.map(hCard).join('');
+  else h='<div class="empty">Нічого не знайдено у «'+esc(S.area)+(S.city?' · '+esc(S.city):'')+
+      (S.q.trim()?' · «'+esc(S.q.trim())+'»':'')+' · активні»</div>';
   var list=document.getElementById('homeList');
   list.innerHTML=h;
-  var c=document.getElementById('bcCount');if(c)c.textContent=counts().all+' апт.';
   // arc-fill: грає ЛИШЕ на щойно-змінене видиме кільце (snapshot-diff); НЕ на першому mount, НЕ на фільтр/band-swap
   if(_homeSnap){
-    M.forEach(function(p){
+    act.forEach(function(p){
       if(p.state!=='ready')return;                       // дуга є лише в ready
       var o=_homeSnap[p.px];
       if(o===undefined||o===p.filled)return;             // без змін / новоз'явлена в фільтрі → не анімуємо
@@ -1862,8 +2068,40 @@ function renderHome(){
 
 /* ---- fill ---- */
 let curPx=null, openBrands={};
+/* roVisit — КОНКРЕТНИЙ візит під переглядом (не аптека). roPh — знімок аптеки з
+   тиром ТОГО візиту: норми MSL залежать від тиру, тож підставити сьогоднішній
+   означало б показати чужі норми під старими цифрами. */
+let roVisit=null, roPh=null;
+function curPh(){return roPh||getPh(curPx);}
+/* F2/b29.3 · READONLY-ПЕРЕГЛЯД (R4). Той самий екран FILL у режимі ro, а не новий:
+   реп мусить бачити свій підрахунок у ТІЙ САМІЙ композиції, в якій його робив —
+   інший екран неминуче розійшовся б у дрібницях, і звірка стала б звіркою розкладок. */
+function clearRO(){
+  roVisit=null; roPh=null;
+  var sf=document.getElementById('s-fill'); if(sf)sf.classList.remove('ro');
+  var rf=document.getElementById('roFlag'); if(rf){rf.hidden=true;rf.querySelector('.rf-t').textContent='';}
+}
+function openVisit(px,date){
+  var ph=getPh(px); if(!ph)return;
+  var e=ST.phs[px]; if(!e||!e.visits)return;
+  var v=null; for(var i=e.visits.length-1;i>=0;i--){if(e.visits[i].date===date){v=e.visits[i];break;}}
+  if(!v)return;
+  var t=(v.tier||{});
+  roVisit=v; roPh={px:ph.px,area:ph.area,city:ph.city,addr:ph.addr,oTC:t.oTC||ph.oTC,iW:t.iW||ph.iW};
+  curPx=px; openBrands={};
+  document.getElementById('s-fill').classList.add('ro');
+  var rf=document.getElementById('roFlag');
+  rf.hidden=false; rf.querySelector('.rf-t').textContent='Перенесено \u00b7 '+jrDate(v.date);
+  document.getElementById('fillAddr').textContent=displayAddr(ph.addr);
+  document.getElementById('fillSub').textContent=ph.city+' \u00b7 Proxima '+ph.px;
+  document.getElementById('chipOtc').textContent='OTC '+roPh.oTC;
+  document.getElementById('chipIw').textContent='IW '+roPh.iW;
+  renderFill(roPh);
+  show('s-fill');
+}
 function openFill(px){
   var ph=getPh(px); if(!ph)return;
+  clearRO();
   curPx=px; openBrands={};
   document.getElementById('fillAddr').textContent=displayAddr(ph.addr);
   document.getElementById('fillSub').textContent=ph.city+' · Proxima '+ph.px;
@@ -1916,7 +2154,7 @@ function brandCard(bk,tier,data){
       h+='<div class="row'+settled+' lv-'+lv+'">'
         +'<div class="info"><div class="rn">'+vSpan+'<span class="rn-tag">'+pk+ck+'</span></div><div class="rm">'+meta+'</div></div>'
         +'<div class="fwrap"><div class="fld'+(saved===0?' is-zero':'')+'">'
-        +'<input class="fld-in" type="text" inputmode="numeric" pattern="[0-9]*" value="'+(has?saved:'')+'" placeholder="'+norm+'" data-k="'+r.k+'" data-m="'+norm+'" data-bk="'+bk+'" oninput="onInput(this)"></div>'
+        +'<input class="fld-in" type="text" inputmode="numeric" pattern="[0-9]*" value="'+(has?saved:'')+'" placeholder="'+norm+'" data-k="'+r.k+'" data-m="'+norm+'" data-bk="'+bk+'" oninput="onInput(this)"'+(roVisit?' disabled':'')+'></div>'
         +dchipHtml(lv,saved,norm)+'</div></div>';
     });
     h+='</div>';
@@ -2025,22 +2263,25 @@ function fireSweep(){
   setTimeout(function(){b.classList.remove('sweeping');b.dataset.sweeping='';},d+80);
 }
 function copyValues(){
-  var vis=todayVisit(curPx), data=vis?vis.vals:{};
+  /* у ro копія лишається законною дією, але transferred/saveST НЕ чіпаємо:
+     візит уже зданий, а нагорода моменту (fireSweep) винагороджує факт передачі,
+     не перегляд — тому вона тут не грає. */
+  var vis=roVisit||todayVisit(curPx), data=vis?vis.vals:{};
   var col=MSL.map(function(s){return data[s.k]!==undefined?data[s.k]:'';}).join('\n');
-  if(vis){vis.transferred=true;saveST();}
+  if(vis&&!roVisit){vis.transferred=true;saveST();}
   var idx=PH.findIndex(function(p){return p.px===curPx;});
   var mRow=2+idx*83;
   /* b27 · копія під слот (Д1): перенос ЯВНИЙ \n + white-space:pre-line у .toast →
      рівно 2 рядки завжди. Автоперенос давав 3 і рвав «Proxima 1688723» навпіл. */
   var msg='✓ Скопійовано 83 значення\nВставити у M'+mRow+' · Proxima '+curPx;
   if(navigator.clipboard&&navigator.clipboard.writeText){
-    navigator.clipboard.writeText(col).then(function(){toast(msg);fireSweep();}).catch(function(){fallbackCopy(col,msg);});
+    navigator.clipboard.writeText(col).then(function(){toast(msg);if(!roVisit)fireSweep();}).catch(function(){fallbackCopy(col,msg);});
   }else{fallbackCopy(col,msg);}
 }
 function fallbackCopy(txt,msg){
   var ta=document.createElement('textarea');ta.value=txt;ta.style.position='fixed';ta.style.opacity='0';
   document.body.appendChild(ta);ta.focus();ta.select();
-  try{document.execCommand('copy');toast(msg);fireSweep();}catch(e){toast('Не вдалось скопіювати');}
+  try{document.execCommand('copy');toast(msg);if(!roVisit)fireSweep();}catch(e){toast('Не вдалось скопіювати');}
   document.body.removeChild(ta);
 }
 
@@ -2106,15 +2347,28 @@ async function zipBuild(files){ // files:[{name,data:Uint8Array}]
 function xe(s){return (''+s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function colName(n){var s='';while(n>0){var m=(n-1)%26;s=String.fromCharCode(65+m)+s;n=(n-m-1)/26;}return s;}
 function u8(str){return new TextEncoder().encode(str);}
+/* b29.5 · ISO 'YYYY-MM-DD' → серійне число Excel (епоха 1900, база 1899-12-30).
+   Дата пишеться ЧИСЛОМ, не текстом: текстова дата не потрапляє в календарний
+   фільтр Excel і сортується правильно лише в ISO — тобто виглядом, який ми
+   адресатові не обіцяли. Серійна дата дає і сортування як дату, і фільтр
+   «за місяць/день», і вигляд, який задаємо МИ через numFmt, а не локаль КАМа. */
+function dserial(iso){var p=String(iso||'').split('-');
+  if(p.length!==3)return '';
+  var n=(Date.UTC(+p[0],+p[1]-1,+p[2])-Date.UTC(1899,11,30))/864e5;
+  return isFinite(n)?n:'';}
 
 var HEAD=['Proxima Pharmacy ID','Area','City','Outlet Address','Network','Category OTC',
           'Category IW','Custom.SKY','Custom.Category','Custom.Kode','Custom.Price',
-          'Кількіть MSL','Залишок','Замовлення','Column1'];
-var WIDTH=[13,18,14,44,11,9,9,44,11,12,10,11,10,12,12];
+          'Кількіть MSL','Залишок','Замовлення','Column1','Дата візиту'];
+var WIDTH=[13,18,14,44,11,9,9,44,11,12,10,11,10,12,12,12];
+/* b29.5 · Остання колонка рахується з HEAD, а не зашита літералом 'O' у трьох
+   місцях. Літерал і масив розходяться мовчки: масив виріс, ref лишився старим —
+   Excel побачив би таблицю вужчу за дані й пішов на ремонт. Тепер джерело одне. */
+var LASTCOL=colName(HEAD.length);
 
 /* ---- аркуш ---- */
 function sheetXml(rows,useTable){
-  var last=rows.length+1, ref='A1:O'+last, x=[];
+  var last=rows.length+1, ref='A1:'+LASTCOL+last, x=[];
   x.push('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>');
   x.push('<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">');
   x.push('<dimension ref="'+ref+'"/>');
@@ -2135,7 +2389,9 @@ function sheetXml(rows,useTable){
   rows.forEach(function(r,ri){
     var n=ri+2; x.push('<row r="'+n+'">');
     r.forEach(function(v,ci){
-      var cr=colName(ci+1)+n, st=(ci===10||ci===14)?' s="2"':'';
+      /* s="2" — гроші (numFmt 2); s="3" — дата візиту (numFmt 164). Порожня дата
+         теж отримує стиль: клітинка без значення, але з форматом колонки. */
+      var cr=colName(ci+1)+n, st=(ci===10||ci===14)?' s="2"':(ci===15?' s="3"':'');
       if(v===null||v===undefined||v===''){ if(st)x.push('<c r="'+cr+'"'+st+'/>'); return; }
       if(v&&v.f!==undefined){
         x.push('<c r="'+cr+'"'+st+'><f>'+xe(v.f)+'</f>'+(v.v===''?'':'<v>'+v.v+'</v>')+'</c>');
@@ -2155,10 +2411,14 @@ function sheetXml(rows,useTable){
 }
 
 function tableXml(rowCount){
-  var ref='A1:O'+(rowCount+1), x=[];
+  var ref='A1:'+LASTCOL+(rowCount+1), x=[];
   x.push('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>');
   x.push('<table xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" id="1" name="АП" displayName="АП" ref="'+ref+'" totalsRowShown="0">');
-  x.push('<autoFilter ref="'+ref+'"/><tableColumns count="15">');
+  x.push('<autoFilter ref="'+ref+'"/><tableColumns count="'+HEAD.length+'">');
+  /* ⚠ b29.5 · НЕ додавати dataDxfId у жодну tableColumn. У нашому styles.xml блоку
+     <dxfs> немає (dxfs=0), тож будь-який dataDxfId — посилання в нікуди: ПК-Excel
+     іде на ремонт table1.xml, мобільний просто відмовляється відкрити файл.
+     Прецедент — демо-прев'ю b29.5 v1 (самері F2.5 §2D, дефект Д-1). */
   HEAD.forEach(function(h,i){
     var id=i+1;
     if(id===14) x.push('<tableColumn id="14" name="'+xe(h)+'"><calculatedColumnFormula>АП[[#This Row],[Кількіть MSL]]-АП[[#This Row],[Залишок]]</calculatedColumnFormula></tableColumn>');
@@ -2171,6 +2431,11 @@ function tableXml(rowCount){
 
 var STYLES='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
 +'<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'
+/* b29.5 · numFmts ПЕРШИМ елементом: порядок дітей styleSheet заданий схемою
+   (numFmts · fonts · fills · borders · cellStyleXfs · cellXfs · cellStyles) і
+   читається позиційно — звірено на файлі, який пише сумісний писар. Крапку у
+   formatCode екрануємо: без бекслеша вона трактується як десятковий роздільник. */
++'<numFmts count="1"><numFmt numFmtId="164" formatCode="dd\\.mm\\.yyyy"/></numFmts>'
 +'<fonts count="2"><font><sz val="11"/><name val="Calibri"/></font>'
 +'<font><b/><sz val="11"/><name val="Calibri"/></font></fonts>'
 +'<fills count="3"><fill><patternFill patternType="none"/></fill>'
@@ -2178,10 +2443,11 @@ var STYLES='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
 +'<fill><patternFill patternType="solid"><fgColor rgb="FFDCE6F1"/><bgColor indexed="64"/></patternFill></fill></fills>'
 +'<borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders>'
 +'<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>'
-+'<cellXfs count="3">'
++'<cellXfs count="4">'
 +'<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>'
 +'<xf numFmtId="0" fontId="1" fillId="2" borderId="0" xfId="0" applyFont="1" applyFill="1"/>'
 +'<xf numFmtId="2" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/>'
++'<xf numFmtId="164" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/>'
 +'</cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles>'
 +'</styleSheet>';
 
@@ -2209,27 +2475,6 @@ async function buildXlsx(rows,useTable){
   return await zipBuild(files);
 }
 
-/* ---- збірка рядків бланка ---- */
-function blankRows(list,MSL,useTable){ // list:[{ph,vals}]
-  var rows=[];
-  list.forEach(function(it){
-    var ph=it.ph, vals=it.vals||{};
-    MSL.forEach(function(s){
-      var tier = (s.c==='OTC')?ph.oTC:ph.iW;
-      var norm = s[tier]||0;
-      var rest = (vals[s.k]!==undefined)?vals[s.k]:'';
-      var n    = rows.length+2;
-      var fN   = useTable ? 'АП[[#This Row],[Кількіть MSL]]-АП[[#This Row],[Залишок]]' : ('L'+n+'-M'+n);
-      var fO   = useTable ? 'АП[[#This Row],[Замовлення]]*АП[[#This Row],[Custom.Price]]' : ('N'+n+'*K'+n);
-      var ordV = (rest==='')?norm:(norm-rest);
-      rows.push([ph.px, ph.area, ph.city, ph.addr, ph.net, ph.oTC, ph.iW,
-                 s.n, s.c, s.k, s.p, norm, rest,
-                 {f:fN,v:ordV}, {f:fO,v:Math.round(ordV*s.p*100)/100}]);
-    });
-  });
-  return rows;
-}
-
 /* ---- рядки бланка ---- */
 function blankRows(list){ // list:[{ph,vis}]
   var rows=[];
@@ -2242,27 +2487,105 @@ function blankRows(list){ // list:[{ph,vis}]
       var ordV=(rest==='')?norm:(norm-rest);
       rows.push([ph.px, ph.area, ph.city, ph.addr, ph.net, tOtc, tIw,
                  s.n, s.c, s.k, s.p, norm, rest,
-                 {f:FN,v:ordV}, {f:FO,v:Math.round(ordV*s.p*100)/100}]);
+                 {f:FN,v:ordV}, {f:FO,v:Math.round(ordV*s.p*100)/100},
+                 (vis&&vis.date)?dserial(vis.date):'']);
     });
   });
   return rows;
 }
 
-function exportXLSX(){
+/* ═══ F2/b29.4 · ЗРІЗ ЕКСПОРТУ (R5 · П-5) ═════════════════════════════════════
+   ЄДИНЕ джерело істини для ДІЇ (exportXLSX) і для ПІДПИСУ (updateCsvLabel).
+   До b29.4 кожен рахував сам: exportXLSX обходив увесь PH і брав останній візит
+   будь-коли, updateCsvLabel — Object.keys(ST.phs). Два незалежні обходи одного
+   наміру розходяться при першій зміні умов фільтрації (П-4) — тут вони розійшлись
+   із самим екраном: обране місто ігнорувалось обома. Тепер зріз рахується один раз
+   і споживається обома; розійтись їм більше нема як — вони читають одну функцію,
+   а не повторюють одну логіку.
+   Повертає {list,label,fname}: list уже у формі, яку приймає blankRows. */
+function plVis(n){var a=n%10,b=n%100;if(a===1&&b!==11)return'візит';if(a>=2&&a<=4&&(b<12||b>14))return'візити';return'візитів';}
+function plBlk(n){var a=n%10,b=n%100;if(a===1&&b!==11)return'блок';if(a>=2&&a<=4&&(b<12||b>14))return'блоки';return'блоків';}
+/* Ім'я файлу НЕ входить у формат — усередині ZIP його немає, його не читає ні
+   Excel-парсер, ні Power Query. Тому санітизація вільна: ріжемо лише те, що ламає
+   файлові системи й share-лист iOS. */
+function fsafe(s){return String(s||'').replace(/[\\\/:*?"<>|]+/g,' ').replace(/\s+/g,' ').trim().slice(0,48);}
+function scopeArea(){return S.city||S.area;}
+/* Одна аптека → в імені ЯДРО АДРЕСИ і дата ВІЗИТУ (не today(): у readonly екран
+   показує минулий візит, а файл називався сьогоднішнім числом — П-15).
+   Ядро — той самий addrParts, що device✓ у журналі: ≤34 симв., медіана 20. */
+function scopeName(list){
+  if(list.length===1){var it=list[0];
+    return 'Фармастор_'+fsafe(addrParts(it.ph.addr).core)+'_'+((it.vis&&it.vis.date)||today())+'.xlsx';}
+  /* b29.5 · Кількість аптек рахується від УНІКАЛЬНИХ Proxima, а не від довжини
+     списку: після зняття дедупу list.length — це число БЛОКІВ. Зріз «2 аптеки ×
+     2 дати» назвався б «4аптеки» — неправда в імені, яке читає КАМ, а не парсер. */
+  var seen={},nph=0;
+  list.forEach(function(it){if(!seen[it.ph.px]){seen[it.ph.px]=1;nph++;}});
+  if(nph===1){
+    /* Одна аптека, кілька дат: ядро адреси + кількість візитів + НАЙНОВІША дата.
+       Найновіша, а не діапазон: «05.07..02.08» читається як безперервний період,
+       тоді як у файлі лежать дискретні зрізи. У теці вкладень кінцева найновіша
+       дата ще й групує файли за свіжістю — початкова найстаріша пливе. */
+    var last=''; list.forEach(function(it){var d=(it.vis&&it.vis.date)||''; if(d>last)last=d;});
+    return 'Фармастор_'+fsafe(addrParts(list[0].ph.addr).core)+'_'
+      +list.length+plVis(list.length)+'_'+(last||today())+'.xlsx';
+  }
+  /* Повні слова замість «3апт»: ім'я бачить людина. Асиметрія «3апт» ⟂ «4візити»
+     в одному контракті — правиться тут, а не лишається на потім (О-13). */
+  return 'Фармастор_'+fsafe(scopeArea())+'_'+nph+plApt(nph)+'_'+today()+'.xlsx';
+}
+function exportScope(){
   var atFill=document.getElementById('s-fill').classList.contains('active');
-  var list=[], name;
+  var list=[],label;
   if(atFill&&curPx){
     var ph=getPh(curPx);
-    var vis=todayVisit(curPx)||(function(){var e=ST.phs[curPx];return e&&e.visits&&e.visits.length?e.visits[e.visits.length-1]:null;})();
-    list=[{ph:ph,vis:vis}]; name='Фармастор_'+curPx+'_'+today()+'.xlsx';
+    var vis=roVisit||todayVisit(curPx)||(function(){var e=ST.phs[curPx];return e&&e.visits&&e.visits.length?e.visits[e.visits.length-1]:null;})();
+    if(ph&&vis)list=[{ph:ph,vis:vis}];
+    label='Ця аптека';
+  } else if(S.mode==='transferred'){
+    /* b29.5 · ДЕДУП D-2/B ЗНЯТО — це і є закриття О-10.
+       Він існував рівно з однієї причини: бланк не вмів сказати дату, тож дві дати
+       однієї аптеки лягали двома нерозрізненними блоками по 83 рядки, і адресат не
+       мав жодного способу зрозуміти, який із них який. 16-та колонка «Дата візиту»
+       цю нерозрізненність знімає — блоки тепер самопідписані, і кожен візит іде у
+       файл своїм блоком.
+       Порядок: аптека (у порядку PH, як його бачить visitModel) → дата ЗА
+       ЗРОСТАННЯМ. Це НЕ порядок екрана: journalGroups сортує дати спадно, бо око
+       шукає свіже зверху. У файлі навпаки — чотири візити однієї аптеки читаються
+       як динаміка зліва направо, а не як купа. Розхід свідомий. */
+    var rows=visitModel().filter(function(r){return r.transferred;}).filter(topMatch);
+    var byPx={},order=[];
+    rows.forEach(function(r){if(!byPx[r.px]){byPx[r.px]=[];order.push(r.px);}byPx[r.px].push(r);});
+    list=[];
+    order.forEach(function(px){
+      var e=ST.phs[px], ph=getPh(px);
+      byPx[px].sort(function(a,b){return a.date<b.date?-1:(a.date>b.date?1:0);});
+      byPx[px].forEach(function(r){
+        var v=(e&&e.visits)?e.visits[r.idx]:null;
+        if(ph&&v)list.push({ph:ph,vis:v});});
+    });
+    /* Стрілка лишається, хоча після зняття дедупу числа зазвичай рівні: list
+       фільтрується на живий ph/vis, тож при битому запису вони РОЗІЙДУТЬСЯ — і
+       підпис це покаже. Підпис зобов'язаний повторювати те, що реально у файлі. */
+    label=scopeArea()+' · '+rows.length+' '+plVis(rows.length)
+      +' → '+list.length+' '+plBlk(list.length);
   } else {
-    PH.forEach(function(ph){var e=ST.phs[ph.px];
-      if(e&&e.visits&&e.visits.length) list.push({ph:ph,vis:e.visits[e.visits.length-1]});});
-    name='Фармастор_усі_'+today()+'.xlsx';
-    if(!list.length){closeSheets();toast('Немає даних для експорту');return;}
+    /* Дошка — сьогоднішній день. Аптеки без введених залишків не потрапляють:
+       83 порожні рядки на аптеку — нуль інформації для адресата (D-1/A).
+       Тому число тут може бути меншим за лічильник чіпа — і підпис це каже. */
+    var vis0=homeModel().filter(topMatch).filter(function(p){return p.state!=='transferred';});
+    vis0.forEach(function(p){var v=todayVisit(p.px);
+      if(v&&Object.keys(v.vals||{}).length)list.push({ph:getPh(p.px),vis:v});});
+    label=scopeArea()+' · '+list.length+' '+plApt(list.length)
+      +(list.length<vis0.length?' з даними':'');
   }
+  return{list:list,label:label,fname:scopeName(list)};
+}
+function exportXLSX(){
+  var sc=exportScope();
   closeSheets();
-  buildXlsx(blankRows(list),true).then(function(bytes){deliverXLSX(name,bytes);})
+  if(!sc.list.length){toast('Немає даних для експорту');return;}
+  buildXlsx(blankRows(sc.list),true).then(function(bytes){deliverXLSX(sc.fname,bytes);})
     .catch(function(){toast('Не вдалось експортувати');});
 }
 function deliverXLSX(name,bytes){
@@ -2291,6 +2614,8 @@ document.addEventListener('pointercancel',clearPressed,{passive:true});
 document.getElementById('homeList').addEventListener('click',function(e){
   var g=e.target.closest('.hist');
   if(g){if(!g.classList.contains('dis')){var gp=g.getAttribute('data-px');if(gp){e.stopPropagation();openCmp(gp);}}return;}  // §5.1 вхід (лише активний бейдж)
+  var jr=e.target.closest('.jr-row');
+  if(jr){var jp=jr.getAttribute('data-px'),jd=jr.getAttribute('data-date');if(jp&&jd)openVisit(jp,jd);return;}
   var c=e.target.closest('.card');if(!c)return;
   var px=c.getAttribute('data-px');if(px)openFill(px);
 });
@@ -2298,8 +2623,9 @@ document.getElementById('homeList').addEventListener('click',function(e){
 /* ---- init ---- */
 loadST();
 loadArea();
+seedDev();
 renderTop();
-renderHome();
+renderList();
 applyThemeSeg(true);
 if(document.fonts&&document.fonts.ready){document.fonts.ready.then(function(){placeThemeThumb(true);});}
 window.addEventListener('resize',function(){requestAnimationFrame(function(){placeThemeThumb(true);});});
@@ -2554,7 +2880,10 @@ function cmpApply(fi,ti){
 
 var PK={fi:0,ti:1,anchor:null};                      // чернетка шіта, окремо від CMP
 function plPos(n){var a=n%10,b=n%100;if(a===1&&b!==11)return'позиція';if(a>=2&&a<=4&&(b<12||b>14))return'позиції';return'позицій';}
-function plVis(n){var a=n%10,b=n%100;if(a===1&&b!==11)return'візит';if(a>=2&&a<=4&&(b<12||b>14))return'візити';return'візитів';}
+/* b29.5 · Другий, байт-у-байт ідентичний екземпляр plVis знято: обидва жили в
+   одному скоупі, тож працював лише hoisted-переможець. Виклик нижче (підказка
+   шіта) резолвиться вгору до оголошення в блоці експорту. Той самий клас, що
+   мертвий дубль blankRows у b29.4 (R6). */
 /* автосвоп = СОРТУВАННЯ пари, а не перевірка "чи не навпаки": інверсію набрати неможливо */
 function pkSetPair(a,b){PK.fi=Math.min(a,b);PK.ti=Math.max(a,b);}
 function pkTap(i){
@@ -2720,7 +3049,7 @@ var ISLC=(function(){
 /* хуки в наявні функції — без правки їхніх тіл (10.7: інтерфейс, не переписування) */
 (function(){
   if(!ISLC)return;
-  var _rh=renderHome; renderHome=function(){ _rh.apply(this,arguments); ISLC.guard(); };
+  var _rl=renderList; renderList=function(){ _rl.apply(this,arguments); ISLC.guard(); };
   var _rt=renderTop;  renderTop =function(){ _rt.apply(this,arguments);  ISLC.remeasure(); };
   var _sh=show;       show      =function(id){ _sh.apply(this,arguments); if(id==='s-home')ISLC.reset(); };
 })();
