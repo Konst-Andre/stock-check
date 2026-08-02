@@ -715,6 +715,17 @@ a.mi{text-decoration:none;color:inherit}
 .srch .si svg{width:100%;height:100%;display:block}
 .srch input{flex:1;border:0;background:transparent;color:var(--text);font:600 14px/1 var(--font);outline:none}
 .srch input::placeholder{color:var(--muted)}
+/* b29.6.1 · О-3 · хрестик очищення — стенд v3, варіант clr=ring · clrSz=20.
+   ::after розширює тап-зону з 20 до 44px, не чіпаючи візуального розміру —
+   інакше ціль менша за мінімум і мазати по ній доводиться пальцем. Поле —
+   звичайний <input>, не type="search", тож нативний ::-webkit-search-cancel-button
+   не з'являється і придушувати нічого. */
+.srch .clr{flex:0 0 auto;position:relative;display:none;place-items:center;cursor:pointer;
+  width:20px;height:20px;border-radius:50%;padding:0;color:var(--muted);
+  border:1px solid var(--border);background:color-mix(in srgb,var(--card) 55%,transparent)}
+.srch .clr::after{content:"";position:absolute;inset:calc((20px - 44px)/2)}
+.srch .clr svg{width:12.4px;height:12.4px;display:block}
+.srch.has-q .clr{display:grid}
 /* list breathing under topArea + empty */
 #homeList{margin-top:12px}
 
@@ -1581,7 +1592,7 @@ function updBrandMoney(bk){
   setMoney(document.getElementById('bm-'+bk),'fb',brandMoney(bk,tierForBrand(bk,ph),curVals(curPx)));
 }
 
-const APP_BUILD = { ver:'v2.22.0', build:'stockcheck-pwa.b29_6', date:'03.08.2026' }; // wsd 10.6 — b29.6: геометрія журналу закрита ЗАМІРОМ (лінійка b29_5a-RULER, XS/375): еталон — картка ДОШКИ (14…14), не острів (12…12); .jr і .jr-grp більше не несуть бічних полів, група успадковує 14 від .list → Δ до острова 2/2, як у .card. Роздільник 16/18→14/14 (обидва якорі заміряні), шеврон 16→15 (стенд P3). DEV_SEED=0 — робочий білд для поля. Було b29.5: 16-та колонка «Дата візиту» ВСЕРЕДИНІ таблиці АП (серійна дата + numFmt 164 dd.mm.yyyy, БЕЗ dataDxfId — dxfs у пакеті немає); дедуп D-2/B знято (кожен візит = свій блок); ім'я файлу 3візити/3аптеки повними словами, «аптеки» від УНІКАЛЬНИХ Proxima. b29.5a: ширина групи журналу зрівняна з островом (компенсація полів .list). Було b29.1: вузол F2, крок 1 — МОДЕЛЬ. Додано addrExt/addrParts (драбина адреси З-1/З-3) + visitModel()/journalGroups() (R1). Адитивно: жоден існуючий виклик не змінено, візуал b28 не рухався. Було b28: експорт CSV→справжній .xlsx (бланк «АП» 1:1, Table TableStyleMedium7, формули N/O з кешем, deflate через CompressionStream). Було b27: (1) фікс блідості блоку «Обслуговування» (.mi.quiet b); (2) тост піднято над CTA-рядом + детерміновані 2 рядки; (3) нагорода моменту 📋 = handoff-sweep (кандидат C, bench v3, device✓)
+const APP_BUILD = { ver:'v2.22.0', build:'stockcheck-pwa.b29_6_1', date:'03.08.2026' }; // wsd 10.6 — b29.6.1: О-3 закрито — хрестик очищення пошуку (стенд v3, clr=ring · clrSz=20, тап-зона 44px через ::after). b29.6: геометрія журналу закрита ЗАМІРОМ (лінійка b29_5a-RULER, XS/375): еталон — картка ДОШКИ (14…14), не острів (12…12); .jr і .jr-grp більше не несуть бічних полів, група успадковує 14 від .list → Δ до острова 2/2, як у .card. Роздільник 16/18→14/14 (обидва якорі заміряні), шеврон 16→15 (стенд P3). DEV_SEED=0 — робочий білд для поля. Було b29.5: 16-та колонка «Дата візиту» ВСЕРЕДИНІ таблиці АП (серійна дата + numFmt 164 dd.mm.yyyy, БЕЗ dataDxfId — dxfs у пакеті немає); дедуп D-2/B знято (кожен візит = свій блок); ім'я файлу 3візити/3аптеки повними словами, «аптеки» від УНІКАЛЬНИХ Proxima. b29.5a: ширина групи журналу зрівняна з островом (компенсація полів .list). Було b29.1: вузол F2, крок 1 — МОДЕЛЬ. Додано addrExt/addrParts (драбина адреси З-1/З-3) + visitModel()/journalGroups() (R1). Адитивно: жоден існуючий виклик не змінено, візуал b28 не рухався. Було b28: експорт CSV→справжній .xlsx (бланк «АП» 1:1, Table TableStyleMedium7, формули N/O з кешем, deflate через CompressionStream). Було b27: (1) фікс блідості блоку «Обслуговування» (.mi.quiet b); (2) тост піднято над CTA-рядом + детерміновані 2 рядки; (3) нагорода моменту 📋 = handoff-sweep (кандидат C, bench v3, device✓)
 const NETWORK = { name:'StockCheck', tagline:'інструмент залишків', tg:'t.me/Konst_Andre' };
 const ORDER_FORM_URL = 'https://rbcom-my.sharepoint.com/:x:/r/personal/yuliia_syniuhina_reckitt_com/_layouts/15/Doc.aspx?sourcedoc=%7B361AB6BF-2AE9-410C-A81F-2AA3502C4EAD%7D&file=%25u0424%25u0430%25u0440%25u043c%25u0430%25u0441%25u0442%25u043e%25u0440%20%25u0437%25u0430%25u043c%25u043e%25u0432%25u043b%25u0435%25u043d%25u043d%25u044f%20%25u0442%25u0442.xlsx&wdLOR=c06833412-A6C7-4B15-AE95-76BCF4AB9FD6&openShare=true&fromShare=true&action=default&mobileredirect=true';
 const MSL_BY_K={}; MSL.forEach(function(s){MSL_BY_K[s.k]=s;});
@@ -1756,8 +1767,14 @@ function bandChips(){if(S.picking==='area')return areaChips();if(S.picking==='fi
 function breadcrumb(){
   return '<div class="bcrow"><button class="bc area-bc pressable'+(S.picking==='area'?' open':'')+'" id="bc"><span class="lbl">'+esc(S.area)+'</span> <span class="bc-c">▾</span></button>'+
     filtChip()+'</div>';}
-function searchField(){return '<div class="srch"><span class="si">'+SVG_SEARCH+'</span>'+
-  '<input id="q" placeholder="Пошук вулиці / Proxima…" value="'+esc(S.q)+'"></div>';}
+function searchField(){return '<div class="srch'+(S.q?' has-q':'')+'" id="srch"><span class="si">'+SVG_SEARCH+'</span>'+
+  '<input id="q" placeholder="Пошук вулиці / Proxima…" value="'+esc(S.q)+'">'+
+  '<button class="clr" id="qclr" type="button" aria-label="Очистити пошук">'+
+  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>'+
+  '</button></div>';}
+/* has-q перемикається точково, БЕЗ перемальовування поля: innerHTML тут стер би
+   фокус і клавіатура закривалась би на кожному символі. */
+function qsync(){var s=document.getElementById('srch');if(s)s.classList.toggle('has-q',!!S.q);}
 
 
 /* ===== §5.4 STATUS-ФІЛЬТР — хелпери (порт b13) ===== */
@@ -1817,7 +1834,10 @@ function bindTop(){
   if(fb)fb.addEventListener('click',function(){
     S.picking=S.picking==='filter'?'city':'filter';renderCrumbState();renderBand();});
   var q=document.getElementById('q');
-  if(q)q.addEventListener('input',function(){S.q=q.value;renderList();});
+  if(q)q.addEventListener('input',function(){S.q=q.value;qsync();renderList();});
+  var qc=document.getElementById('qclr');
+  if(qc)qc.addEventListener('click',function(){
+    S.q='';if(q){q.value='';q.focus();}qsync();renderList();});
 }
 function renderBand(){var row=document.getElementById('cityrow');if(!row)return;
   row.innerHTML=bandChips();row.scrollLeft=0;
