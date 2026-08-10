@@ -2731,6 +2731,10 @@ AREAS.sort(function(x,y){var ix=AREA_ORDER.indexOf(x),iy=AREA_ORDER.indexOf(y);
   if(ix<0)return 1; if(iy<0)return -1; return ix-iy;});
 function citiesOf(a){var s=[];PH.forEach(function(p){if(p.area===a&&s.indexOf(p.city)<0)s.push(p.city);});
   return s.sort(function(x,y){return x.localeCompare(y,'uk');});}
+/* О-48: множина мереж, присутніх у області (≥1 аптека). Дзеркало citiesOf за
+   структурою, але БЕЗ sort — порядок карток пікера задає NETS.filter (канонічний
+   реєстр), тож сортування тут було б мертвим кодом. Споживач: renderNetworkPicker. */
+function netsOf(a){var s=[];PH.forEach(function(p){if(p.area===a&&s.indexOf(p.net)<0)s.push(p.net);});return s;}
 var S={area:AREAS[0]||'',city:'',q:'',net:'',picking:'city',mode:'active'}; /* b29.3: режим all знято — фільтр і є перемикачем дошка⟂журнал. b32.0 (Д-8): net='' = «всі мережі», фільтр рівня області */
 const AK='farmstore_area';
 function loadArea(){try{var r=JSON.parse(localStorage.getItem(AK));if(r&&AREAS.indexOf(r.a)>=0)S.area=r.a;}catch(e){}} /* B57 name-guard: область ∈ AREAS */
@@ -2794,7 +2798,7 @@ function updateNetBtn(){var b=document.getElementById('netBtn');if(!b)return;
 /* ══ b32.1 · Network Stagebench v3.7 → native B32 picker ════════════════
    Дані беруться з PH/NETS, а не з тестових семплів стенда. Це зберігає один
    canonical filter (S.net) і робить лічильники карток точними для поточного DATA. */
-function networkTotal(n){return PH.filter(function(p){return p.net===n;}).length;}
+function networkTotal(n,a){return PH.filter(function(p){return p.net===n&&(!a||p.area===a);}).length;}
 function networkLabelLines(net){return NET_PICK_LABELS[net.slug]||[net.label];}
 function networkPlate(net){
   if(net.kind==='glyph')return '<span class="np-plate" style="--npScale:'+(NET_PICK_SCALE[net.slug]||1)+'"><span class="np-glyph">'+NET_PICK_GLYPH.replaceAll('NET_INK',net.color||'#0A8336')+'</span></span>';
@@ -2804,7 +2808,7 @@ function networkPlate(net){
 function networkCard(net){var selected=S.net===net.net,lines=networkLabelLines(net);
   return '<button type="button" class="np-card pressable'+(selected?' is-sel':'')+'" data-net="'+esc(net.net)+'" aria-pressed="'+(selected?'true':'false')+'">'
     +networkPlate(net)+'<span class="np-label">'+lines.map(function(line){return '<span>'+esc(line)+'</span>';}).join('')+'</span>'
-    +'<span class="np-count">'+networkTotal(net.net)+' '+plApt(networkTotal(net.net))+'</span></button>';}
+    +'<span class="np-count">'+networkTotal(net.net,S.area)+' '+plApt(networkTotal(net.net,S.area))+'</span></button>';}
 function measureNetworkWell(){var well=document.getElementById('npWell'),grid=document.getElementById('npGrid'),card=document.querySelector('#npGrid .np-card'),sheet=document.getElementById('sh-network');if(!well||!grid||!card||!sheet)return;
   /* Р-48: формула читає живу картку та живі LOCK-токени, а не дублює числа в JS.
      Так cardH=162 / gY=14 / peek=16 / pad=10 дають wellH=374 на XS. */
@@ -2815,7 +2819,8 @@ function renderNetworkPicker(){var grid=document.getElementById('npGrid'),all=do
   sub.textContent=(S.net?netLabel(S.net):'Всі мережі')+' · '+visible+' '+plApt(visible);
   all.className='np-all pressable'+(allSelected?' is-sel':'');all.setAttribute('aria-pressed',allSelected?'true':'false');
   all.innerHTML='<span class="np-all-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="7" cy="7" r="3.4"/><circle cx="17" cy="7" r="3.4"/><circle cx="7" cy="17" r="3.4"/><circle cx="17" cy="17" r="3.4"/></svg></span><span><b>Всі мережі</b><span>Показати всі аптеки в обраній області</span></span>';
-  grid.innerHTML=NETS.map(networkCard).join('');requestAnimationFrame(measureNetworkWell);}
+  var scope=netsOf(S.area); /* О-48: лише мережі з ≥1 аптекою в області; порожній scope → всі NETS */
+  grid.innerHTML=(scope.length?NETS.filter(function(n){return scope.indexOf(n.net)>=0;}):NETS).map(networkCard).join('');requestAnimationFrame(measureNetworkWell);}
 function selectNetwork(net){S.net=net||'';saveNet();updateNetBtn();
   if(document.getElementById('s-home').classList.contains('active')){renderTop();renderList();}
   closeNamed('sh-network');toast((S.net?netLabel(S.net):'Всі мережі')+' · '+homeModel().filter(topMatch).length+' '+plApt(homeModel().filter(topMatch).length));}
