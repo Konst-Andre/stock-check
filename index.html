@@ -688,6 +688,27 @@ a.mi{text-decoration:none;color:inherit}
 [data-theme="dark"] .ntile{--ntile-gl:rgb(233,241,235)}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .ntile{--ntile-gl:rgb(233,241,235)}}
 .ntile .bscale{display:grid;place-items:center;transform:scale(1.55)} /* badgeScale */
+/* b32.1 · P8 — MARK-режим плитки: обрана мережа показує СВІЙ знак.
+   Матеріал — дзеркало `#sh-network .np-plate` (device✓ s5), перемасштабоване 73px→35px.
+   padding ЧИСЛОМ, не %: у .np-plate стоїть calc(73px * 3%) — множення length×percentage
+   заборонене, весь calc невалідний і padding резолвиться в 0 (техборг s5). Тут одразу
+   формула стенду: calc(розмір * pad / 100) = 1.05px, тобто ті самі 3% пропорційно.
+   background:#fff дублюється в усіх трьох гілках свідомо: auto-dark селектор
+   `:root:not([data-theme="light"]) .ntile` має вагу (0,2,1) і перебив би (0,2,0). */
+.ntile.is-mark{--ntSignPad:3;
+  padding:calc(35px * var(--ntSignPad) / 100);
+  background:#fff;
+  border:1px solid color-mix(in srgb,var(--border) 73%,transparent);
+  box-shadow:0 2px 5px rgba(20,50,42,.10)}
+.ntile.is-mark img{width:100%;height:100%;object-fit:contain;display:block;
+  transform:scale(var(--ntScale,1));transform-origin:center}
+.ntile.is-mark .np-glyph{width:100%;height:100%;display:grid;place-items:center;
+  transform:scale(var(--ntScale,1))}
+.ntile.is-mark .np-glyph svg{width:62%;height:62%}
+[data-theme="dark"] .ntile.is-mark{background:#fff;
+  border-color:color-mix(in srgb,var(--border) 50%,transparent);box-shadow:none}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .ntile.is-mark{background:#fff;
+  border-color:color-mix(in srgb,var(--border) 50%,transparent);box-shadow:none}}
 /* filter-tier inside island: toparea relocated here → transparent so glass shows through */
 #s-home .isl .toparea{background:transparent;border-bottom:none;padding:10px 0 12px} /* tierPadT/B (valuesLOCK §4) */
 .toparea{--chipH:30px;--chipGap:6px;--chipPadX:14px;--chipRad:10px;--searchH:40px;
@@ -1210,14 +1231,7 @@ a.mi{text-decoration:none;color:inherit}
 #sh-network .np-head{padding:0 14px 10px;display:flex;align-items:flex-start;gap:10px}
 #sh-network .np-title{font:800 18px/1.15 var(--font);color:var(--text)}
 #sh-network .np-sub{margin-top:3px;font:600 12px/1.35 var(--font);color:var(--muted)}
-#sh-network .np-all{margin:0 14px 10px;width:calc(100% - 28px);min-height:46px;padding:8px 12px;
-  border-radius:14px;border:1px solid var(--border);background:var(--surface-2);color:var(--text);
-  display:flex;align-items:center;gap:10px;text-align:left;cursor:pointer;transition:transform .12s ease,background .16s,border-color .16s}
-#sh-network .np-all.is-sel{background:color-mix(in srgb,var(--accent-soft) 48%,var(--surface-2));border-color:color-mix(in srgb,var(--accent) 42%,var(--border))}
-#sh-network .np-all.is-pressed,#sh-network .np-card.is-pressed{transform:scale(.97)}
-#sh-network .np-all-ic{width:28px;height:28px;border-radius:9px;display:grid;place-items:center;flex:none;color:var(--accent-ink);background:#fff;border:1px solid color-mix(in srgb,var(--border) 72%,transparent)}
-#sh-network .np-all b{display:block;font:800 13px/1.15 var(--font)}
-#sh-network .np-all span:last-child{display:block;margin-top:2px;font:600 11px/1.2 var(--font);color:var(--muted)}
+#sh-network .np-card.is-pressed{transform:scale(.97)}
 #sh-network{--npCols:3;--npPlate:73px;--npRad:16px;--npGX:10px;--npGY:14px;--npPad:9px;--npLbl:12px;--npCnt:10px;
   --npKMark:1;--npSignPad:3%;--npPeek:16px;--npWellRad:20px;--npWellPad:10px;--npFade:24px}
 #sh-network .np-well{position:relative;max-height:var(--npWellH,339px);overflow:auto;-webkit-overflow-scrolling:touch;
@@ -1249,7 +1263,7 @@ a.mi{text-decoration:none;color:inherit}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) #sh-network .np-card{background:color-mix(in srgb,#fff 3.7%,var(--bg));border-color:color-mix(in srgb,var(--border) 73%,transparent);box-shadow:none}:root:not([data-theme="light"]) #sh-network .np-card::after{z-index:2;background:linear-gradient(180deg,rgba(255,255,255,.20),transparent 42%)}:root:not([data-theme="light"]) #sh-network .np-plate{border-color:color-mix(in srgb,var(--border) 50%,transparent)}:root:not([data-theme="light"]) #sh-network .np-card.is-sel{border-color:color-mix(in srgb,var(--accent) 73%,transparent);background:color-mix(in srgb,var(--accent-soft) 38%,var(--bg))}:root:not([data-theme="light"]) #sh-network .np-card.is-sel .np-plate{box-shadow:0 0 0 1px var(--accent)}:root:not([data-theme="light"]) #sh-network .np-card.is-sel .np-label{color:var(--accent)}}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) #sh-network{--npWellBg:color-mix(in srgb,#000 20%,var(--bg))}}
 @media (max-width:359px){#sh-network .np-card{padding:7px;min-height:134px;border-radius:23px}#sh-network .np-plate{width:64px;height:64px}}
-@media (prefers-reduced-motion:reduce){#sh-network,#sh-network .np-card,#sh-network .np-all{transition-duration:.01ms!important}}
+@media (prefers-reduced-motion:reduce){#sh-network,#sh-network .np-card{transition-duration:.01ms!important}}
 </style>
 </head>
 
@@ -1273,7 +1287,7 @@ a.mi{text-decoration:none;color:inherit}
           <div class="isl-actions">
             <!-- b32.0 · Д-6: підпис БАЗОВИЙ; живий стан ставить updateNetBtn() в init -->
             <button class="netbtn pressable" aria-label="Мережа" id="netBtn">
-              <span class="ntile"><span class="bscale"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><rect x="8" y="2.4" width="8" height="19.2" rx="4" fill="none" stroke="var(--ntile-gl)" stroke-width="2.7"/><rect x="2.4" y="8" width="19.2" height="8" rx="4" fill="none" stroke="var(--ntile-gl)" stroke-width="2.7"/></svg></span></span>
+              <span class="ntile"><span class="bscale"><svg width="17" height="17" viewBox="0 0 24 24" fill="var(--ntile-gl)" fill-rule="evenodd"><path d="M12 1.4 L2.6 8.9 V18.4 A2.2 2.2 0 0 0 4.8 20.6 H19.2 A2.2 2.2 0 0 0 21.4 18.4 V8.9 Z M10.65 10 H13.35 V12.65 H16 V15.35 H13.35 V18 H10.65 V15.35 H8 V12.65 H10.65 Z"/></svg></span></span>
             </button>
             <button class="isl-menu pressable js-keb" aria-label="Меню" onclick="openSheet()"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.95"/><circle cx="12" cy="12" r="1.95"/><circle cx="19" cy="12" r="1.95"/></svg><span class="kdot js-kdot"></span></button>
           </div>
@@ -1461,7 +1475,6 @@ a.mi{text-decoration:none;color:inherit}
 <div class="sheet" id="sh-network" role="dialog" aria-label="Вибір мережі" aria-modal="true">
   <div class="grip"></div>
   <div class="np-head"><div><div class="np-title">Мережа</div><div class="np-sub" id="npSub">Всі мережі · 0 аптек</div></div></div>
-  <button class="np-all pressable" id="npAll" type="button"></button>
   <div class="np-well" id="npWell"><div class="np-grid" id="npGrid"></div></div>
 </div>
 
@@ -2766,7 +2779,7 @@ const NETS=[
  {net:'Соломія Сервіс',                label:'Подорожник',        slug:'PODOROZHNYK',        kind:'raster', origin:'recreated'},
  {net:'Сіріус',                        label:'Бажаємо здоров\'я', slug:'BAZHAEMO',           kind:'raster', origin:'recreated'},
  {net:'Тріоль',                        label:'Аптека Тріоль',     slug:'TRIOL',              kind:'raster', origin:'recreated'},
- {net:'УАХ',                           label:'Здравиця',          slug:'UAH',                kind:'raster', origin:'recreated'},
+ {net:'УАХ',                           label:'УАХ',          slug:'UAH',                kind:'raster', origin:'recreated'},
  {net:'Факультет',                     label:'Факультет-Фарм',    slug:'FAKULTET',           kind:'raster', origin:'recreated'},
  {net:'Зайцева Л.В.',                  label:'Зайцева Л.В.',      slug:'ZAITSEVA',           kind:'raster', origin:'recreated'},
  {net:'Фармастор',                     label:'Фармастор',         slug:'FARMASTOR',          kind:'glyph',  origin:'recreated', color:'#0A8336'}
@@ -2776,14 +2789,20 @@ const NET_ASSETS={"A911":{mark:"UklGRqAlAABXRUJQVlA4WAoAAAAQAAAA3wAA3wAAQUxQSHcN
    геометрії сітки, не побічний ефект ширини або hyphenation. */
 const NET_PICK_LABELS={
   ANC:['АНЦ'],A911:['Аптека','9-1-1'],PODOROZHNYK:['Подорожник'],BAZHAEMO:['Бажаємо','здоров\'я'],
-  MED_SERVIS:['Мед-Сервіс'],FARMASTOR:['Фармастор'],UAH:['Здравиця'],NARODNA:['Народна','аптека'],
+  MED_SERVIS:['Мед-Сервіс'],FARMASTOR:['Фармастор'],UAH:['УАХ'],NARODNA:['Народна','аптека'],
   FAKULTET:['Факультет-','Фарм'],ZAITSEVA:['Зайцева','Л.В.'],TRIOL:['Аптека','Тріоль'],MOYA_APTEKA:['Моя Аптека'],
   LIKY_POLTAVSHCHYNY:['Ліки','Полтавщини'],LINDA_FARM:['Лінда-Фарм'],CENTRALNA:['Центральна','аптека'],APTEKA_NC:['Аптека НЦ']
 };
 const NET_PICK_SCALE={ANC:1.12,A911:1.12,PODOROZHNYK:1.28,BAZHAEMO:1.11,MED_SERVIS:1.05,
-  FARMASTOR:1.05,UAH:1.28,NARODNA:1.10,FAKULTET:1.25,ZAITSEVA:1.29,TRIOL:1.10,
+  FARMASTOR:1.30,UAH:1.28,NARODNA:1.10,FAKULTET:1.25,ZAITSEVA:1.29,TRIOL:1.10,
   MOYA_APTEKA:1.15,LIKY_POLTAVSHCHYNY:1.12,LINDA_FARM:1.02,CENTRALNA:1.19,APTEKA_NC:1.03};
 const NET_PICK_GLYPH='<svg viewBox="0 0 24 24" fill="none"><rect x="8" y="2.4" width="8" height="19.2" rx="4" stroke="NET_INK" stroke-width="2.7"/><rect x="2.4" y="8" width="19.2" height="8" rx="4" stroke="NET_INK" stroke-width="2.7"/></svg>';
+/* b32.1 · P8 — знак стану «ВСІ МЕРЕЖІ». Свідомо ІНШИЙ, ніж NET_PICK_GLYPH:
+   той хрест-пігулка є знаком Фармастора, і показувати його як «всі» означало б
+   два різні стани одним малюнком. Розмір 17 при .bscale 1.55 = 26.4px на плитці 35px
+   (поле 7.0px, device-pick s6). ДУБЛЬ цього рядка лежить у статичній розмітці #netBtn
+   (плейсхолдер до першого updateNetBtn) — правити обидва місця разом. */
+const NET_ALL_GLYPH='<svg width="17" height="17" viewBox="0 0 24 24" fill="NET_INK" fill-rule="evenodd"><path d="M12 1.4 L2.6 8.9 V18.4 A2.2 2.2 0 0 0 4.8 20.6 H19.2 A2.2 2.2 0 0 0 21.4 18.4 V8.9 Z M10.65 10 H13.35 V12.65 H16 V15.35 H13.35 V18 H10.65 V15.35 H8 V12.65 H10.65 Z"/></svg>';
 const NET_PICK_DURI='data:image/webp;base64,';
 /* Єдина точка «ключ → людська назва». Однорядково: її витягує матриця (М-21b). */
 function netLabel(n){for(var i=0;i<NETS.length;i++)if(NETS[i].net===n)return NETS[i].label;return n||'';}
@@ -2795,7 +2814,25 @@ const NK='farmstore_net';
 function loadNet(){try{var r=JSON.parse(localStorage.getItem(NK));
   if(r&&r.n){for(var i=0;i<NETS.length;i++)if(NETS[i].net===r.n){S.net=r.n;break;}}}catch(e){}}
 function saveNet(){try{localStorage.setItem(NK,JSON.stringify({n:S.net}));}catch(e){}}
+/* b32.1 · P8 — вміст плитки читає S.net. Три гілки:
+   ''            → фірмова зелена плитка + знак «Всі» (NET_ALL_GLYPH)
+   kind:'glyph'  → mark-плита + знак мережі в її кольорі (Фармастор — єдиний такий)
+   растр         → mark-плита + mini-ассет (112²; mark 224² тут завеликий за вагою)
+   Масштаб береться з NET_PICK_SCALE — тієї самої таблиці, що й пікер: на стенді
+   один kNet їхав і на плиту 73px, і на mini 35px, тож друга таблиця не заводиться.
+   Невідомий ключ (чужий localStorage) падає в гілку «Всі», а не в порожню плитку. */
+function netTileHTML(){
+  var all='<span class="ntile"><span class="bscale">'+NET_ALL_GLYPH.replaceAll('NET_INK','var(--ntile-gl)')+'</span></span>';
+  if(!S.net)return all;
+  var net=null;for(var i=0;i<NETS.length;i++)if(NETS[i].net===S.net){net=NETS[i];break;}
+  if(!net)return all;
+  var open='<span class="ntile is-mark" style="--ntScale:'+(NET_PICK_SCALE[net.slug]||1)+'">';
+  if(net.kind==='glyph')return open+'<span class="np-glyph">'+NET_PICK_GLYPH.replaceAll('NET_INK',net.color||'#0A8336')+'</span></span>';
+  var asset=(typeof NET_ASSETS!=='undefined')&&NET_ASSETS[net.slug];
+  return asset?(open+'<img alt="" src="'+NET_PICK_DURI+asset.mini+'"></span>'):all;
+}
 function updateNetBtn(){var b=document.getElementById('netBtn');if(!b)return;
+  b.innerHTML=netTileHTML();
   b.setAttribute('aria-label','Мережа: '+(S.net?netLabel(S.net):'Всі мережі'));}
 
 /* ══ b32.1 · Network Stagebench v3.7 → native B32 picker ════════════════
@@ -2817,18 +2854,44 @@ function measureNetworkWell(){var well=document.getElementById('npWell'),grid=do
      Так cardH=162 / gY=14 / peek=16 / pad=10 дають wellH=374 на XS. */
   var cs=getComputedStyle(sheet),gs=getComputedStyle(grid),peek=parseFloat(cs.getPropertyValue('--npPeek'))||0,pad=parseFloat(cs.getPropertyValue('--npWellPad'))||0,gap=parseFloat(gs.rowGap)||0;
   well.style.setProperty('--npWellH',(2*card.offsetHeight+gap+peek+2*pad).toFixed(1)+'px');}
-function renderNetworkPicker(){var grid=document.getElementById('npGrid'),all=document.getElementById('npAll'),sub=document.getElementById('npSub');if(!grid||!all||!sub)return;
-  var visible=homeModel().filter(topMatch).length,allSelected=!S.net;
+/* b32.1 · Крок 2-3 (D-picker-vsi) — «Всі» більше не банер над сіткою, а ПЕРША КАРТКА
+   в мові .np-card. Причина: банер був окремим типом контролу для того самого вибору,
+   тобто два різні жести для однієї осі. Тепер вибір скрізь однаковий — тап по картці.
+   data-net="" ловиться тим самим делегатом сітки: селектор [data-net] матчить і
+   порожній атрибут, тож окремий лістенер не потрібен (його прибрано).
+   .np-count порожній навмисно: числа тут немає за рішенням оператора, але елемент
+   лишається розпіркою — інакше плита цієї картки стояла б вище за сусідні. */
+/* s11 · дві правки картки «Всі»:
+   (1) ЛІЧИЛЬНИК. Рахується так само, як у сусідів — по ОБЛАСТІ, без міста й пошуку
+       (networkTotal(n,S.area)); тому це рівно сума всіх карток сітки, а не число
+       з підзаголовка шіта (там ще діють місто+пошук через topMatch).
+   (2) ЧОРНИЛО ФІКСОВАНЕ. Було var(--accent-ink), який перевертається за темою:
+       світла hsl(162 82% 16%) → майже чорний, темна hsl(163 46% 68%) → блідий.
+       Плита ж #fff в ОБИДВОХ темах — підкладка не змінюється, отже й чорнило не
+       має. Беремо акцент застосунку hsl(162 82% 27%) як фіксований бренд-колір,
+       тим самим правом, яким його має знак Фармастора. НЕ повертати на токен. */
+function areaTotal(){return PH.filter(function(p){return !S.area||p.area===S.area;}).length;}
+function allCard(){var sel=!S.net,n=areaTotal();
+  return '<button type="button" class="np-card pressable'+(sel?' is-sel':'')+'" data-net="" aria-pressed="'+(sel?'true':'false')+'">'
+    +'<span class="np-plate"><span class="np-glyph">'+NET_ALL_GLYPH.replaceAll('NET_INK','hsl(162 82% 27%)')+'</span></span>'
+    +'<span class="np-label"><span>Всі мережі</span></span>'
+    +'<span class="np-count">'+n+' '+plApt(n)+'</span></button>';}
+function renderNetworkPicker(){var grid=document.getElementById('npGrid'),sub=document.getElementById('npSub');if(!grid||!sub)return;
+  var visible=homeModel().filter(topMatch).length;
   sub.textContent=(S.net?netLabel(S.net):'Всі мережі')+' · '+visible+' '+plApt(visible);
-  all.className='np-all pressable'+(allSelected?' is-sel':'');all.setAttribute('aria-pressed',allSelected?'true':'false');
-  all.innerHTML='<span class="np-all-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="7" cy="7" r="3.4"/><circle cx="17" cy="7" r="3.4"/><circle cx="7" cy="17" r="3.4"/><circle cx="17" cy="17" r="3.4"/></svg></span><span><b>Всі мережі</b><span>Показати всі аптеки в обраній області</span></span>';
   var scope=netsOf(S.area); /* О-48: лише мережі з ≥1 аптекою в області; порожній scope → всі NETS */
-  grid.innerHTML=(scope.length?NETS.filter(function(n){return scope.indexOf(n.net)>=0;}):NETS).map(networkCard).join('');requestAnimationFrame(measureNetworkWell);}
+  /* b32.1 · P8-4 — порядок карток за кількістю аптек В ОБЛАСТІ, спадно.
+     Було: порядок реєстру NETS (алфавіт слугів) — для користувача це шум.
+     .slice() обов'язковий: гілка ":NETS" віддає САМ масив, і sort мутував би
+     реєстр — джерело істини для netLabel/name-guard/loadNet.
+     Рівні лічильники лишаються в порядку реєстру: Array.sort стабільний (ES2019). */
+  var list=(scope.length?NETS.filter(function(n){return scope.indexOf(n.net)>=0;}):NETS).slice();
+  list.sort(function(a,b){return networkTotal(b.net,S.area)-networkTotal(a.net,S.area);});
+  grid.innerHTML=allCard()+list.map(networkCard).join('');requestAnimationFrame(measureNetworkWell);}
 function selectNetwork(net){S.net=net||'';saveNet();updateNetBtn();
   if(document.getElementById('s-home').classList.contains('active')){renderTop();renderList();}
   closeNamed('sh-network');toast((S.net?netLabel(S.net):'Всі мережі')+' · '+homeModel().filter(topMatch).length+' '+plApt(homeModel().filter(topMatch).length));}
 function openNetworkPicker(){renderNetworkPicker();openNamed('sh-network');}
-document.getElementById('npAll').addEventListener('click',function(){selectNetwork('');});
 document.getElementById('npGrid').addEventListener('click',function(e){var card=e.target.closest('.np-card[data-net]');if(card)selectNetwork(card.getAttribute('data-net'));});
 
 var SVG_SEARCH='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><circle cx="11" cy="11" r="7.2"/><path d="M20.5 20.5 16.2 16.2"/></svg>';
