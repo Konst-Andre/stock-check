@@ -1233,6 +1233,9 @@ a.mi{text-decoration:none;color:inherit}
 #sh-network .np-plate{width:var(--npPlate);height:var(--npPlate);padding:calc(var(--npPlate) * var(--npSignPad));display:grid;place-items:center;overflow:hidden;flex:none;border-radius:var(--npRad);background:#fff;border:1px solid color-mix(in srgb,var(--border) 73%,transparent);position:relative;z-index:1}
 #sh-network .np-plate img{width:100%;height:100%;object-fit:contain;display:block;transform:scale(calc(var(--npKMark) * var(--npScale,1)));transform-origin:center}
 #sh-network .np-glyph{width:100%;height:100%;display:grid;place-items:center;transform:scale(calc(var(--npKMark) * var(--npScale,1)))}
+/* b32.1 crop-fix: гліф без w/h тягнувся на всю плиту; стенд тримає 62% (round(sz*.62)).
+   box-відносно → однаково на 35→73px. Зачіпає лише Фармастор (єдиний kind:glyph). */
+#sh-network .np-glyph svg{width:62%;height:62%}
 #sh-network .np-label{width:100%;min-height:calc(var(--npLbl) * 2.36);font:650 var(--npLbl)/1.18 var(--font);color:var(--text);text-align:center;overflow:hidden;position:relative;z-index:1}
 #sh-network .np-label span{display:block;white-space:nowrap}
 #sh-network .np-count{font:700 var(--npCnt)/1 var(--font);font-variant-numeric:tabular-nums;color:var(--muted);position:relative;z-index:1}
@@ -2778,7 +2781,7 @@ const NET_PICK_LABELS={
   LIKY_POLTAVSHCHYNY:['Ліки','Полтавщини'],LINDA_FARM:['Лінда-Фарм'],CENTRALNA:['Центральна','аптека'],APTEKA_NC:['Аптека НЦ']
 };
 const NET_PICK_SCALE={ANC:1.12,A911:1.12,PODOROZHNYK:1.28,BAZHAEMO:1.11,MED_SERVIS:1.05,
-  FARMASTOR:1.35,UAH:1.28,NARODNA:1.10,FAKULTET:1.25,ZAITSEVA:1.29,TRIOL:1.10,
+  FARMASTOR:1.05,UAH:1.28,NARODNA:1.10,FAKULTET:1.25,ZAITSEVA:1.29,TRIOL:1.10,
   MOYA_APTEKA:1.15,LIKY_POLTAVSHCHYNY:1.12,LINDA_FARM:1.02,CENTRALNA:1.19,APTEKA_NC:1.03};
 const NET_PICK_GLYPH='<svg viewBox="0 0 24 24" fill="none"><rect x="8" y="2.4" width="8" height="19.2" rx="4" stroke="NET_INK" stroke-width="2.7"/><rect x="2.4" y="8" width="19.2" height="8" rx="4" stroke="NET_INK" stroke-width="2.7"/></svg>';
 const NET_PICK_DURI='data:image/webp;base64,';
