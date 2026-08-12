@@ -167,31 +167,54 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);
 .hdr-title .t{font-size:19px;font-weight:800;letter-spacing:-.3px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .hdr-title .s{font-size:12px;font-weight:600;margin-top:1px;
   color:color-mix(in srgb,var(--muted) calc(var(--mutL)*1%),var(--text-2));white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* О-51 · підзаголовок, що несе мітку мережі. Прапорець стоїть НА САМОМУ .s
+   (class="s s-net") → селектор .s.s-net, не .s-net .s (Г-4). Клас потрібен, бо
+   .s спільний із екраном порівняння (#cmpSub): там дітей немає, і flex зняв би
+   з нього text-overflow разом із еліпсисом. При flex обрізання переїжджає на .s-txt. */
+.hdr-title .s.s-net{display:flex;align-items:center;gap:4px}   /* netGap 4 */
+.s-net .s-txt{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.s-net .ntile{flex:0 0 auto}
 
-.hdr-sub{display:flex;align-items:center;gap:8px;margin-top:9px;flex-wrap:wrap}
+.hdr-sub{display:flex;align-items:center;gap:4px;margin-top:9px;flex-wrap:nowrap} /* faGap 4 · faRows 1 · faWrap nowrap · faAlign center (лок s15c) */
 .tchip{font:700 11px/1 var(--font);color:var(--text-2);background:var(--surface-2);
   border:1px solid var(--border-subtle);border-radius:var(--r-pill);padding:4px 8px;letter-spacing:.2px}
 [data-theme="dark"] .tchip{background:var(--surface-3);border-color:var(--border)}
-/* ===== money-home (valuesLOCK: full·semantic·pill·12·700) ===== */
+/* ===== money-home · О-49 · ЛОК СТЕНДА s15c =====================================
+   split · over-first · div=tone · sign=none · zeroMode=dash · curr=row.
+   Форма ЗАПЕЧЕНА: перемикачі стенда (data-shape / data-order / data-div) у продукт
+   не їдуть — тут ОДИН стан, а не комбінатор. Знак не малюється, сенс несе колір.
+   Маркер дому висить НА САМОМУ елементі (class="mny fa"), тому селектори пишуться
+   .mny.fa / .mny.fb, а НЕ .fa .mny: селектор нащадка мовчки не спрацював би —
+   border-color упав би на currentColor і дав чорну рамку (Г-4, дефект Д-1 стенда).
+   bdFA = bdFB у кожній темі — свідомо: після фіксу Д-1 доми стали порівнюваними. */
 .pair{display:inline-flex;align-items:center}
-.pair.fa{gap:6px}
+.pair.fa{gap:3px}                                        /* faPairGap 3 */
 .prow{display:flex;align-items:center;gap:8px;margin-top:9px}
-.bright{display:inline-flex;align-items:center;gap:2px}
+.bright{display:inline-flex;align-items:center;gap:5px}  /* fbGap 5 · money-first = порядок DOM */
 .bhdr .bcnt{min-width:56px}
-.money{font:700 12px/1 var(--font);font-variant-numeric:tabular-nums;white-space:nowrap;letter-spacing:.1px;padding:2.5px 7px;border-radius:9px;display:inline-flex;align-items:center}
-.money.empty{display:none}
-.money.pos{color:hsl(162 82% 27%);background:color-mix(in srgb,var(--accent-soft) 7%,var(--card));box-shadow:0 1px 2px rgba(20,50,42,.16)}
-.money.neg{color:#c0392b;background:color-mix(in srgb,#eab8b2 7%,var(--card));box-shadow:0 1px 2px rgba(80,20,20,.14)}
-.money.fa.pos{border:1px solid color-mix(in srgb,var(--accent) 37%,transparent)}
-.money.fa.neg{border:1px solid color-mix(in srgb,#c0392b 37%,transparent)}
-.money.fb.pos{border:1px solid color-mix(in srgb,var(--accent) 30%,transparent)}
-.money.fb.neg{border:1px solid color-mix(in srgb,#c0392b 30%,transparent)}
-[data-theme="dark"] .money.pos{color:hsl(163 52% 60%);background:color-mix(in srgb,var(--accent-soft) 12%,transparent)}
-[data-theme="dark"] .money.neg{color:#e07a6f;background:color-mix(in srgb,hsl(6 42% 22%) 12%,transparent)}
-[data-theme="dark"] .money.fa.pos{border:1px solid color-mix(in srgb,var(--accent) 37%,transparent);box-shadow:inset 0 1px 0 rgba(255,255,255,.14)}
-[data-theme="dark"] .money.fa.neg{border:1px solid color-mix(in srgb,#e07a6f 37%,transparent);box-shadow:inset 0 1px 0 rgba(255,255,255,.14)}
-[data-theme="dark"] .money.fb.pos{border:1px solid color-mix(in srgb,var(--accent) 28%,transparent);box-shadow:inset 0 1px 0 rgba(255,255,255,.08)}
-[data-theme="dark"] .money.fb.neg{border:1px solid color-mix(in srgb,#e07a6f 28%,transparent);box-shadow:inset 0 1px 0 rgba(255,255,255,.08)}
+/* капсула: одна рамка на дві половини. over-first дає row-reverse, тому DOM
+   лишається short → mdiv → over, а «останній ВИДИМИЙ» на екрані = short. */
+.mny{display:inline-flex;align-items:center;font:700 11px/1 var(--font);
+  font-variant-numeric:tabular-nums;letter-spacing:.1px;white-space:nowrap;
+  flex-direction:row-reverse;padding:0;overflow:hidden;
+  border:1px solid transparent;border-radius:9px;
+  background:var(--card);box-shadow:0 1.5px 1.5px rgba(20,50,42,.16)}
+.mny.empty{display:none}
+.mh{display:inline-flex;align-items:center;white-space:nowrap;padding:3.5px 3px;color:var(--base)}
+.mdiv{flex:0 0 auto;align-self:stretch;width:1px;background:var(--border-subtle)}
+.mh-short{--base:var(--crit);background:color-mix(in srgb,#eab8b2 7%,var(--card))}
+.mh-over{--base:hsl(162 82% 27%);background:color-mix(in srgb,var(--accent-soft) 7%,var(--card))}
+.mny.fa{border-color:color-mix(in srgb,var(--muted) 14%,transparent)}
+.mny.fb{border-color:color-mix(in srgb,var(--muted) 14%,transparent)}
+/* DARK — підйом тоном, не тінню (A45). --base нестачі ХАРДКОДОМ #e07a6f:
+   токен --crit у темній = #e0685c, це інший колір, а лок судився саме на #e07a6f. */
+[data-theme="dark"] .mh-short{--base:#e07a6f;background:color-mix(in srgb,hsl(6 42% 17%) 12%,transparent)}
+[data-theme="dark"] .mh-over{--base:hsl(163 52% 60%);background:color-mix(in srgb,hsl(163 37% 14%) 12%,transparent)}
+[data-theme="dark"] .mny{background-color:color-mix(in srgb,var(--surface-3) 24%,transparent);
+  background-image:linear-gradient(180deg,rgba(255,255,255,.14) 0,transparent 7px);box-shadow:none}
+[data-theme="dark"] .mdiv{background:var(--border)}
+[data-theme="dark"] .mny.fa{border-color:color-mix(in srgb,var(--muted) 37%,transparent)}
+[data-theme="dark"] .mny.fb{border-color:color-mix(in srgb,var(--muted) 37%,transparent)}
 .progress{flex:1;min-width:80px;height:6px;border-radius:6px;overflow:hidden;
   background:color-mix(in srgb,var(--bg-soft),var(--border) 37%);
   border:1px solid color-mix(in srgb,var(--border),transparent 45%);
@@ -709,6 +732,17 @@ a.mi{text-decoration:none;color:inherit}
   border-color:color-mix(in srgb,var(--border) 50%,transparent);box-shadow:none}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .ntile.is-mark{background:#fff;
   border-color:color-mix(in srgb,var(--border) 50%,transparent);box-shadow:none}}
+/* О-51 · та сама плитка, зменшена 35 → 24 (markPx), поле 3% пропорційно (markPad).
+   markPlate РОЗЩЕПЛЕНО ПО ТЕМАХ (Д-2 стенда): на світлій білий well лежить на майже
+   білому #eef3f1 і читається не як матеріал, а як недорізаний край гліфа → flat;
+   на темній білий має за що чіплятись → tile лишається.
+   Одне правило дає обидві теми: (0,2,0) програє [data-theme="dark"] .ntile.is-mark
+   (0,3,0) і auto-dark (0,4,0) — там перемагають плиткові правила вище; у світлій вага
+   рівна базовому .ntile.is-mark, тож виграє порядком джерела. МУСИТЬ стояти тут, після
+   обох темних блоків: піднімеш вище — темна тема втратить плитку. */
+.ntile.is-hmark{width:24px;height:24px;border-radius:calc(24px * 12 / 35);
+  padding:calc(24px * var(--ntSignPad) / 100);
+  border-color:transparent;box-shadow:none}
 /* filter-tier inside island: toparea relocated here → transparent so glass shows through */
 #s-home .isl .toparea{background:transparent;border-bottom:none;padding:10px 0 12px} /* tierPadT/B (valuesLOCK §4) */
 .toparea{--chipH:30px;--chipGap:6px;--chipPadX:14px;--chipRad:10px;--searchH:40px;
@@ -858,7 +892,7 @@ a.mi{text-decoration:none;color:inherit}
 .bhdr .bcnt{display:inline-flex;align-items:center;justify-content:center;min-width:34px;padding:3px 9px;border-radius:9px;
   font:700 12px/1 var(--font);font-variant-numeric:tabular-nums;color:var(--text-2);
   background:color-mix(in srgb,var(--surface-2) calc(var(--counterFill)*1%),var(--card));border:1px solid var(--border-subtle)}
-[data-theme="dark"] .bhdr .bcnt{background:color-mix(in srgb,var(--surface-3) calc(var(--counterFill)*1%),var(--card));border-color:var(--border)}
+[data-theme="dark"] .bhdr .bcnt{background:color-mix(in srgb,var(--surface-3) calc(var(--counterFill)*1%),var(--card));border-color:color-mix(in srgb,var(--border) 82%,transparent)} /* bcntBd 82 (лок s15c): при 100 рамка капсули важча за рамку пілюлі грошей поруч і тягне око на лічильник */
 .bhdr .bcnt.done{color:var(--accent-ink);background:var(--accent-soft);border-color:transparent}
 .bwrap{display:grid;grid-template-rows:1fr;transition:grid-template-rows var(--collapseDur) var(--collapseEase)}
 .brand.collapsed .bwrap{grid-template-rows:0fr}
@@ -983,6 +1017,15 @@ a.mi{text-decoration:none;color:inherit}
   :root:not([data-theme="light"]) .thseg{background:color-mix(in srgb,var(--card),#000 20%);border-color:color-mix(in srgb,var(--border),#000 16%);box-shadow:inset 0 2px 5px rgba(0,0,0,.5),inset 0 -1px 0 rgba(255,255,255,.08)}
   :root:not([data-theme="light"]) .seg-thumb{background:linear-gradient(180deg,hsl(163 55% 34%),hsl(163 55% 30%))}
   :root:not([data-theme="light"]) .cf-cancel{background:color-mix(in srgb,var(--surface-3),#fff 3%)}
+  /* О-49 · близнюки спліт-капсули (A69). Шість штук — рівно стільки, скільки dark-правил
+     .mny вище; пропуск будь-якого дає auto-light із темними значеннями. */
+  :root:not([data-theme="light"]) .mh-short{--base:#e07a6f;background:color-mix(in srgb,hsl(6 42% 17%) 12%,transparent)}
+  :root:not([data-theme="light"]) .mh-over{--base:hsl(163 52% 60%);background:color-mix(in srgb,hsl(163 37% 14%) 12%,transparent)}
+  :root:not([data-theme="light"]) .mny{background-color:color-mix(in srgb,var(--surface-3) 24%,transparent);
+    background-image:linear-gradient(180deg,rgba(255,255,255,.14) 0,transparent 7px);box-shadow:none}
+  :root:not([data-theme="light"]) .mdiv{background:var(--border)}
+  :root:not([data-theme="light"]) .mny.fa{border-color:color-mix(in srgb,var(--muted) 37%,transparent)}
+  :root:not([data-theme="light"]) .mny.fb{border-color:color-mix(in srgb,var(--muted) 37%,transparent)}
   /* §5.1-PICKER (b24) — дзеркала ВСЕРЕДИНІ media, як вимагає A69.
      ⚠️ Секція #s-cmp (р.~750+) ставить такі правила ПОЗА media — в режимі «авто»
      на світлій системі там вмикається темний одяг поверх світлих токенів.
@@ -1001,7 +1044,7 @@ a.mi{text-decoration:none;color:inherit}
   :root:not([data-theme="light"]) .fld{background:color-mix(in srgb,var(--card),#000 calc(var(--dWellDip)*1%));
     box-shadow:inset 0 2px calc(var(--dWellInset)*1px) rgba(0,0,0,.55),inset 0 -1px 0 rgba(255,255,255,var(--dWellLight));
     border:1px solid color-mix(in srgb,var(--border),#000 20%)}
-  :root:not([data-theme="light"]) .bhdr .bcnt{background:color-mix(in srgb,var(--surface-3) calc(var(--counterFill)*1%),var(--card));border-color:var(--border)}
+  :root:not([data-theme="light"]) .bhdr .bcnt{background:color-mix(in srgb,var(--surface-3) calc(var(--counterFill)*1%),var(--card));border-color:color-mix(in srgb,var(--border) 82%,transparent)} /* bcntBd 82 — auto-dark близнюк (A69) */
   :root:not([data-theme="light"]) .cnt{background:color-mix(in srgb,var(--surface-3) calc(var(--counterFill)*1%),var(--card));border-color:var(--border)}
   :root:not([data-theme="light"]) .ebrow{border-top-color:var(--border)}
   :root:not([data-theme="light"]) .row .rpk{background:var(--surface-3);border-color:var(--border)}
@@ -1304,14 +1347,14 @@ a.mi{text-decoration:none;color:inherit}
           <button class="icon-btn pressable" aria-label="Назад" onclick="show('s-home')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 6 9 12 15 18"/></svg></button>
           <div class="hdr-title">
             <div class="t" id="fillAddr">Аптека</div>
-            <div class="s" id="fillSub">—</div>
+            <div class="s s-net" id="fillSub"><span class="s-txt">—</span></div>
             <div class="ro-flag" id="roFlag" hidden><span class="rf-ic">✓</span><span class="rf-t"></span></div>
           </div>
           <button class="icon-btn pressable js-keb" aria-label="Меню" onclick="openSheet()"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.95"/><circle cx="12" cy="12" r="1.95"/><circle cx="19" cy="12" r="1.95"/></svg><span class="kdot js-kdot"></span></button>
         </div>
         <div class="hdr-sub">
-          <span class="pair fa"><span class="tchip" id="chipOtc">OTC —</span><span class="money fa empty" id="moneyOtc"></span></span>
-          <span class="pair fa"><span class="tchip" id="chipIw">IW —</span><span class="money fa empty" id="moneyIw"></span></span>
+          <span class="pair fa"><span class="tchip" id="chipOtc">OTC —</span><span class="mny fa empty" id="moneyOtc"></span></span>
+          <span class="pair fa"><span class="tchip" id="chipIw">IW —</span><span class="mny fa empty" id="moneyIw"></span></span>
         </div>
         <div class="prow">
           <div class="progress"><i id="fillBar"></i></div>
@@ -2565,29 +2608,59 @@ const IW_BRANDS=['durex','contex','evi'];
    H1/b30: знак інвертовано. Оверсток = «+» (лежить зайвого), нестача = «−»
    (можна замовити). Еталон семантики — .dchip картки, який рахував так завжди. */
 var MONEY_PRICE={}; MSL.forEach(function(s){MONEY_PRICE[s.k]=s.p;});
-function fmtMoney(v){var neg=v<0,a=Math.abs(Math.round(v));return (neg?'\u2212':'+')+a.toLocaleString('uk-UA').replace(/\u00A0/g,' ')+' грн';}
-/* рахуємо ЛИШЕ введені SKU (реп відмітив залишок); не введено — не рахуємо */
-function brandMoney(bk,tier,data){var L=LAYOUT[bk],s=0,any=false;if(!L)return {s:0,any:false};
+/* О-49: тіло числа БЕЗ знака й БЕЗ «грн» — знак не малюється (sign=none, сенс несе
+   колір), а «грн» вішає mnyInner, бо воно одне на РЯД, а не одне на число. */
+function fmtMoneyVal(v){return Math.abs(Math.round(v)).toLocaleString('uk-UA').replace(/\u00A0/g,' ');}
+/* рахуємо ЛИШЕ введені SKU (реп відмітив залишок); не введено — не рахуємо.
+   О-49: підсумок розщеплено на два доми — over (надлишок, >0) ⟂ short (нестача, <0).
+   Знак b30 (over «+», short «−») у МОДЕЛІ зберігається — його читає решта логіки;
+   у ПОКАЗ іде abs. any лишається семафором «жодного SKU не введено». */
+function brandMoney(bk,tier,data){var L=LAYOUT[bk],over=0,short=0,any=false;if(!L)return {over:0,short:0,any:false};
   L.subs.forEach(function(sub){sub.rows.forEach(function(r){
     if(data[r.k]===undefined)return; any=true;
-    s+=(data[r.k]-normFor(r.k,tier))*(MONEY_PRICE[r.k]||0);
-  });});return {s:s,any:any};}
-function catMoney(list,tier,data){var s=0,any=false;list.forEach(function(bk){var m=brandMoney(bk,tier,data);s+=m.s;if(m.any)any=true;});return {s:s,any:any};}
+    var d=(data[r.k]-normFor(r.k,tier))*(MONEY_PRICE[r.k]||0);
+    if(d>0)over+=d; else if(d<0)short+=d;
+  });});return {over:over,short:short,any:any};}
+function catMoney(list,tier,data){var over=0,short=0,any=false;
+  list.forEach(function(bk){var m=brandMoney(bk,tier,data);over+=m.over;short+=m.short;if(m.any)any=true;});
+  return {over:over,short:short,any:any};}
 function tierForBrand(bk,ph){return OTC_BRANDS.indexOf(bk)>=0?ph.oTC:ph.iW;}
-function setMoney(el,fam,m){if(!el)return;
-  if(!m.any){el.className='money '+fam+' empty';el.textContent='';return;}
-  el.className='money '+fam+' '+(m.s<0?'neg':'pos');el.textContent=fmtMoney(m.s);}
+/* пілюля показує ЧИСЛА чи риску — треба знати ДО запису: «грн» вішається на останню
+   пілюлю ряду, яка показує числа; риска «грн» не носить. */
+function mnyHasNum(m){return !!m.any&&(Math.round(m.over)!==0||Math.round(m.short)!==0);}
+/* ЄДИНИЙ будівник нутрощів капсули — і для рендера картки рядком, і для оновлення
+   на льоту. Дві копії дали б різну розмітку на першому пейнті й на першому введенні,
+   тобто мигання, яке виглядало б як баг анімації.
+   DOM: short → mdiv → over. row-reverse малює over → mdiv → short, тож ОСТАННІЙ
+   ВИДИМИЙ на екрані = short, а коли short немає — over. */
+function mnyInner(m,curr){
+  var o=Math.round(m.over), s=Math.round(m.short);
+  var hasO=o!==0, hasS=s!==0;
+  if(!hasO&&!hasS)return '<span class="mh mh-short">\u2014</span>';  /* zeroMode=dash */
+  var h='';
+  if(hasS)h+='<span class="mh mh-short">'+fmtMoneyVal(s)+(curr?' грн':'')+'</span>';
+  if(hasS&&hasO)h+='<span class="mdiv"></span>';
+  if(hasO)h+='<span class="mh mh-over">'+fmtMoneyVal(o)+((curr&&!hasS)?' грн':'')+'</span>';
+  return h;}
+function setMoney(el,fam,m,curr){if(!el)return;
+  el.className='mny '+fam+(m.any?'':' empty');
+  el.innerHTML=m.any?mnyInner(m,curr):'';}
 function updHeadMoney(){
   var ph=curPh(); if(!ph)return; var data=curVals(curPx);
-  setMoney(document.getElementById('moneyOtc'),'fa',catMoney(OTC_BRANDS,ph.oTC,data));
-  setMoney(document.getElementById('moneyIw'),'fa',catMoney(IW_BRANDS,ph.iW,data));
+  var mo=catMoney(OTC_BRANDS,ph.oTC,data), mi=catMoney(IW_BRANDS,ph.iW,data);
+  /* curr='row': «грн» ОДИН раз на весь ряд fa. Обидві пілюлі рахуються ДО запису —
+     рішення для OTC залежить від того, чи має числа IW (вона правіша в ряду). */
+  var iwNum=mnyHasNum(mi);
+  setMoney(document.getElementById('moneyOtc'),'fa',mo,mnyHasNum(mo)&&!iwNum);
+  setMoney(document.getElementById('moneyIw'),'fa',mi,iwNum);
 }
 function updBrandMoney(bk){
   var ph=curPh(); if(!ph)return;
-  setMoney(document.getElementById('bm-'+bk),'fb',brandMoney(bk,tierForBrand(bk,ph),curVals(curPx)));
+  /* дім fb — одна пілюля на ряд, тож row тотожний last: «грн» завжди її */
+  setMoney(document.getElementById('bm-'+bk),'fb',brandMoney(bk,tierForBrand(bk,ph),curVals(curPx)),true);
 }
 
-const APP_BUILD = { ver:'v2.25.0', build:'stockcheck-pwa.b32.1', date:'12.08.2026' }; // wsd 10.6 — b32.1 «port-fix» · s12/О-50 АДРЕСА: core (addrParts) живить ВСІ поверхні показу — картка дошки (hCard), шапка філу (openFill ×2), шапка порівняння (openCmp), рядок журналу (note геть із mtxt). Зрізано район+тип поселення (166 адрес) і хвіст note (182). Замір 965: core max 55 / med 21 (було 90 / 24), детектор залишків = 0, порожніх core = 0. Поле addr у homeModel/visitModel НЕ чіпано — воно haystack topMatch, орієнтири («ТЦ Караван») лишаються знаходимими пошуком. displayAddr жива (її споживає addrExt). CSS не змінювався. Гейт = ✓6·⚠4·✗9, тотожно s11.  (порт b32.0-Codex): CSS — plate 82→73 · знято min-height:162 (cardH natural ≈144.3) · wellH fallback 374→339 (переміряється рантайм measureNetworkWell) · light shadow sh16→sh23 (0 3.8px 10.5px rgba(20,50,42,.209) — глибша, реверс A65-recess, device-lock) · dark+auto-dark --npWellBg=tone120 color-mix(#000 20%) (заглиблена ніша, A69-твін). JS — region-reset р.2905: зміна області скидає S.net='' → «Всі мережі» (+saveNet+updateNetBtn перед ре-рендером; тільки гілка data-area, city/filter не чіпано). ver БАМПНУТО: region-reset — user-visible зміна, Р-35 незастосовний. НЕ чіпано: topMatch · NETS(16/16) · DATA · geometry · EB/Р-46 · .netbtn база · tone.L. Було b32.0 «ШОВ» (вузол H4): ver НЕ бампається (Р-35 — видимої для користувача зміни версії немає, 10.6 вимагає batch+date). 10 точок: (9) A69 — .ntile розщеплено на explicit-dark + @media auto-dark, хардкод-значення більше не течуть в auto-light; (6a/6b) Д-6 — aria-label і тост netBtn читають ЖИВИЙ стан замість «поки що єдина мережа» (Р-34); (7) Д-27 — AREA_ORDER оголошенням (wsd 1.10): Дніпропетровська → Полтавська → Кіровоградська, невідома область у хвіст + тост (Р-36); (2) Д-8 — NETS[] повним масивом із products/StockCheck_NETS_register.md §7 (Р-33) + S.net із персистенцією farmstore_net і name-guard (Р-37); (3) гейт мережі першим рядком topMatch — при S.net='' no-op; лічильники чіпів рахуються ПІСЛЯ мережі (О-42, дефолт до стенда О-20); (1) Д-11 — net у ОБИДВІ моделі (visitModel + homeModel), адитивно; без цього гейт п.3 тихо спорожнив би журнал; (4/5) Д-6/Р-30 — netScopeLabel(list) знімає 3 хардкоди 'Фармастор_' в імені файлу і додає мітку мережі в підпис зрізу (М-18); мітка береться з ЕКСПОРТОВАНОГО СПИСКУ, не з фільтра; кілька мереж → «Всі мережі» одним рядком на обидва споживачі (М-25/A). НЕ чіпано: m:2+i*83 · tierForBrand · DATA · геометрія · .netbtn · .ntile як клас (розщеплення — b32.1). Було b31 (вузол H2): НОВА БАЗА MSL — 965 аптек · 83 SKU · 16 мереж · 63 пари обл+місто (було 63/83/1/8). DATA-блок згенеровано StockCheck_msl_gen.py з docs/Файл для замовлення з MSL.xlsx (виправлена версія 05.08: колонка «Кількіть MSL» рахується за літерою СВОЄЇ категорії — 0 розходжень із normFor на 80 095 рядках). Формат DATA НЕ змінено (замір: пакування словниками виграє 2.8 КБ gzip — не окупає гідратацію). net нормалізовано: 'УАХ\xa0' → 'УАХ'. tierForBrand НЕ чіпався. Було b30 (вузол H1): ЗНАК money інвертовано — Σ(порахував − MSL_ярус)×p. Оверсток = «+» (лежить зайвого товару), нестача = «−» (можна замовити на цю суму). Причина: .dchip картки (р.~2134/2233) рахував нестачу як «-N» завжди, а бейдж money — навпаки; на одному екрані два протилежні знаки для того самого стану. Приведено бейдж до картки, не навпаки. Клас neg/pos НЕ чіпався (варіант A, дві точки: setMoney + bmCls) → нестача червона як чіп, оверсток зелений. Було b29.6.1: b29.6.1: О-3 закрито — хрестик очищення пошуку (стенд v3, clr=ring · clrSz=20, тап-зона 44px через ::after). b29.6: геометрія журналу закрита ЗАМІРОМ (лінійка b29_5a-RULER, XS/375): еталон — картка ДОШКИ (14…14), не острів (12…12); .jr і .jr-grp більше не несуть бічних полів, група успадковує 14 від .list → Δ до острова 2/2, як у .card. Роздільник 16/18→14/14 (обидва якорі заміряні), шеврон 16→15 (стенд P3). DEV_SEED=0 — робочий білд для поля. Було b29.5: 16-та колонка «Дата візиту» ВСЕРЕДИНІ таблиці АП (серійна дата + numFmt 164 dd.mm.yyyy, БЕЗ dataDxfId — dxfs у пакеті немає); дедуп D-2/B знято (кожен візит = свій блок); ім'я файлу 3візити/3аптеки повними словами, «аптеки» від УНІКАЛЬНИХ Proxima. b29.5a: ширина групи журналу зрівняна з островом (компенсація полів .list). Було b29.1: вузол F2, крок 1 — МОДЕЛЬ. Додано addrExt/addrParts (драбина адреси З-1/З-3) + visitModel()/journalGroups() (R1). Адитивно: жоден існуючий виклик не змінено, візуал b28 не рухався. Було b28: експорт CSV→справжній .xlsx (бланк «АП» 1:1, Table TableStyleMedium7, формули N/O з кешем, deflate через CompressionStream). Було b27: (1) фікс блідості блоку «Обслуговування» (.mi.quiet b); (2) тост піднято над CTA-рядом + детерміновані 2 рядки; (3) нагорода моменту 📋 = handoff-sweep (кандидат C, bench v3, device✓)
+const APP_BUILD = { ver:'v2.26.0', build:'stockcheck-pwa.b32.2', date:'12.08.2026' }; // wsd 10.6 — b32.2 «ПОРТ ЛОКУ s15c»: О-49 форма грошей + О-51 мітка мережі, обидва з device-судженого стенда StockCheck_money_stagebench_v2 (ред. s15c). О-49: .money (одна пілюля, знаковий підсумок) → .mny — спліт-капсула, дві половини в одній рамці, порядок over-first (row-reverse), роздільник tone (1px), знак НЕ малюється (сенс несе колір), обидва нулі → риска, «грн» ОДИН раз на ряд fa (на останній пілюлі ряду, що показує числа) і один раз на пілюлю fb. Модель brandMoney/catMoney: {s,any} → {over,short,any}; знак b30 (over=+, short=−) у моделі збережено, у показ іде abs. Геометрія: mPadX 3 · mPadY 3.5 · mRad 9 · mFs 11 · mDivW 1 · mBw 1 обидва доми · faGap 4 · faPairGap 3 · fbGap 5. Матеріал L: shadow 0 1.5px 1.5px rgba(20,50,42,.16) · fill 7% · рамка --muted 14%. Матеріал D: fill --surface-3 24% (fillMix 12×2) · ridge rgba(255,255,255,.14)→7px · рамка --muted 37% · shadow none. Доми — маркером НА САМОМУ елементі (.mny.fa/.mny.fb), НЕ селектором нащадка: у стенді .fb .mny був мертвим і давав чорну рамку від currentColor (правило Г-4). О-51: мітка мережі АПТЕКИ (ph.net, не фільтр S.net) у підзаголовку шапки філу — .ntile.is-mark зменшена 35→24 (markPx) з полем 3% (markPad); markPlate РОЗЩЕПЛЕНО ПО ТЕМАХ (s15b Д-2): світла flat, темна tile. ПРАВКА р.861+1004: bcntBd 100 → 82 (рамка капсули лічильника була важча за рамку пілюлі грошей поруч). НЕ портовано: magn · abbr · caseMode · iwCase · faPairs · faStretch · bcntState · dchip* · addrCase · roFlag · devW · zoom — оснастка стенда. НЕ чіпано: kNets · R-46/EB · DATA · geometry · tone.L · topMatch · tierForBrand · sh=23 · знак «Всі» · .ntile.is-mark background:#fff · displayAddr · addr у моделях · FN/FO в експорті · мертвий р.180 · мертвий лок «56» у materiality §4. Гейт: ✓7·⚠3·✗3 — шість ✗ закрито тим, що .money.* без auto-dark близнюків більше не існує; це не регрес, а погашення боргу H3. ЧІП ДЕЛЬТИ СИМЕТРИЧНИЙ (запит оператора після device-раунду, закриває scope-ШИРОКО спеки s12 §1.4): .dchip судить ДЕЛЬТУ, а не рівень — d>0 «+N», d<0 «-N», d=0 чіпа немає; нового CSS нуль, бо .dchip живе на --sig, який рядок ставить за рівнем (.row.lv-ok → --accent). Дві точки: dchipHtml + live-гілка. Було b32.1 «port-fix» · s12/О-50 АДРЕСА: core (addrParts) живить ВСІ поверхні показу — картка дошки (hCard), шапка філу (openFill ×2), шапка порівняння (openCmp), рядок журналу (note геть із mtxt). Зрізано район+тип поселення (166 адрес) і хвіст note (182). Замір 965: core max 55 / med 21 (було 90 / 24), детектор залишків = 0, порожніх core = 0. Поле addr у homeModel/visitModel НЕ чіпано — воно haystack topMatch, орієнтири («ТЦ Караван») лишаються знаходимими пошуком. displayAddr жива (її споживає addrExt). CSS не змінювався. Гейт = ✓6·⚠4·✗9, тотожно s11.  (порт b32.0-Codex): CSS — plate 82→73 · знято min-height:162 (cardH natural ≈144.3) · wellH fallback 374→339 (переміряється рантайм measureNetworkWell) · light shadow sh16→sh23 (0 3.8px 10.5px rgba(20,50,42,.209) — глибша, реверс A65-recess, device-lock) · dark+auto-dark --npWellBg=tone120 color-mix(#000 20%) (заглиблена ніша, A69-твін). JS — region-reset р.2905: зміна області скидає S.net='' → «Всі мережі» (+saveNet+updateNetBtn перед ре-рендером; тільки гілка data-area, city/filter не чіпано). ver БАМПНУТО: region-reset — user-visible зміна, Р-35 незастосовний. НЕ чіпано: topMatch · NETS(16/16) · DATA · geometry · EB/Р-46 · .netbtn база · tone.L. Було b32.0 «ШОВ» (вузол H4): ver НЕ бампається (Р-35 — видимої для користувача зміни версії немає, 10.6 вимагає batch+date). 10 точок: (9) A69 — .ntile розщеплено на explicit-dark + @media auto-dark, хардкод-значення більше не течуть в auto-light; (6a/6b) Д-6 — aria-label і тост netBtn читають ЖИВИЙ стан замість «поки що єдина мережа» (Р-34); (7) Д-27 — AREA_ORDER оголошенням (wsd 1.10): Дніпропетровська → Полтавська → Кіровоградська, невідома область у хвіст + тост (Р-36); (2) Д-8 — NETS[] повним масивом із products/StockCheck_NETS_register.md §7 (Р-33) + S.net із персистенцією farmstore_net і name-guard (Р-37); (3) гейт мережі першим рядком topMatch — при S.net='' no-op; лічильники чіпів рахуються ПІСЛЯ мережі (О-42, дефолт до стенда О-20); (1) Д-11 — net у ОБИДВІ моделі (visitModel + homeModel), адитивно; без цього гейт п.3 тихо спорожнив би журнал; (4/5) Д-6/Р-30 — netScopeLabel(list) знімає 3 хардкоди 'Фармастор_' в імені файлу і додає мітку мережі в підпис зрізу (М-18); мітка береться з ЕКСПОРТОВАНОГО СПИСКУ, не з фільтра; кілька мереж → «Всі мережі» одним рядком на обидва споживачі (М-25/A). НЕ чіпано: m:2+i*83 · tierForBrand · DATA · геометрія · .netbtn · .ntile як клас (розщеплення — b32.1). Було b31 (вузол H2): НОВА БАЗА MSL — 965 аптек · 83 SKU · 16 мереж · 63 пари обл+місто (було 63/83/1/8). DATA-блок згенеровано StockCheck_msl_gen.py з docs/Файл для замовлення з MSL.xlsx (виправлена версія 05.08: колонка «Кількіть MSL» рахується за літерою СВОЄЇ категорії — 0 розходжень із normFor на 80 095 рядках). Формат DATA НЕ змінено (замір: пакування словниками виграє 2.8 КБ gzip — не окупає гідратацію). net нормалізовано: 'УАХ\xa0' → 'УАХ'. tierForBrand НЕ чіпався. Було b30 (вузол H1): ЗНАК money інвертовано — Σ(порахував − MSL_ярус)×p. Оверсток = «+» (лежить зайвого товару), нестача = «−» (можна замовити на цю суму). Причина: .dchip картки (р.~2134/2233) рахував нестачу як «-N» завжди, а бейдж money — навпаки; на одному екрані два протилежні знаки для того самого стану. Приведено бейдж до картки, не навпаки. Клас neg/pos НЕ чіпався (варіант A, дві точки: setMoney + bmCls) → нестача червона як чіп, оверсток зелений. Було b29.6.1: b29.6.1: О-3 закрито — хрестик очищення пошуку (стенд v3, clr=ring · clrSz=20, тап-зона 44px через ::after). b29.6: геометрія журналу закрита ЗАМІРОМ (лінійка b29_5a-RULER, XS/375): еталон — картка ДОШКИ (14…14), не острів (12…12); .jr і .jr-grp більше не несуть бічних полів, група успадковує 14 від .list → Δ до острова 2/2, як у .card. Роздільник 16/18→14/14 (обидва якорі заміряні), шеврон 16→15 (стенд P3). DEV_SEED=0 — робочий білд для поля. Було b29.5: 16-та колонка «Дата візиту» ВСЕРЕДИНІ таблиці АП (серійна дата + numFmt 164 dd.mm.yyyy, БЕЗ dataDxfId — dxfs у пакеті немає); дедуп D-2/B знято (кожен візит = свій блок); ім'я файлу 3візити/3аптеки повними словами, «аптеки» від УНІКАЛЬНИХ Proxima. b29.5a: ширина групи журналу зрівняна з островом (компенсація полів .list). Було b29.1: вузол F2, крок 1 — МОДЕЛЬ. Додано addrExt/addrParts (драбина адреси З-1/З-3) + visitModel()/journalGroups() (R1). Адитивно: жоден існуючий виклик не змінено, візуал b28 не рухався. Було b28: експорт CSV→справжній .xlsx (бланк «АП» 1:1, Table TableStyleMedium7, формули N/O з кешем, deflate через CompressionStream). Було b27: (1) фікс блідості блоку «Обслуговування» (.mi.quiet b); (2) тост піднято над CTA-рядом + детерміновані 2 рядки; (3) нагорода моменту 📋 = handoff-sweep (кандидат C, bench v3, device✓)
 const NETWORK = { name:'StockCheck', tagline:'інструмент залишків', tg:'t.me/Konst_Andre' };
 const ORDER_FORM_URL = 'https://rbcom-my.sharepoint.com/:x:/r/personal/yuliia_syniuhina_reckitt_com/_layouts/15/Doc.aspx?sourcedoc=%7B361AB6BF-2AE9-410C-A81F-2AA3502C4EAD%7D&file=%25u0424%25u0430%25u0440%25u043c%25u0430%25u0441%25u0442%25u043e%25u0440%20%25u0437%25u0430%25u043c%25u043e%25u0432%25u043b%25u0435%25u043d%25u043d%25u044f%20%25u0442%25u0442.xlsx&wdLOR=c06833412-A6C7-4B15-AE95-76BCF4AB9FD6&openShare=true&fromShare=true&action=default&mobileredirect=true';
 const MSL_BY_K={}; MSL.forEach(function(s){MSL_BY_K[s.k]=s;});
@@ -2834,6 +2907,25 @@ function netTileHTML(){
 function updateNetBtn(){var b=document.getElementById('netBtn');if(!b)return;
   b.innerHTML=netTileHTML();
   b.setAttribute('aria-label','Мережа: '+(S.net?netLabel(S.net):'Всі мережі'));}
+/* ══ О-51 · мітка мережі в шапці філу ═══════════════════════════════════════
+   Джерело — ph.net, тобто ІДЕНТИЧНІСТЬ АПТЕКИ, а не S.net (фільтр дошки):
+   при «Всі мережі» шапка все одно каже, у чиїй аптеці стоїш. Гілки ті самі, що
+   в netTileHTML: kind='glyph' → знак у кольорі мережі, інакше mini-растр.
+   Невідома мережа або відсутній ассет → мітки НЕМАЄ (порожній рядок), а не
+   порожня плитка: біла рамка без вмісту читалась би як збій завантаження. */
+function netMarkHTML(n){
+  if(!n)return '';
+  var net=null;for(var i=0;i<NETS.length;i++)if(NETS[i].net===n){net=NETS[i];break;}
+  if(!net)return '';
+  var open='<span class="ntile is-mark is-hmark" style="--ntScale:'+(NET_PICK_SCALE[net.slug]||1)+'">';
+  if(net.kind==='glyph')return open+'<span class="np-glyph">'+NET_PICK_GLYPH.replaceAll('NET_INK',net.color||'#0A8336')+'</span></span>';
+  var asset=(typeof NET_ASSETS!=='undefined')&&NET_ASSETS[net.slug];
+  return asset?(open+'<img alt="" src="'+NET_PICK_DURI+asset.mini+'"></span>'):'';}
+/* єдина точка складання підзаголовка шапки філу — обидва входи (ro-перегляд і
+   звичайне відкриття) мусять давати однаковий рядок, інакше мітка з'являлась би
+   лише на одному з них */
+function fillSubHTML(ph){
+  return netMarkHTML(ph.net)+'<span class="s-txt">'+esc(ph.city+' \u00b7 Proxima '+ph.px)+'</span>';}
 
 /* ══ b32.1 · Network Stagebench v3.7 → native B32 picker ════════════════
    Дані беруться з PH/NETS, а не з тестових семплів стенда. Це зберігає один
@@ -3278,7 +3370,7 @@ function openVisit(px,date){
   var rf=document.getElementById('roFlag');
   rf.hidden=false; rf.querySelector('.rf-t').textContent='Перенесено \u00b7 '+jrDate(v.date);
   document.getElementById('fillAddr').textContent=addrParts(ph.addr).core;
-  document.getElementById('fillSub').textContent=ph.city+' \u00b7 Proxima '+ph.px;
+  document.getElementById('fillSub').innerHTML=fillSubHTML(ph);
   document.getElementById('chipOtc').textContent='OTC '+roPh.oTC;
   document.getElementById('chipIw').textContent='IW '+roPh.iW;
   renderFill(roPh);
@@ -3289,14 +3381,23 @@ function openFill(px){
   clearRO();
   curPx=px; openBrands={};
   document.getElementById('fillAddr').textContent=addrParts(ph.addr).core;
-  document.getElementById('fillSub').textContent=ph.city+' · Proxima '+ph.px;
+  document.getElementById('fillSub').innerHTML=fillSubHTML(ph);
   document.getElementById('chipOtc').textContent='OTC '+ph.oTC;
   document.getElementById('chipIw').textContent='IW '+ph.iW;
   renderFill(ph);
   show('s-fill');
 }
 function fillLevel(saved,norm){if(saved===undefined)return'none';if(saved===0)return'crit';if(saved<norm)return'low';return'ok';}
-function dchipHtml(lv,saved,norm){if(lv!=='crit'&&lv!=='low')return'';return '<span class="dchip">-'+Math.abs(saved-norm)+'</span>';}
+/* О-49 · чіп дельти СИМЕТРИЧНИЙ (b32.2). Було: малювався лише при lv crit/low і завжди
+   як '-N' — оверсток на рівні SKU не показувався ніяк, і пілюля бренда казала «+1 948»,
+   а в рядках під нею не було жодного сліду, звідки цей оверсток.
+   Тепер судиться ДЕЛЬТА, а не рівень: d>0 → «+N», d<0 → «-N», d=0 → чіпа немає.
+   Кольору не додаємо: .dchip живе на --sig, а рядок сам ставить --sig за рівнем
+   (.row.lv-ok → var(--accent), .lv-low → --warn, .lv-crit → --crit, р.928).
+   Тому надлишковий чіп зелений «безкоштовно», і рядок стає червоно-зеленим
+   індикатором без жодного нового правила. */
+function dchipHtml(lv,saved,norm){if(saved===undefined)return'';var d=saved-norm;if(d===0)return'';
+  return '<span class="dchip">'+(d>0?'+':'-')+Math.abs(d)+'</span>';}
 function renderFill(ph){
   var data=curVals(curPx);
   document.getElementById('fill-body').innerHTML=catSec('OTC',ph.oTC,OTC_BRANDS,data)+catSec('IW',ph.iW,IW_BRANDS,data);
@@ -3315,8 +3416,9 @@ function brandCard(bk,tier,data){
   if(openBrands[bk]===undefined)openBrands[bk]=!done;
   var isOpen=openBrands[bk];
   var bmv=brandMoney(bk,tier,data);
-  var bmCls=bmv.any?('money fb '+(bmv.s<0?'neg':'pos')):'money fb empty';
-  var bmTxt=bmv.any?fmtMoney(bmv.s):'';
+  /* та сама розмітка, що й у updBrandMoney — один mnyInner на обидві точки */
+  var bmCls='mny fb'+(bmv.any?'':' empty');
+  var bmTxt=bmv.any?mnyInner(bmv,true):'';
   var h='<div class="brand'+(isOpen?'':' collapsed')+'"><div class="bhdr" onclick="toggleBrand(\''+bk+'\')">'
     +'<span class="arr" id="ba-'+bk+'">'+(isOpen?'▾':'▸')+'</span>'
     +'<span class="bnm">'+L.brand+'</span>'
@@ -3395,7 +3497,8 @@ function onInput(inp){
       else if(saved===undefined&&ck){ck.remove();}}
     var fw=inp.closest('.fwrap');
     if(fw){var chip=fw.querySelector('.dchip');
-      if(lv==='crit'||lv==='low'){if(!chip){chip=document.createElement('span');chip.className='dchip';fw.appendChild(chip);}chip.textContent='-'+Math.abs(saved-m);}
+      var d=(saved===undefined?0:saved-m);   /* дзеркало dchipHtml: та сама умова, той самий знак */
+      if(d!==0){if(!chip){chip=document.createElement('span');chip.className='dchip';fw.appendChild(chip);}chip.textContent=(d>0?'+':'-')+Math.abs(d);}
       else if(chip){chip.remove();}}
   }
   refreshCounters(bk);
