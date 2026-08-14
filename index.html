@@ -2682,7 +2682,33 @@ try{console.log(NETWORK.name+' build '+APP_BUILD.ver+' · '+APP_BUILD.build+' ·
 const SK='farmstore_v2';
 let ST={ver:2,phs:{}};
 function today(){return new Date().toISOString().slice(0,10);}
-function loadST(){migrateV1toV2();try{var r=localStorage.getItem(SK);if(r)ST=JSON.parse(r);}catch(e){}if(!ST||!ST.phs)ST={ver:2,phs:{}};}
+function loadST(){migrateV1toV2();try{var r=localStorage.getItem(SK);if(r)ST=JSON.parse(r);}catch(e){}if(!ST||!ST.phs)ST={ver:2,phs:{}};pruneStore();}
+/* ══ b32.3 · КРОК 2 · МІГРАЦІЯ ════════════════════════════════════════════════
+   Прибирає ВЖЕ накопичені порожні записи — ті, що лягли до появи pruneVisit.
+   Стоїть у loadST() після парсингу і до першого рендеру: visitModel() рахує idx
+   від живого масиву, тож індекси перерахуються природно, без осиротілих r.idx.
+
+   ІДЕМПОТЕНТНА: другий прохід не знаходить нічого і не пише в localStorage.
+   saveST() тільки якщо реально щось прибрано — інакше кожен старт застосунку
+   переписував би сховище без причини.
+
+   ЦЕ ВИДАЛЕННЯ ДАНИХ, тому мірка тут та сама hasData(), що вже device-пройдена
+   на кроці 1: порожній vals без transferred = артефакт за операторською
+   моделлю (екран заповнення служить і калькулятором при завідуючій — прохід
+   без збереження не є візитом). Логуємо підсумок: мовчазне видалення в
+   польовому інструменті неприпустиме навіть коли видаляється порожнеча. */
+function pruneStore(){
+  var vis=0,phs=0;
+  Object.keys(ST.phs||{}).forEach(function(px){
+    var e=ST.phs[px]; if(!e||!e.visits)return;
+    var n=e.visits.length;
+    e.visits=e.visits.filter(hasData);
+    vis+=n-e.visits.length;
+    if(!e.visits.length){delete ST.phs[px];phs++;}
+  });
+  if(vis){saveST();console.log('[b32.3] prune: знято порожніх візитів '+vis+', аптек '+phs);}
+  return vis;
+}
 function saveST(){try{localStorage.setItem(SK,JSON.stringify(ST));}catch(e){}}
 function getPh(px){return PH.find(function(p){return p.px===px;});}
 /* ---- visits[] accessors (node 6) ---- */
@@ -2694,6 +2720,48 @@ function ensureVisit(px){if(!ST.phs[px])ST.phs[px]={visits:[]};
   var ph=getPh(px);
   var nv={date:today(),vals:{},tier:{oTC:ph?ph.oTC:'',iW:ph?ph.iW:''},transferred:false};
   arr.push(nv);return nv;}
+/* ══ b32.3 · О-53 · ЄДИНИЙ ПРЕДИКАТ «ЩО ТАКЕ ВІЗИТ» ═══════════════════════════
+   Корінь дефекту «лічильник Історія бреше»: onInput() кличе ensureVisit() на
+   ПЕРШОМУ натисканні клавіші, ще до розбору значення. Запис лягає в visits[]
+   одразу. Далі `delete vis.vals[k]` при стиранні поля прибирає ЗНАЧЕННЯ, але
+   не сам запис — лишається {date, vals:{}, transferred:false}. Те саме робить
+   «Очистити підрахунок» (v.vals={}). Кожна доба таких тестів = ще один запис.
+
+   Чому не помітили: визначення візиту було розмазане по п'яти читачах, і вони
+   розійшлися. phState рахував по keys(vals) — правильно; бейдж, журнал і
+   лічильник clearData рахували visits.length — довжину масиву. Звідси кільце
+   «—» (new) і «Історія · 3» на одній картці: два читачі, дві мірки.
+
+   Операторська модель (підтверджено 14.08): екран заповнення служить і як
+   КАЛЬКУЛЯТОР НА МІСЦІ — ввів числа при завідуючій, показав суму в грошах,
+   стер. Такий прохід не є візитом і не має лишати сліду. Отже порожній vals
+   без transferred — ЗАВЖДИ артефакт, легітимного «зайшов і нічого» не існує.
+
+   transferred у предикаті лишається навмисно: перенесений візит із порожнім
+   vals — не артефакт, і мірка не має його з'їсти.
+   ВАЖЛИВО: 0 — валідний залишок (є .is-zero), тому тест на keys().length,
+   НІКОЛИ не на truthy vals[k].
+   ══════════════════════════════════════════════════════════════════════════ */
+function hasData(v){return !!(v&&(v.transferred||Object.keys(v.vals||{}).length));}
+/* ══ b32.3 · КРОК 2 · ПИСАЧ ═══════════════════════════════════════════════════
+   Крок 1 навчив читачів не рахувати порожні записи — симптом зник. Крок 2 не
+   дає їм накопичуватись далі: сховище не має рости від калькуляторних проходів.
+
+   ЧОМУ ТІЛЬКИ ОСТАННІЙ І ТІЛЬКИ СЬОГОДНІШНІЙ: ensureVisit() створює виключно
+   сьогоднішній запис і кладе його через arr.push() — отже артефакт живого
+   сеансу завжди останній у масиві. Прибирати щось глибше — робота МІГРАЦІЇ
+   (див. pruneStore нижче), не писача. Так prune ніколи не зачепить запис,
+   якого не створював цей самий сеанс.
+
+   ГВАРД hasData: transferred-візит із порожнім vals НЕ артефакт і не чіпається. */
+function pruneVisit(px){
+  var e=ST.phs[px]; if(!e||!e.visits||!e.visits.length)return false;
+  var last=e.visits[e.visits.length-1];
+  if(last.date!==today()||hasData(last))return false;
+  e.visits.pop();
+  if(!e.visits.length)delete ST.phs[px];   /* аптека без візитів — не ключ у сховищі */
+  return true;
+}
 /* b29.3 · ro прив'язаний до ВІДКРИТОЇ аптеки (М-5): без гарда px===curPx
    filledCount(інший_px) віддавав би значення переглянутого візиту. */
 function curVals(px){if(roVisit&&px===curPx)return roVisit.vals;
@@ -2747,9 +2815,14 @@ function clearData(){
   if(atFill&&curPx){
     title='Очистити підрахунок?';
     desc='Скине введені залишки цієї аптеки за сьогодні. Історія візитів лишиться.';
-    onOk=function(){var v=todayVisit(curPx);if(v){v.vals={};v.transferred=false;}saveST();renderFill(getPh(curPx));toast('Підрахунок очищено');};
+    onOk=function(){var v=todayVisit(curPx);if(v){v.vals={};v.transferred=false;}
+      pruneVisit(curPx);   /* b32.3 крок 2: кнопка очищення лишала той самий артефакт, що й ручне стирання */
+      saveST();renderFill(getPh(curPx));toast('Підрахунок очищено');};
   } else {
-    var n=Object.keys(ST.phs||{}).filter(function(px){var e=ST.phs[px];return e&&e.visits&&e.visits.length;}).length;
+    /* b32.3 · О-53: some(hasData), а не visits.length — інакше «видалить дані
+       по N аптеках» рахувало й ті, де лежали самі порожні записи. */
+    var n=Object.keys(ST.phs||{}).filter(function(px){var e=ST.phs[px];
+      return e&&e.visits&&e.visits.some(hasData);}).length;
     title='Очистити всі дані?';
     desc='Видалить залишки та історію візитів по всіх аптеках ('+n+' '+plApt(n)+'). Дію не скасувати.';
     onOk=function(){ST.phs={};saveST();renderList();toast('Усі дані очищено');};
@@ -3027,7 +3100,9 @@ function qsync(){var s=document.getElementById('srch');if(s)s.classList.toggle('
 var FILTERS=[{k:'active',label:'Активні'},{k:'transferred',label:'Перенесені'}];
 function phState(px){var e=ST.phs[px];if(!e||!e.visits||!e.visits.length)return'new';
   var v=e.visits[e.visits.length-1];
-  return v.transferred?'transferred':(Object.keys(v.vals||{}).length?'ready':'new');}
+  /* b32.3: тіло не змінилось за поведінкою — keys(vals).length переїхав у hasData().
+     Сенс правки в тому, щоб мірка жила в ОДНОМУ місці, а не в п'яти. */
+  return v.transferred?'transferred':(hasData(v)?'ready':'new');}
 /* F2/b29.3 · ДВІ МОДЕЛІ, ОДИН ФІЛЬТР (О-6 + М-1).
    Активні — АПТЕКИ (homeModel), Перенесені — ВІЗИТИ (visitModel). Одиниці різні,
    складати не можна — тому c.all більше не існує, і спокуси скласти не лишається.
@@ -3127,6 +3202,11 @@ function visitModel(){
     var e=ST.phs[ph.px]; if(!e||!e.visits||!e.visits.length)return;
     var ap=addrParts(ph.addr), dAddr=displayAddr(ph.addr);
     e.visits.forEach(function(v,i){
+      /* b32.3 · О-53: порожні записи не потрапляють у журнал.
+         ГВАРД СТОЇТЬ ВСЕРЕДИНІ forEach, а НЕ як .filter() перед ним — р.3866
+         читає e.visits[r.idx] прямим індексом у масив. Фільтрація до циклу
+         зсунула б i, і відкриття рядка журналу показало б ЧУЖИЙ візит. */
+      if(!hasData(v))return;
       out.push({px:ph.px,date:v.date,idx:i,transferred:!!v.transferred,
         area:ph.area,city:ph.city,
         addr:dAddr, net:ph.net,          /* topMatch шукає по тому ж рядку, що й дошка; net — Д-11 */
@@ -3231,7 +3311,10 @@ function animRing(card,oldF,newF){
 }
 function homeModel(){
   return PH.map(function(ph,i){
-    var e=ST.phs[ph.px],visits=(e&&e.visits)?e.visits.length:0,v=todayVisit(ph.px);
+    var e=ST.phs[ph.px],v=todayVisit(ph.px);
+    /* b32.3 · О-53: було visits.length — довжина масиву, тобто рахувались і
+       порожні записи від калькуляторних проходів. Тепер мірка одна (hasData). */
+    var visits=(e&&e.visits)?e.visits.filter(hasData).length:0;
     var filled=v?Object.keys(v.vals).length:0,state,date=null,lastTr=null;
     if(v&&v.transferred){state='transferred';date=v.date;}
     else if(v&&filled>0){state='ready';date=v.date;}
@@ -3485,6 +3568,10 @@ function onInput(inp){
   if(v===''){delete vis.vals[k];saved=undefined;}
   else{saved=Number(v);vis.vals[k]=saved;}
   vis.transferred=false;
+  /* b32.3 крок 2: порядок важливий — prune стоїть ПІСЛЯ vis.transferred=false,
+     інакше присвоєння впало б на вже осиротілий об'єкт (не помилка, але сенсу
+     нуль) і читати код став би неможливо. Стер останнє значення → запис іде. */
+  pruneVisit(curPx);
   saveST();
   var fld=inp.closest('.fld'); if(fld)fld.classList.toggle('is-zero',saved===0);
   var row=inp.closest('.row');
