@@ -245,6 +245,26 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);
 .sheet.on{transform:translateY(0);box-shadow:0 -8px 30px rgba(0,0,0,.18)}
 [data-theme="dark"] .sheet.on{box-shadow:0 -8px 30px rgba(0,0,0,.5)}
 .grip{width:38px;height:4px;border-radius:4px;background:var(--border);margin:6px auto 8px}
+/* ══ b32.4 · П-2 · СТЕЛЯ ТА СКРОЛ МЕНЮ ═══════════════════════════════════════
+   Було: .sheet має лише position:fixed;bottom:0 — без max-height і без overflow.
+   Меню ≈600px (4 секції + сегмент теми + 5 рядків .mi) ≈ 74% висоти XS. Секцію
+   «Обслуговування» перебудовує renderMaint() ДИНАМІЧНО, тож другий рядок у ній
+   виштовхнув би верх меню за екран БЕЗ можливості доскролити. Міна, не гіпотеза.
+
+   ЧОМУ #sheet, А НЕ .sheet: клас спільний для шести шітів, і два з них уже мають
+   ВЛАСНУ нішу зі скролом — #sh-period .vlist (р.422, max-height:40dvh) та
+   #sh-network .np-well (р.1280, max-height:var(--npWellH)). Скрол на спільному
+   класі дав би їм вкладений скрол: зовнішній шіт + внутрішня ніша. На iOS це
+   затик на межі — жест не знає, кого рухати, а np-well ще й без
+   overscroll-behavior, щоб зупинити ланцюг. Тому scope строго #sheet — єдиний
+   шіт без стелі й без ніші.
+
+   85dvh — канон A17. НЕ vh: з vh стеля стрибає на появу/зникнення тулбара Safari.
+   overscroll-behavior:contain — щоб докрут меню не тягнув дошку під ним.
+   СЬОГОДНІ СКРОЛ НЕ З'ЯВЛЯЄТЬСЯ (600 < 690 на XS) — це страховка на майбутній
+   рядок renderMaint, а не лікування наявного переповнення. */
+#sheet{max-height:85dvh;overflow-y:auto;overscroll-behavior:contain;
+  -webkit-overflow-scrolling:touch}
 /* A58 grouped-card menu (b11) */
 .eb{font:800 10.5px/1 var(--font);text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin:14px 16px 7px}
 .gcard{margin:0 12px;background:color-mix(in srgb,var(--text) 1%,var(--surface-3));border:1px solid color-mix(in srgb,var(--border) 45%,var(--border-subtle));border-radius:14px;overflow:hidden;box-shadow:0 3px 6px -6px rgba(20,50,42,.30)}   /* H2 tail: світла — тон несе, drop=шепіт-белт (свідома відмова від A66≥14) */
@@ -4009,6 +4029,46 @@ document.getElementById('homeList').addEventListener('click',function(e){
   var px=c.getAttribute('data-px');if(px)openFill(px);
 });
 
+/* ══ b32.4 · П-1 · SWIPE-TO-CLOSE — порт Cookbook A19 + guard A21 ═════════════
+   Було: .grip намальовано (р.247), але обробників touch немає — ручка обіцяла
+   жест, якого не існує. М'яка форма 3.9 (no stubs).
+
+   ПОРТ, НЕ ВИГАДКА. Канон A19 писаний під Drive Lens: .sh-bg → .sh-box →
+   .sh-grip-w. У StockCheck структура інша — окремий .sheet-scrim + .sheet →
+   .grip, без обгортки грипа. Портуються ЛОГІКА І ПОРОГИ, селектори адаптовані.
+
+   END-ONLY: рішення приймається лише на touchend, live-follow немає. Тому обидва
+   слухачі {passive:true} і preventDefault не потрібен — вертикальний скрол
+   усередині меню лишається рідним.
+
+   ПОРОГИ З A19 ДОСЛІВНО: grip dy>40 закриває ЗАВЖДИ; контент — тільки якщо
+   scrollTop===0 на СТАРТІ жесту AND dy>64. Просте dy>N без перевірки scrollTop
+   дає агресивне закриття при скролі вгору — це названа помилка в A19.
+
+   ig-НАБІР (обов'язкова частина A19) для #sheet ПОРОЖНІЙ: усередині немає ні
+   скрольних списків, ні власно-свайпових елементів. .thseg — кнопки з onclick,
+   не свайп. Це РІШЕННЯ, не пропуск: щойно в меню з'явиться скрольний список або
+   горизонт-свайп елемент, його ОБОВ'ЯЗКОВО внести сюди, інакше свайп у ньому
+   потягне меню донизу.
+
+   SCOPE: тільки #sheet. Решта п'яти шітів (about/install/confirm/period/network)
+   у цьому ході НЕ чіпаються — їхній grip лишається мертвим свідомо, бо period і
+   network мають внутрішні ніші й потребують власного ig-набору. Окремий хід. */
+function addSwipeClose(boxId, closeFn){
+  var box=document.getElementById(boxId);
+  if(!box||box._sw)return; box._sw=true;          /* A21: шіти persist у DOM — без guard кожне відкриття вішає ще один listener */
+  var sy=0, ss=0, gt=false;
+  box.addEventListener('touchstart',function(e){
+    sy=e.touches[0].clientY; ss=box.scrollTop;
+    gt=!!e.target.closest('.grip');
+  },{passive:true});
+  box.addEventListener('touchend',function(e){
+    var dy=e.changedTouches[0].clientY-sy;
+    if(gt&&dy>40)closeFn();                        /* grip: завжди */
+    else if(ss===0&&dy>64)closeFn();               /* контент: лише з самого верху */
+  },{passive:true});
+}
+
 /* ---- init ---- */
 loadST();
 loadArea();
@@ -4022,6 +4082,10 @@ updateNetBtn();     /* b32.0 · Д-6 — aria з живого стану, рів
    уже стався, тож повідомлення не перекриває порожній екран. */
 if(AREA_UNKNOWN.length)toast('Нова область: '+AREA_UNKNOWN[0]+' — порядок не оголошено');
 applyThemeSeg(true);
+/* b32.4 · П-1: реєстрація ОДИН раз при init, а не в openSheet() — інакше guard
+   _sw робив би зайву роботу на кожне відкриття, а сенс лишався б той самий.
+   closeSheet (р.2847), не closeSheets: закриваємо саме меню, решту не чіпаємо. */
+addSwipeClose('sheet', closeSheet);
 if(document.fonts&&document.fonts.ready){document.fonts.ready.then(function(){placeThemeThumb(true);});}
 window.addEventListener('resize',function(){requestAnimationFrame(function(){placeThemeThumb(true);});});
 
