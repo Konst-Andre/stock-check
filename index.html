@@ -225,6 +225,34 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);
 [data-theme="dark"] .progress > i{background:hsl(163 52% 46%)}
 .pcount{font:700 11px/1 var(--font);color:var(--muted);font-variant-numeric:tabular-nums}
 
+/* ══ b32.5 · Х-3 · ІНДИКАТОР ПАМ'ЯТІ (stagebench v3, ставка 15.08) ══════════
+   Шкала НЕ вигадана — це .progress вище, той самий матеріал на обидві теми.
+   Живе тут навмисно: поруч із каноном, з якого списана.
+
+   ЗАЛИВКА — ТЕГ i, НЕ span. Причина конкретна: рядок меню має правило
+   `.mi-tx span{display:block;font:...;margin-top:2px}` зі специфічністю (0,1,1).
+   Клас .stq-fill дав би (0,1,0) і програв би: заливка отримала б margin-top:2px,
+   з'їхала вниз усередині треку й уперлась у нижній край (зловлено на стенді v2).
+   `> i` виводить її з-під того правила за побудовою, а не за вагою селектора.
+
+   ЛОК зі стенда: stH 6 · stRad 6 · stFillRad 6 · stGap 5 · stInset 2.
+   stInset — повітря НАВКОЛО заливки: трек росте на 2×inset, тож висота 6
+   лишається висотою саме заливки. inset:0 дав би рівно .progress. */
+:root{--stH:6px; --stRad:6px; --stFillRad:6px; --stGap:5px; --stInset:2px}
+.mi-tx > .stq-bar{display:block;box-sizing:content-box;
+  height:var(--stH);padding:var(--stInset);margin-top:var(--stGap);
+  border-radius:var(--stRad);overflow:hidden;
+  background:color-mix(in srgb,var(--bg-soft),var(--border) 37%);
+  border:1px solid color-mix(in srgb,var(--border),transparent 45%);
+  box-shadow:inset 0 1px .5px rgba(20,50,42,.16),inset 0 -1px 0 rgba(20,50,42,.06)}
+[data-theme="dark"] .mi-tx > .stq-bar{background:color-mix(in srgb,var(--bg),#fff 16%);
+  border:none;box-shadow:inset 0 1px 0 rgba(255,255,255,.16)}
+.stq-bar > i{display:block;height:100%;border-radius:var(--stFillRad);
+  background:var(--stSig,var(--accent));width:0;transition:width .3s ease,background .3s ease}
+[data-theme="dark"] .stq-bar > i{background:var(--stSig,hsl(163 52% 46%))}
+/* рядок — ТАБЛО, не дія: ні pressable, ні шеврона, курсор за замовчуванням */
+.mi.stq{cursor:default}
+
 .screen{display:none}
 .screen.active{display:block}
 .scaffold{margin:14px;padding:22px 16px;border:1px dashed var(--border);border-radius:var(--r-card);background:var(--card);text-align:center}
@@ -481,9 +509,16 @@ a.mi{text-decoration:none;color:inherit}
 /* ===== About sheet (A58) ===== */
 .about-hd{display:flex;align-items:center;gap:12px;padding:6px 20px 14px}
 .about-logo{width:44px;height:44px;border-radius:12px;flex-shrink:0;display:flex;align-items:center;justify-content:center;
-  font:800 22px/1 var(--font);color:#fff;background:linear-gradient(180deg,color-mix(in srgb,#fff 16%,var(--accent)),var(--accent));
-  box-shadow:0 2px 8px -2px color-mix(in srgb,var(--accent) 40%,transparent)}
-[data-theme="dark"] .about-logo{background:linear-gradient(180deg,hsl(163 55% 34%),hsl(163 55% 30%));box-shadow:inset 0 1px 0 rgba(255,255,255,.1)}
+  font:800 22px/1 var(--font);color:var(--text);background:var(--bg);
+  box-shadow:inset 0 0 0 1px var(--border)}
+/* b32.5 · Х-3 · плашка = мініатюра ІКОНКИ ЗАСТОСУНКУ, не окремий знак.
+   Було: зелений градієнт + літери «SC» — вигадка, якої немає ні на домашньому
+   екрані, ні в шапці. Стало: фон --bg + марка з тим самим path, що .sc-comet
+   (р.1347) і COMET_D (icon_gen.py) — одна геометрія на всі три поверхні.
+   [data-theme=dark] твін ЗНЯТО свідомо: рецепт більше не має хардкодів, обидва
+   токени темові самі. Побічно гаситься борг A69 — auto-dark дубля в цього
+   правила не існувало ЖОДНОГО, тож у режимі «Авто» на темній системі плашка
+   лишалась світлою. */
 .about-name{font:800 16px/1.15 var(--font);color:var(--text)}
 .about-tag{font:600 12px/1.2 var(--font);color:var(--muted);margin-top:2px}
 /* H3 tail · A58 grouped About */
@@ -987,6 +1022,10 @@ a.mi{text-decoration:none;color:inherit}
   box-shadow:0 1.5px 4px -2px rgba(20,50,42,.10)}
 .btn-form svg{width:15px;height:15px;flex-shrink:0}
 .btn-copy.is-pressed{transform:scale(.96);transition-duration:.06s}
+/* b32.5 · П-6 · gated = порожній підрахунок. НЕ .btn-copy{background:...} —
+   CTA-гама портована 1:1 (р.465) і чіпати її не можна. Тому накладка
+   фільтром: градієнт лишається той самий, гасне лише насиченість. */
+.btn-copy.gated{filter:saturate(.22);opacity:.55}
 .btn-form.is-pressed{transform:scale(.92);transition-duration:.06s}
 [data-theme="dark"] .btn-copy{background:linear-gradient(180deg,hsl(163 55% 34%),hsl(163 55% 30%));
   box-shadow:inset 0 1px 0 rgba(255,255,255,.10)}
@@ -1024,6 +1063,9 @@ a.mi{text-decoration:none;color:inherit}
   :root:not([data-theme="light"]) .tchip{background:var(--surface-3);border-color:var(--border)}
   :root:not([data-theme="light"]) .progress{background:color-mix(in srgb,var(--bg),#fff 16%);border:none;box-shadow:inset 0 1px 0 rgba(255,255,255,.16)}
   :root:not([data-theme="light"]) .progress > i{background:hsl(163 52% 46%)}
+  :root:not([data-theme="light"]) .mi-tx > .stq-bar{background:color-mix(in srgb,var(--bg),#fff 16%);
+    border:none;box-shadow:inset 0 1px 0 rgba(255,255,255,.16)}
+  :root:not([data-theme="light"]) .stq-bar > i{background:var(--stSig,hsl(163 52% 46%))}
   :root:not([data-theme="light"]) .demo-btn.secondary{background:var(--surface-3);border-color:var(--border)}
   :root:not([data-theme="light"]) .sheet{background:var(--card)}
   :root:not([data-theme="light"]) .sheet.on{box-shadow:0 -8px 30px rgba(0,0,0,.5)}
@@ -1460,6 +1502,10 @@ a.mi{text-decoration:none;color:inherit}
       <span class="mi-tx"><b>Про додаток</b><span id="aboutVer">Версія — шелл</span></span>
       <span class="mi-act"><span class="mi-chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span></span>
     </div>
+    <div class="mi stq" id="miStq">
+      <span class="mi-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5.5" rx="8" ry="3"/><path d="M4 5.5v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/><path d="M4 11.5v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/></svg></span>
+      <span class="mi-tx"><b>Пам'ять додатка</b><span id="stqSub">—</span><span class="stq-bar"><i id="stqFill"></i></span></span>
+    </div>
     <div class="mi danger pressable" id="miClear" onclick="clearData()">
       <span class="mi-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></span>
       <span class="mi-tx"><b id="clearLbl">Очистити всі дані</b><span id="clearSub">Усі аптеки та візити</span></span>
@@ -1471,7 +1517,7 @@ a.mi{text-decoration:none;color:inherit}
 <div class="sheet" id="sh-about" role="dialog" aria-label="Про додаток">
   <div class="grip"></div>
   <div class="about-hd">
-    <div class="about-logo" id="ab-logo">SC</div>
+    <div class="about-logo" id="ab-logo"><svg width="34" height="34" viewBox="0 0 48 48" aria-hidden="true"><defs><linearGradient id="scAbout" gradientUnits="userSpaceOnUse" x1="39.91" y1="25.67" x2="32.95" y2="10.74"><stop offset="0" stop-color="var(--comet-a)"/><stop offset="1" stop-color="var(--comet-b)"/></linearGradient></defs><path d="M43.00 26.00L41.70 30.76L39.24 34.99L35.80 38.42L31.63 40.83L27.02 42.07L22.29 42.09L17.75 40.90L13.70 38.59L10.42 35.36L8.09 31.42L6.87 27.05L6.82 22.56L7.91 18.24L10.06 14.39L13.11 11.24L16.82 9.01L20.94 7.82L25.19 7.73L29.29 8.73L32.95 10.74L32.95 10.74L29.18 9.03L25.15 8.35L21.12 8.74L17.35 10.13L14.11 12.42L11.60 15.44L9.96 18.97L9.29 22.76L9.62 26.56L10.90 30.11L13.03 33.17L15.85 35.55L19.15 37.12L22.70 37.77L26.26 37.49L29.59 36.31L32.47 34.34L34.71 31.73L36.20 28.66L36.83 25.35Z" fill="url(#scAbout)"/><path d="M17.5 25l4.7 4.7L32 18.5" fill="none" stroke="var(--text)" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
     <div><div class="about-name" id="ab-name">StockCheck</div><div class="about-tag" id="ab-tag">інструмент залишків</div></div>
   </div>
   <div class="eb">Автор</div>
@@ -2680,7 +2726,7 @@ function updBrandMoney(bk){
   setMoney(document.getElementById('bm-'+bk),'fb',brandMoney(bk,tierForBrand(bk,ph),curVals(curPx)),true);
 }
 
-const APP_BUILD = { ver:'v2.26.0', build:'stockcheck-pwa.b32.2', date:'12.08.2026' }; // wsd 10.6 — b32.2 «ПОРТ ЛОКУ s15c»: О-49 форма грошей + О-51 мітка мережі, обидва з device-судженого стенда StockCheck_money_stagebench_v2 (ред. s15c). О-49: .money (одна пілюля, знаковий підсумок) → .mny — спліт-капсула, дві половини в одній рамці, порядок over-first (row-reverse), роздільник tone (1px), знак НЕ малюється (сенс несе колір), обидва нулі → риска, «грн» ОДИН раз на ряд fa (на останній пілюлі ряду, що показує числа) і один раз на пілюлю fb. Модель brandMoney/catMoney: {s,any} → {over,short,any}; знак b30 (over=+, short=−) у моделі збережено, у показ іде abs. Геометрія: mPadX 3 · mPadY 3.5 · mRad 9 · mFs 11 · mDivW 1 · mBw 1 обидва доми · faGap 4 · faPairGap 3 · fbGap 5. Матеріал L: shadow 0 1.5px 1.5px rgba(20,50,42,.16) · fill 7% · рамка --muted 14%. Матеріал D: fill --surface-3 24% (fillMix 12×2) · ridge rgba(255,255,255,.14)→7px · рамка --muted 37% · shadow none. Доми — маркером НА САМОМУ елементі (.mny.fa/.mny.fb), НЕ селектором нащадка: у стенді .fb .mny був мертвим і давав чорну рамку від currentColor (правило Г-4). О-51: мітка мережі АПТЕКИ (ph.net, не фільтр S.net) у підзаголовку шапки філу — .ntile.is-mark зменшена 35→24 (markPx) з полем 3% (markPad); markPlate РОЗЩЕПЛЕНО ПО ТЕМАХ (s15b Д-2): світла flat, темна tile. ПРАВКА р.861+1004: bcntBd 100 → 82 (рамка капсули лічильника була важча за рамку пілюлі грошей поруч). НЕ портовано: magn · abbr · caseMode · iwCase · faPairs · faStretch · bcntState · dchip* · addrCase · roFlag · devW · zoom — оснастка стенда. НЕ чіпано: kNets · R-46/EB · DATA · geometry · tone.L · topMatch · tierForBrand · sh=23 · знак «Всі» · .ntile.is-mark background:#fff · displayAddr · addr у моделях · FN/FO в експорті · мертвий р.180 · мертвий лок «56» у materiality §4. Гейт: ✓7·⚠3·✗3 — шість ✗ закрито тим, що .money.* без auto-dark близнюків більше не існує; це не регрес, а погашення боргу H3. ЧІП ДЕЛЬТИ СИМЕТРИЧНИЙ (запит оператора після device-раунду, закриває scope-ШИРОКО спеки s12 §1.4): .dchip судить ДЕЛЬТУ, а не рівень — d>0 «+N», d<0 «-N», d=0 чіпа немає; нового CSS нуль, бо .dchip живе на --sig, який рядок ставить за рівнем (.row.lv-ok → --accent). Дві точки: dchipHtml + live-гілка. Було b32.1 «port-fix» · s12/О-50 АДРЕСА: core (addrParts) живить ВСІ поверхні показу — картка дошки (hCard), шапка філу (openFill ×2), шапка порівняння (openCmp), рядок журналу (note геть із mtxt). Зрізано район+тип поселення (166 адрес) і хвіст note (182). Замір 965: core max 55 / med 21 (було 90 / 24), детектор залишків = 0, порожніх core = 0. Поле addr у homeModel/visitModel НЕ чіпано — воно haystack topMatch, орієнтири («ТЦ Караван») лишаються знаходимими пошуком. displayAddr жива (її споживає addrExt). CSS не змінювався. Гейт = ✓6·⚠4·✗9, тотожно s11.  (порт b32.0-Codex): CSS — plate 82→73 · знято min-height:162 (cardH natural ≈144.3) · wellH fallback 374→339 (переміряється рантайм measureNetworkWell) · light shadow sh16→sh23 (0 3.8px 10.5px rgba(20,50,42,.209) — глибша, реверс A65-recess, device-lock) · dark+auto-dark --npWellBg=tone120 color-mix(#000 20%) (заглиблена ніша, A69-твін). JS — region-reset р.2905: зміна області скидає S.net='' → «Всі мережі» (+saveNet+updateNetBtn перед ре-рендером; тільки гілка data-area, city/filter не чіпано). ver БАМПНУТО: region-reset — user-visible зміна, Р-35 незастосовний. НЕ чіпано: topMatch · NETS(16/16) · DATA · geometry · EB/Р-46 · .netbtn база · tone.L. Було b32.0 «ШОВ» (вузол H4): ver НЕ бампається (Р-35 — видимої для користувача зміни версії немає, 10.6 вимагає batch+date). 10 точок: (9) A69 — .ntile розщеплено на explicit-dark + @media auto-dark, хардкод-значення більше не течуть в auto-light; (6a/6b) Д-6 — aria-label і тост netBtn читають ЖИВИЙ стан замість «поки що єдина мережа» (Р-34); (7) Д-27 — AREA_ORDER оголошенням (wsd 1.10): Дніпропетровська → Полтавська → Кіровоградська, невідома область у хвіст + тост (Р-36); (2) Д-8 — NETS[] повним масивом із products/StockCheck_NETS_register.md §7 (Р-33) + S.net із персистенцією farmstore_net і name-guard (Р-37); (3) гейт мережі першим рядком topMatch — при S.net='' no-op; лічильники чіпів рахуються ПІСЛЯ мережі (О-42, дефолт до стенда О-20); (1) Д-11 — net у ОБИДВІ моделі (visitModel + homeModel), адитивно; без цього гейт п.3 тихо спорожнив би журнал; (4/5) Д-6/Р-30 — netScopeLabel(list) знімає 3 хардкоди 'Фармастор_' в імені файлу і додає мітку мережі в підпис зрізу (М-18); мітка береться з ЕКСПОРТОВАНОГО СПИСКУ, не з фільтра; кілька мереж → «Всі мережі» одним рядком на обидва споживачі (М-25/A). НЕ чіпано: m:2+i*83 · tierForBrand · DATA · геометрія · .netbtn · .ntile як клас (розщеплення — b32.1). Було b31 (вузол H2): НОВА БАЗА MSL — 965 аптек · 83 SKU · 16 мереж · 63 пари обл+місто (було 63/83/1/8). DATA-блок згенеровано StockCheck_msl_gen.py з docs/Файл для замовлення з MSL.xlsx (виправлена версія 05.08: колонка «Кількіть MSL» рахується за літерою СВОЄЇ категорії — 0 розходжень із normFor на 80 095 рядках). Формат DATA НЕ змінено (замір: пакування словниками виграє 2.8 КБ gzip — не окупає гідратацію). net нормалізовано: 'УАХ\xa0' → 'УАХ'. tierForBrand НЕ чіпався. Було b30 (вузол H1): ЗНАК money інвертовано — Σ(порахував − MSL_ярус)×p. Оверсток = «+» (лежить зайвого товару), нестача = «−» (можна замовити на цю суму). Причина: .dchip картки (р.~2134/2233) рахував нестачу як «-N» завжди, а бейдж money — навпаки; на одному екрані два протилежні знаки для того самого стану. Приведено бейдж до картки, не навпаки. Клас neg/pos НЕ чіпався (варіант A, дві точки: setMoney + bmCls) → нестача червона як чіп, оверсток зелений. Було b29.6.1: b29.6.1: О-3 закрито — хрестик очищення пошуку (стенд v3, clr=ring · clrSz=20, тап-зона 44px через ::after). b29.6: геометрія журналу закрита ЗАМІРОМ (лінійка b29_5a-RULER, XS/375): еталон — картка ДОШКИ (14…14), не острів (12…12); .jr і .jr-grp більше не несуть бічних полів, група успадковує 14 від .list → Δ до острова 2/2, як у .card. Роздільник 16/18→14/14 (обидва якорі заміряні), шеврон 16→15 (стенд P3). DEV_SEED=0 — робочий білд для поля. Було b29.5: 16-та колонка «Дата візиту» ВСЕРЕДИНІ таблиці АП (серійна дата + numFmt 164 dd.mm.yyyy, БЕЗ dataDxfId — dxfs у пакеті немає); дедуп D-2/B знято (кожен візит = свій блок); ім'я файлу 3візити/3аптеки повними словами, «аптеки» від УНІКАЛЬНИХ Proxima. b29.5a: ширина групи журналу зрівняна з островом (компенсація полів .list). Було b29.1: вузол F2, крок 1 — МОДЕЛЬ. Додано addrExt/addrParts (драбина адреси З-1/З-3) + visitModel()/journalGroups() (R1). Адитивно: жоден існуючий виклик не змінено, візуал b28 не рухався. Було b28: експорт CSV→справжній .xlsx (бланк «АП» 1:1, Table TableStyleMedium7, формули N/O з кешем, deflate через CompressionStream). Було b27: (1) фікс блідості блоку «Обслуговування» (.mi.quiet b); (2) тост піднято над CTA-рядом + детерміновані 2 рядки; (3) нагорода моменту 📋 = handoff-sweep (кандидат C, bench v3, device✓)
+const APP_BUILD = { ver:'v2.27.0', build:'stockcheck-pwa.b32.5', date:'15.08.2026' }; // wsd 10.6 — b32.2 «ПОРТ ЛОКУ s15c»: О-49 форма грошей + О-51 мітка мережі, обидва з device-судженого стенда StockCheck_money_stagebench_v2 (ред. s15c). О-49: .money (одна пілюля, знаковий підсумок) → .mny — спліт-капсула, дві половини в одній рамці, порядок over-first (row-reverse), роздільник tone (1px), знак НЕ малюється (сенс несе колір), обидва нулі → риска, «грн» ОДИН раз на ряд fa (на останній пілюлі ряду, що показує числа) і один раз на пілюлю fb. Модель brandMoney/catMoney: {s,any} → {over,short,any}; знак b30 (over=+, short=−) у моделі збережено, у показ іде abs. Геометрія: mPadX 3 · mPadY 3.5 · mRad 9 · mFs 11 · mDivW 1 · mBw 1 обидва доми · faGap 4 · faPairGap 3 · fbGap 5. Матеріал L: shadow 0 1.5px 1.5px rgba(20,50,42,.16) · fill 7% · рамка --muted 14%. Матеріал D: fill --surface-3 24% (fillMix 12×2) · ridge rgba(255,255,255,.14)→7px · рамка --muted 37% · shadow none. Доми — маркером НА САМОМУ елементі (.mny.fa/.mny.fb), НЕ селектором нащадка: у стенді .fb .mny був мертвим і давав чорну рамку від currentColor (правило Г-4). О-51: мітка мережі АПТЕКИ (ph.net, не фільтр S.net) у підзаголовку шапки філу — .ntile.is-mark зменшена 35→24 (markPx) з полем 3% (markPad); markPlate РОЗЩЕПЛЕНО ПО ТЕМАХ (s15b Д-2): світла flat, темна tile. ПРАВКА р.861+1004: bcntBd 100 → 82 (рамка капсули лічильника була важча за рамку пілюлі грошей поруч). НЕ портовано: magn · abbr · caseMode · iwCase · faPairs · faStretch · bcntState · dchip* · addrCase · roFlag · devW · zoom — оснастка стенда. НЕ чіпано: kNets · R-46/EB · DATA · geometry · tone.L · topMatch · tierForBrand · sh=23 · знак «Всі» · .ntile.is-mark background:#fff · displayAddr · addr у моделях · FN/FO в експорті · мертвий р.180 · мертвий лок «56» у materiality §4. Гейт: ✓7·⚠3·✗3 — шість ✗ закрито тим, що .money.* без auto-dark близнюків більше не існує; це не регрес, а погашення боргу H3. ЧІП ДЕЛЬТИ СИМЕТРИЧНИЙ (запит оператора після device-раунду, закриває scope-ШИРОКО спеки s12 §1.4): .dchip судить ДЕЛЬТУ, а не рівень — d>0 «+N», d<0 «-N», d=0 чіпа немає; нового CSS нуль, бо .dchip живе на --sig, який рядок ставить за рівнем (.row.lv-ok → --accent). Дві точки: dchipHtml + live-гілка. Було b32.1 «port-fix» · s12/О-50 АДРЕСА: core (addrParts) живить ВСІ поверхні показу — картка дошки (hCard), шапка філу (openFill ×2), шапка порівняння (openCmp), рядок журналу (note геть із mtxt). Зрізано район+тип поселення (166 адрес) і хвіст note (182). Замір 965: core max 55 / med 21 (було 90 / 24), детектор залишків = 0, порожніх core = 0. Поле addr у homeModel/visitModel НЕ чіпано — воно haystack topMatch, орієнтири («ТЦ Караван») лишаються знаходимими пошуком. displayAddr жива (її споживає addrExt). CSS не змінювався. Гейт = ✓6·⚠4·✗9, тотожно s11.  (порт b32.0-Codex): CSS — plate 82→73 · знято min-height:162 (cardH natural ≈144.3) · wellH fallback 374→339 (переміряється рантайм measureNetworkWell) · light shadow sh16→sh23 (0 3.8px 10.5px rgba(20,50,42,.209) — глибша, реверс A65-recess, device-lock) · dark+auto-dark --npWellBg=tone120 color-mix(#000 20%) (заглиблена ніша, A69-твін). JS — region-reset р.2905: зміна області скидає S.net='' → «Всі мережі» (+saveNet+updateNetBtn перед ре-рендером; тільки гілка data-area, city/filter не чіпано). ver БАМПНУТО: region-reset — user-visible зміна, Р-35 незастосовний. НЕ чіпано: topMatch · NETS(16/16) · DATA · geometry · EB/Р-46 · .netbtn база · tone.L. Було b32.0 «ШОВ» (вузол H4): ver НЕ бампається (Р-35 — видимої для користувача зміни версії немає, 10.6 вимагає batch+date). 10 точок: (9) A69 — .ntile розщеплено на explicit-dark + @media auto-dark, хардкод-значення більше не течуть в auto-light; (6a/6b) Д-6 — aria-label і тост netBtn читають ЖИВИЙ стан замість «поки що єдина мережа» (Р-34); (7) Д-27 — AREA_ORDER оголошенням (wsd 1.10): Дніпропетровська → Полтавська → Кіровоградська, невідома область у хвіст + тост (Р-36); (2) Д-8 — NETS[] повним масивом із products/StockCheck_NETS_register.md §7 (Р-33) + S.net із персистенцією farmstore_net і name-guard (Р-37); (3) гейт мережі першим рядком topMatch — при S.net='' no-op; лічильники чіпів рахуються ПІСЛЯ мережі (О-42, дефолт до стенда О-20); (1) Д-11 — net у ОБИДВІ моделі (visitModel + homeModel), адитивно; без цього гейт п.3 тихо спорожнив би журнал; (4/5) Д-6/Р-30 — netScopeLabel(list) знімає 3 хардкоди 'Фармастор_' в імені файлу і додає мітку мережі в підпис зрізу (М-18); мітка береться з ЕКСПОРТОВАНОГО СПИСКУ, не з фільтра; кілька мереж → «Всі мережі» одним рядком на обидва споживачі (М-25/A). НЕ чіпано: m:2+i*83 · tierForBrand · DATA · геометрія · .netbtn · .ntile як клас (розщеплення — b32.1). Було b31 (вузол H2): НОВА БАЗА MSL — 965 аптек · 83 SKU · 16 мереж · 63 пари обл+місто (було 63/83/1/8). DATA-блок згенеровано StockCheck_msl_gen.py з docs/Файл для замовлення з MSL.xlsx (виправлена версія 05.08: колонка «Кількіть MSL» рахується за літерою СВОЄЇ категорії — 0 розходжень із normFor на 80 095 рядках). Формат DATA НЕ змінено (замір: пакування словниками виграє 2.8 КБ gzip — не окупає гідратацію). net нормалізовано: 'УАХ\xa0' → 'УАХ'. tierForBrand НЕ чіпався. Було b30 (вузол H1): ЗНАК money інвертовано — Σ(порахував − MSL_ярус)×p. Оверсток = «+» (лежить зайвого товару), нестача = «−» (можна замовити на цю суму). Причина: .dchip картки (р.~2134/2233) рахував нестачу як «-N» завжди, а бейдж money — навпаки; на одному екрані два протилежні знаки для того самого стану. Приведено бейдж до картки, не навпаки. Клас neg/pos НЕ чіпався (варіант A, дві точки: setMoney + bmCls) → нестача червона як чіп, оверсток зелений. Було b29.6.1: b29.6.1: О-3 закрито — хрестик очищення пошуку (стенд v3, clr=ring · clrSz=20, тап-зона 44px через ::after). b29.6: геометрія журналу закрита ЗАМІРОМ (лінійка b29_5a-RULER, XS/375): еталон — картка ДОШКИ (14…14), не острів (12…12); .jr і .jr-grp більше не несуть бічних полів, група успадковує 14 від .list → Δ до острова 2/2, як у .card. Роздільник 16/18→14/14 (обидва якорі заміряні), шеврон 16→15 (стенд P3). DEV_SEED=0 — робочий білд для поля. Було b29.5: 16-та колонка «Дата візиту» ВСЕРЕДИНІ таблиці АП (серійна дата + numFmt 164 dd.mm.yyyy, БЕЗ dataDxfId — dxfs у пакеті немає); дедуп D-2/B знято (кожен візит = свій блок); ім'я файлу 3візити/3аптеки повними словами, «аптеки» від УНІКАЛЬНИХ Proxima. b29.5a: ширина групи журналу зрівняна з островом (компенсація полів .list). Було b29.1: вузол F2, крок 1 — МОДЕЛЬ. Додано addrExt/addrParts (драбина адреси З-1/З-3) + visitModel()/journalGroups() (R1). Адитивно: жоден існуючий виклик не змінено, візуал b28 не рухався. Було b28: експорт CSV→справжній .xlsx (бланк «АП» 1:1, Table TableStyleMedium7, формули N/O з кешем, deflate через CompressionStream). Було b27: (1) фікс блідості блоку «Обслуговування» (.mi.quiet b); (2) тост піднято над CTA-рядом + детерміновані 2 рядки; (3) нагорода моменту 📋 = handoff-sweep (кандидат C, bench v3, device✓)
 const NETWORK = { name:'StockCheck', tagline:'інструмент залишків', tg:'t.me/Konst_Andre' };
 const ORDER_FORM_URL = 'https://rbcom-my.sharepoint.com/:x:/r/personal/yuliia_syniuhina_reckitt_com/_layouts/15/Doc.aspx?sourcedoc=%7B361AB6BF-2AE9-410C-A81F-2AA3502C4EAD%7D&file=%25u0424%25u0430%25u0440%25u043c%25u0430%25u0441%25u0442%25u043e%25u0440%20%25u0437%25u0430%25u043c%25u043e%25u0432%25u043b%25u0435%25u043d%25u043d%25u044f%20%25u0442%25u0442.xlsx&wdLOR=c06833412-A6C7-4B15-AE95-76BCF4AB9FD6&openShare=true&fromShare=true&action=default&mobileredirect=true';
 const MSL_BY_K={}; MSL.forEach(function(s){MSL_BY_K[s.k]=s;});
@@ -2729,7 +2775,74 @@ function pruneStore(){
   if(vis){saveST();console.log('[b32.3] prune: знято порожніх візитів '+vis+', аптек '+phs);}
   return vis;
 }
-function saveST(){try{localStorage.setItem(SK,JSON.stringify(ST));}catch(e){}}
+/* ══ b32.5 · Х-3 · ПАМ'ЯТЬ ДОДАТКА ═════════════════════════════════════════
+   ТРИ РІЗНІ ЗА ЯКІСТЮ ВЕЛИЧИНИ — не плутати:
+
+   1) ВАГА — вимірна точно: Σ(key.length+value.length)×2. WebKit тарифікує
+      localStorage в UTF-16 code units, тож ×2 це одиниця обліку, не здогадка.
+      Рахуємо ВЕСЬ origin, бо квота спільна: чужий ключ теж займає нашу стелю.
+
+   2) СТЕЛЯ — НЕ вимірна наперед. 5 МБ це дефолт WebKit, який Safari врізає під
+      тиском диска, і спитати про неї API не дає. Тому вона тут НАВЧЕНА:
+      при першій відмові запису ми знаємо точку відмови й записуємо її в
+      окремий ключ. Далі шкала вже не оцінка, а факт. Ключ окремий від ST
+      НАВМИСНО: «Очистити всі дані» стирає дані, але знання про стелю
+      пристрою лишається — воно про залізо, а не про візити.
+
+   3) ПРОБА — навмисний удар маленьким блоком, щоб дізнатись правду ДО того,
+      як користувач втратить візит. Робиться лише коли розрахунок уже ≥60%:
+      нижче вона нічого не додає, а синхронний запис 64 КБ на кожне відкриття
+      меню коштував би кадрів. Прибирає за собою у finally — без цього
+      невдалий шлях лишив би сміття рівно там, де місця вже немає. */
+var CAPK='farmstore_cap', CAP_DEF=5*1024*1024, CAP=CAP_DEF;
+var STQ_TIGHT=false, _qTs=0;
+try{var _c=+localStorage.getItem(CAPK); if(_c>0)CAP=_c;}catch(e){}
+
+function storeBytes(){var t=0;
+  try{for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);
+    t+=(k.length+((localStorage.getItem(k)||'').length))*2;}}catch(e){}
+  return t;}
+function learnCap(b){ if(b<=0)return; CAP=b;
+  try{localStorage.setItem(CAPK,String(b));}catch(e){} }   /* ключ малий — проходить там, де ST уже ні */
+function visitCount(){var n=0,p=ST&&ST.phs?ST.phs:{};
+  for(var px in p){if(p[px]&&p[px].visits)n+=p[px].visits.length;} return n;}
+function plVis(n){var a=n%10,b=n%100;
+  if(a===1&&b!==11)return'візит'; if(a>=2&&a<=4&&(b<12||b>14))return'візити'; return'візитів';}
+
+function stqProbe(){
+  var key='__sc_probe__', blob=new Array(64*512+1).join('ab');   /* 64×512 пар = 64 КБ у UTF-16 */
+  try{ localStorage.setItem(key,blob); return true; }
+  catch(e){ return false; }
+  finally{ try{localStorage.removeItem(key);}catch(e2){} }
+}
+
+function renderStore(){
+  var sub=document.getElementById('stqSub'), fl=document.getElementById('stqFill');
+  if(!sub||!fl)return;
+  var b=storeBytes(), pct=Math.min(100,Math.round(b/CAP*100));
+  if(pct>=60){ STQ_TIGHT=!stqProbe(); } else { STQ_TIGHT=false; }
+  if(STQ_TIGHT)pct=100;
+  var sig = pct>=90 ? 'var(--crit)' : (pct>=70 ? 'var(--warn)' : '');
+  var row=document.getElementById('miStq');
+  if(row){ if(sig)row.style.setProperty('--stSig',sig); else row.style.removeProperty('--stSig'); }
+  fl.style.width=pct+'%';
+  if(pct>=100){ sub.textContent='Заповнено — експортуйте дані та очистіть'; return; }
+  var vc=visitCount(), per=(vc>0&&b>0)?(b/vc):1900;   /* середній візит з ЖИВИХ даних; 1900 — лише поки їх нема */
+  var left=Math.max(0,Math.floor((CAP-b)/per));
+  sub.textContent=pct+'% \u00b7 ще ~'+left+' '+plVis(left);
+}
+
+/* saveST більше НЕ німий. Порожній catch означав, що при повній квоті візит
+   мовчки не зберігався, а оператор дізнавався про це вже вдома. */
+function saveST(){
+  try{localStorage.setItem(SK,JSON.stringify(ST));}
+  catch(e){
+    learnCap(storeBytes());                       /* точка відмови = стеля, тепер відома */
+    var now=Date.now(); if(now-_qTs<5000)return;  /* onInput кличе saveST на кожну клавішу — без гарду тост би торохтів */
+    _qTs=now;
+    toast('Пам\u2019ять додатка заповнена\nЕкспортуйте дані та очистіть');
+  }
+}
 function getPh(px){return PH.find(function(p){return p.px===px;});}
 /* ---- visits[] accessors (node 6) ---- */
 function todayVisit(px){var e=ST.phs[px];if(!e||!e.visits||!e.visits.length)return null;
@@ -2863,7 +2976,7 @@ function show(id){
   document.getElementById('app').scrollTop=0;
   if(id==='s-home'){clearRO();renderList();}
 }
-function openSheet(){updateCsvLabel();updateClearLabel();document.getElementById('scrim').classList.add('on');document.getElementById('sheet').classList.add('on');requestAnimationFrame(function(){placeThemeThumb(true);});}
+function openSheet(){updateCsvLabel();updateClearLabel();renderStore();document.getElementById('scrim').classList.add('on');document.getElementById('sheet').classList.add('on');requestAnimationFrame(function(){placeThemeThumb(true);});}
 function closeSheet(){document.getElementById('scrim').classList.remove('on');document.getElementById('sheet').classList.remove('on');}
 function closeSheets(){document.getElementById('scrim').classList.remove('on');
   document.getElementById('sheet').classList.remove('on');document.getElementById('sh-about').classList.remove('on');
@@ -3633,6 +3746,12 @@ function updProg(){
   var fc=filledCount(curPx), pct=Math.round(fc/TOTAL*100);
   document.getElementById('fillBar').style.width=pct+'%';
   document.getElementById('fillCount').textContent=fc+' / '+TOTAL;
+  /* b32.5 · П-6 · стан CTA живе тут, бо updProg — ЄДИНА точка, куди сходяться
+     обидва входи: renderFill (відкриття/ro) і onInput (кожна правка поля).
+     Окремий обхід дав би другу мірку «порожньо» — рівно та розбіжність,
+     що породила О-53. */
+  var cb=document.querySelector('#s-fill .btn-copy');
+  if(cb)cb.classList.toggle('gated',fc===0);
   updHeadMoney();
 }
 
@@ -3662,6 +3781,13 @@ function copyValues(){
      візит уже зданий, а нагорода моменту (fireSweep) винагороджує факт передачі,
      не перегляд — тому вона тут не грає. */
   var vis=roVisit||todayVisit(curPx), data=vis?vis.vals:{};
+  /* b32.5 · П-6 · ГЕЙТ ПОРОЖНЬОГО ПІДРАХУНКУ. Без нього тап робив три брехні:
+     клав у буфер 83 порожні рядки (вставка стирала б чужі клітинки), казав
+     тостом «Скопійовано 83 значення», і — головне — ставив transferred=true.
+     Останнє пробивало О-53: transferred НАВМИСНО рятує візит від pruneStore(),
+     тож порожній тап конвертував артефакт у ВІЧНИЙ запис, який прополка вже
+     не бере. Вихід стоїть ПЕРЕД побудовою col і перед transferred. */
+  if(!Object.keys(data).length){toast('Порожній підрахунок — немає що копіювати');return;}
   var col=MSL.map(function(s){return data[s.k]!==undefined?data[s.k]:'';}).join('\n');
   if(vis&&!roVisit){vis.transferred=true;saveST();}
   var idx=PH.findIndex(function(p){return p.px===curPx;});
@@ -4054,15 +4180,23 @@ document.getElementById('homeList').addEventListener('click',function(e){
    SCOPE: тільки #sheet. Решта п'яти шітів (about/install/confirm/period/network)
    у цьому ході НЕ чіпаються — їхній grip лишається мертвим свідомо, бо period і
    network мають внутрішні ніші й потребують власного ig-набору. Окремий хід. */
-function addSwipeClose(boxId, closeFn){
+function addSwipeClose(boxId, closeFn, ig){
   var box=document.getElementById(boxId);
   if(!box||box._sw)return; box._sw=true;          /* A21: шіти persist у DOM — без guard кожне відкриття вішає ще один listener */
-  var sy=0, ss=0, gt=false;
+  var sy=0, ss=0, gt=false, ign=false;
   box.addEventListener('touchstart',function(e){
     sy=e.touches[0].clientY; ss=box.scrollTop;
     gt=!!e.target.closest('.grip');
+    /* b32.5 · П-7 · ig-НАБІР. Ніша зі своїм скролом (#sh-period .vlist,
+       #sh-network .np-well) міряє scrollTop У СЕБЕ, а не в box. box.scrollTop
+       там ЗАВЖДИ 0 (у цих шітів немає overflow — р.250 scope строго #sheet),
+       тож умова ss===0 не боронить нічого: свайп донизу при скролі списку
+       закривав би шіт. Тому жест, що почався в ніші, знімається з розгляду
+       ЦІЛКОМ. Grip у ніші не лежить, тож гілку grip це не зачіпає. */
+    ign=!!(ig&&e.target.closest(ig));
   },{passive:true});
   box.addEventListener('touchend',function(e){
+    if(ign)return;                                 /* жест належить ніші */
     var dy=e.changedTouches[0].clientY-sy;
     if(gt&&dy>40)closeFn();                        /* grip: завжди */
     else if(ss===0&&dy>64)closeFn();               /* контент: лише з самого верху */
@@ -4086,6 +4220,19 @@ applyThemeSeg(true);
    _sw робив би зайву роботу на кожне відкриття, а сенс лишався б той самий.
    closeSheet (р.2847), не closeSheets: закриваємо саме меню, решту не чіпаємо. */
 addSwipeClose('sheet', closeSheet);
+/* b32.5 · П-7 · решта п'яти шітів. SCOPE-обіцянка з b32.4 закрита: grip у них
+   більше не мертвий.
+   ig за фактом розмітки: about/install/confirm ніш не мають (порожній ig —
+   РІШЕННЯ, не пропуск: щойно в них з'явиться скрольний список, його вносити
+   сюди); period має .vlist (р.442), network має .np-well (р.1300).
+   sh-install закривається ОБГОРТКОЮ, а не референсом: closeSheets перевизначено
+   пізніше в maint-IIFE (mtDisarm+mtScheduleFlush). Референс, знятий тут, на
+   init захопив би до-IIFE-версію і лишив maint-таймер зарядженим. */
+addSwipeClose('sh-about',   function(){closeNamed('sh-about');},   null);
+addSwipeClose('sh-install', function(){closeSheets();},            null);
+addSwipeClose('sh-confirm', function(){closeNamed('sh-confirm');}, null);
+addSwipeClose('sh-period',  function(){closeNamed('sh-period');},  '.vlist');
+addSwipeClose('sh-network', function(){closeNamed('sh-network');}, '.np-well');
 if(document.fonts&&document.fonts.ready){document.fonts.ready.then(function(){placeThemeThumb(true);});}
 window.addEventListener('resize',function(){requestAnimationFrame(function(){placeThemeThumb(true);});});
 
