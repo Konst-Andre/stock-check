@@ -14,7 +14,10 @@
 
 ## Живі самері (стеля 2)
 
-Поки жодного в репо: обидва живі — лише в Project (`SC-2`): StockCheck_session_summary_b32_7_s20s21_STORAGE_TRUTH.md · StockCheck_session_summary_b32_5_s18s19_STORAGE_DONE.md. Прийдуть — `sessions/` + рядок тут з повним шляхом.
+| файл | що |
+|---|---|
+| `sessions/StockCheck_session_summary_b32_7_s20s21_STORAGE_TRUTH.md` | останнє (15.08.2026): втрата даних, правда індикатора, persistent storage · b32.5 → b32.7 |
+| `sessions/StockCheck_session_summary_b32_5_s18s19_STORAGE_DONE.md` | попереднє: пам'ять додатка, b32.5 |
 
 ## Канон
 
@@ -37,9 +40,15 @@
 |---|---|
 | `tools/StockCheck_marks_gate_v2_1.py` | гейт міток мереж |
 | `tools/StockCheck_net_cut_v2_1.py` | нарізка ассетів мереж |
+| `tools/StockCheck_msl_gen.py` | генератор DATA-блока з `sources/Файл для замовлення з MSL.xlsx` — єдине джерело бази |
+| `tools/StockCheck_h2_msl_data.py` | гейт звірки DATA-блока з xlsx (пара до `msl_gen`) |
+| `tools/StockCheck_icon_gen.py` | генератор іконок PWA з локнутого гліфа |
+| `tools/StockCheck_b32_7_s21_smoke.js` | смоук живого білда: `node tools/StockCheck_b32_7_s21_smoke.js index.html` → ✓ 124 ✗ 0 (06.10.2026) |
+| `tools/StockCheck_money_stagebench_v2.html` | стенд форми грошей О-49 + мітки мережі О-51 (ред. s15c) |
+| `tools/StockCheck_money_stagebench_v2_smoke.js` | матриця стенда — ✓ 103 (06.10.2026; потрібен `jsdom`) |
 
-Оголошені в ядрі живими, але лежать лише в Project (`SC-2`, прийдуть вкладенням Konst): StockCheck_money_stagebench_v2_smoke.js · StockCheck_money_stagebench_SPEC_v1.md · StockCheck_b32_2_port_smoke.js · StockCheck_msl_gen.py · StockCheck_net_pack_v2.py · nets_assets_v2.js · _MANIFEST.txt · StockCheck_nets_register_gate.py · StockCheck_icon_gen.py. Стенд `StockCheck_money_stagebench_v2.html` — у `archive/stands/StockCheck/` (так лежав у ядрі).
+**Не знайдено ніде** (оголошувались у ядрі живими; Konst 06.10: у Project їх нема — інших не шукати): StockCheck_money_stagebench_SPEC_v1.md · StockCheck_b32_2_port_smoke.js · StockCheck_net_pack_v2.py · nets_assets_v2.js · _MANIFEST.txt · StockCheck_nets_register_gate.py. Втрата зафіксована (wsd 1.10), не архівація: пакувальник мереж і гейт реєстру — відтворити, коли знадобляться (`SC-4`); смоук b32.2 витіснено смоуком b32.7.
 
 ## Живий білд
 
-Сайт = `index.html` у корені: `b32_7_s21_persist` (О-3 журналу GW: ≡ живому сайту за blob-sha; ядро оголошувало `b32_2`). Device-вирок — у самері `b32_7` (Project, `SC-2`).
+Сайт = `index.html` у корені: `b32_7_s21_persist`, v2.27.2 (md5 `285a0c68` ≡ `StockCheck_port_b32_7_s21_persist.html` з Project — копію не тримаємо; ≡ живий сайт). Device-вирок — у самері `b32_7` (`sessions/`).
